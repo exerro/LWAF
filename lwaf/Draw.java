@@ -4,8 +4,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -15,10 +13,14 @@ public class Draw {
     private static VAO rectangleVAO;
     private static ShaderLoader.Program texturedShaderProgram;
     private static ShaderLoader.Program untexturedShaderProgram;
-    private static vec3f colour;
+    private static vec3f colour = new vec3f(1, 1, 1);
 
     public static void setColour(vec3f colour) {
         Draw.colour = colour;
+    }
+
+    public static void setColour(float r, float g, float b) {
+        Draw.colour = new vec3f(r, g, b);
     }
 
     public static void rectangle(vec2f position, vec2f size) {
@@ -34,11 +36,11 @@ public class Draw {
         untexturedShaderProgram.stop();
     }
 
-    public static void image(vec2f position, Texture texture, vec2f scale) {
+    public static void image(Texture texture, vec2f position, vec2f scale) {
         vec2f displaySize = getDisplaySize();
         vec2f textureSize = new vec2f(texture.getWidth(), texture.getHeight());
 
-        glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+        texture.bind();
         glActiveTexture(GL_TEXTURE0);
         texturedShaderProgram.setUniform("position", position.div(displaySize).mul(2));
         texturedShaderProgram.setUniform("scale", scale.mul(textureSize).div(displaySize).mul(2));
@@ -48,11 +50,30 @@ public class Draw {
         GL11.glDrawElements(GL11.GL_TRIANGLES, rectangleVAO.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
         rectangleVAO.unload();
         texturedShaderProgram.stop();
-        glBindTexture(GL_TEXTURE_2D, 0);
+        texture.unbind();
     }
 
-    public static void image(vec2f position, Texture texture) {
-        image(position, texture, new vec2f(1, 1));
+    public static void image(Texture texture, vec2f position) {
+        image(texture, position, new vec2f(1, 1));
+    }
+
+    public static void image(Texture texture) {
+        image(texture, new vec2f(0, 0), new vec2f(1, 1));
+    }
+
+    public static void view(View view, vec2f position, vec2f scale) {
+        view.render();
+        image(view.getTexture(), position, scale);
+    }
+
+    public static void view(View view, vec2f position) {
+        view.render();
+        image(view.getTexture(), position);
+    }
+
+    public static void view(View view) {
+        view.render();
+        image(view.getTexture());
     }
 
     public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {

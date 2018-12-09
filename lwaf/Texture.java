@@ -14,6 +14,20 @@ public class Texture {
     private final int textureID;
     private final int width, height;
 
+    public Texture(int width, int height) {
+        this.width = width;
+        this.height = height;
+
+        textureID = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
     public Texture(String filePath) {
         ByteBuffer data;
 
@@ -42,6 +56,14 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         STBImage.stbi_image_free(data);
+    }
+
+    public void bind() {
+        glBindTexture(GL_TEXTURE_2D, textureID);
+    }
+
+    public void unbind() {
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public int getTextureID() {

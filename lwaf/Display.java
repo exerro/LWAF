@@ -137,6 +137,7 @@ public class Display {
 
         glClearColor(cr, cg, cb, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
 
         active = this;
     }
