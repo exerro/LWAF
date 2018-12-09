@@ -226,7 +226,7 @@ public class Display {
         glfwDestroyWindow(windowID);
         glfwTerminate();
         // TODO: what does this do?
-        GLFWErrorCallback x=glfwSetErrorCallback(null);if(x!=null)x.free();
+        var x=glfwSetErrorCallback(null);if(x!=null)x.free();
     }
 
     public static Display getActive() {

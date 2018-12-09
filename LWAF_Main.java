@@ -13,9 +13,7 @@ public class LWAF_Main extends Application {
         Application.run(app);
     }
 
-    private float x = 0;
     private View view;
-    private VAO vao;
 
     private LWAF_Main(Display display) {
         super(display);
@@ -24,7 +22,7 @@ public class LWAF_Main extends Application {
     @Override
     protected void load() {
         view = new View(128, 128);
-        view.setRenderer(new Renderer() {
+        view.attachRenderer(new Renderer() {
             @Override
             protected void draw(FBO framebuffer) {
                 Draw.setColour(0, 0, 1);
@@ -36,13 +34,16 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void draw() {
-        super.draw();
         Draw.view(view);
     }
 
     @Override
     protected void update(float dt) {
-        super.update(dt);
-        x += dt * 10;
+
+    }
+
+    @Override
+    protected void unload() {
+        view.destroy();
     }
 }

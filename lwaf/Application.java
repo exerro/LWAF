@@ -1,49 +1,24 @@
 package lwaf;
 
-import org.lwjgl.openvr.Texture;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("unused")
 public abstract class Application {
 
     private final Display display;
-    private List<UI> uiComponents = new ArrayList<>();
+    private boolean running = true;
 
     protected Application(Display display) {
         this.display = display;
     }
 
-    protected void load() {
+    protected abstract void load();
+    protected abstract void draw();
+    protected abstract void update(float dt);
+    protected abstract void unload();
 
-    }
-
-    protected void draw() {
-        for (UI component : uiComponents) {
-            component.draw();
-        }
-    }
-
-    protected void update(float dt) {
-        for (UI component : uiComponents) {
-            component.update(dt);
-        }
-    }
-
-    public <T extends UI> T addUI(T component) {
-        uiComponents.add(component);
-        return component;
-    }
-
-    public <T extends UI> T removeUI(T component) {
-        uiComponents.remove(component);
-        return component;
-    }
-
-    public void clearUI() {
-        uiComponents.clear();
+    public void stop() {
+        running = false;
     }
 
     public Display getDisplay() {
@@ -71,8 +46,12 @@ public abstract class Application {
             app.draw();
             app.display.finishRenderFrame();
             app.display.pollEvents();
-        } while (!app.display.windowShouldClose());
+        } while (app.running && !app.display.windowShouldClose());
+
+        app.unload();
 
         app.display.destroy();
+
+        Draw.destroy();
     }
 }

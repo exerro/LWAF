@@ -9,6 +9,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Draw {
 
     private static VAO rectangleVAO;
@@ -22,12 +23,12 @@ public class Draw {
         return viewportSize;
     }
 
-    public static void viewport(vec2f size) {
+    static void viewport(vec2f size) {
         viewportSize = size;
         glViewport(0, 0, (int) size.x, (int) size.y);
     }
 
-    public static void viewport() {
+    static void viewport() {
         int w = Display.getActive().getWidth(), h = Display.getActive().getHeight();
         viewportSize = new vec2f(w, h);
         glViewport(0, 0, w, h);
@@ -82,7 +83,7 @@ public class Draw {
     public static void view(View view, vec2f position, vec2f scale) {
         view.render();
 
-        // flip the V coord of texture coordinates
+        // flip the V coordinate of texture coordinates
         rectangleVAO.bufferData(rectangleVAOuvVBOID, new float[] {
                 0, 0,
                 0, 1,

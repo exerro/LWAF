@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ShaderLoader {
     private static final Map<Integer, Integer> referenceCount = new HashMap<>();
     private static final Map<String, Integer> shaderIDLookup = new HashMap<>();
@@ -33,10 +34,10 @@ public abstract class ShaderLoader {
     }
 
     private static Program loadShaders(String vertexShader, String geometryShader, String fragmentShader, boolean instanced) throws ProgramLoadException, IOException, ShaderLoadException {
-        int programID = GL20.glCreateProgram(),
-                vertexID = loadShader(vertexShader, GL20.GL_VERTEX_SHADER),
-                fragmentID = loadShader(fragmentShader, GL20.GL_FRAGMENT_SHADER),
-                geometryID = geometryShader != null ? loadShader(geometryShader, GL32.GL_GEOMETRY_SHADER) : -1;
+        int programID  = GL20.glCreateProgram(),
+            vertexID   = loadShader(vertexShader, GL20.GL_VERTEX_SHADER),
+            fragmentID = loadShader(fragmentShader, GL20.GL_FRAGMENT_SHADER),
+            geometryID = geometryShader != null ? loadShader(geometryShader, GL32.GL_GEOMETRY_SHADER) : -1;
 
         GL20.glAttachShader(programID, vertexID);
 

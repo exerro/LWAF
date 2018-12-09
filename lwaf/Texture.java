@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Texture {
 
     private final int textureID;
@@ -38,13 +39,12 @@ public class Texture {
 
             data = STBImage.stbi_load(filePath, w, h, channels, STBImage.STBI_rgb_alpha);
 
-            if (data == null) throw new RuntimeException(STBImage.stbi_failure_reason());
+            if (data == null)
+                throw new RuntimeException(STBImage.stbi_failure_reason());
 
             width = w.get();
             height = h.get();
         }
-
-        if (data == null) throw new RuntimeException("umm");
 
         textureID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureID);

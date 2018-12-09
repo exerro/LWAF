@@ -1,33 +1,54 @@
 package lwaf;
 
+import java.util.List;
+
 import static org.lwjgl.opengl.GL11.*;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class View {
 
     private final FBO fbo;
-    private Renderer renderer;
+    private List<Renderer> renderers;
     private vec3f colour = new vec3f(0, 0, 0);
 
     public View(int width, int height) {
         fbo = new FBO(width, height);
     }
 
-    public void render() {
-        if (renderer == null) return;
-
+    void render() {
         fbo.bind();
         glClearColor(colour.x, colour.y, colour.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderer.draw(fbo);
+
+        for (var renderer : renderers) {
+            renderer.draw(fbo);
+        }
+
         fbo.unbind();
     }
 
-    public void setRenderer(Renderer renderer) {
-        this.renderer = renderer;
+    public <T extends Renderer> T attachRenderer(T renderer) {
+        renderer.load();
+        renderers.add(renderer);
+        return renderer;
+    }
+
+    public <T extends Renderer> T detachRenderer(T renderer) {
+        renderer.unload();
+        renderers.remove(renderer);
+        return renderer;
     }
 
     public Texture getTexture() {
         return fbo.getTexture();
+    }
+
+    public void destroy() {
+        fbo.destroy();
+
+        for (var renderer : renderers) {
+            renderer.unload();
+        }
     }
 
 }
