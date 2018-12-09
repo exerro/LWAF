@@ -14,11 +14,12 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void draw() {
-
+        super.draw();
     }
 
     @Override
     protected void update(float dt) {
+        super.update(dt);
         System.out.println(dt);
     }
 }

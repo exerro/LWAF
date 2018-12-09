@@ -1,9 +1,13 @@
 package lwaf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("unused")
 public abstract class Application {
 
     private final Display display;
+    private List<UI> uiComponents = new ArrayList<>();
 
     protected Application(Display display) {
         this.display = display;
@@ -31,8 +35,31 @@ public abstract class Application {
         display.destroy();
     }
 
-    protected abstract void draw();
-    protected abstract void update(float dt);
+    protected void draw() {
+        for (UI component : uiComponents) {
+            component.draw();
+        }
+    }
+
+    protected void update(float dt) {
+        for (UI component : uiComponents) {
+            component.update(dt);
+        }
+    }
+
+    public <T extends UI> T addUI(T component) {
+        uiComponents.add(component);
+        return component;
+    }
+
+    public <T extends UI> T removeUI(T component) {
+        uiComponents.remove(component);
+        return component;
+    }
+
+    public void clearUI() {
+        uiComponents.clear();
+    }
 
     public Display getDisplay() {
         return display;
