@@ -13,28 +13,6 @@ public abstract class Application {
         this.display = display;
     }
 
-    public void run() throws Display.WindowCreationError {
-        long nanos, deltaNanos, lastNanos;
-
-        display.setup();
-
-        lastNanos = System.nanoTime();
-
-        do {
-            nanos = System.nanoTime();
-            deltaNanos = nanos - lastNanos;
-            lastNanos = nanos;
-
-            update(deltaNanos / 1000000000f);
-            display.beginRenderFrame();
-            draw();
-            display.finishRenderFrame();
-            display.pollEvents();
-        } while (!display.windowShouldClose());
-
-        display.destroy();
-    }
-
     protected void draw() {
         for (UI component : uiComponents) {
             component.draw();
@@ -65,4 +43,27 @@ public abstract class Application {
         return display;
     }
 
+    public static void run(Application app) throws Display.WindowCreationError {
+        long nanos, deltaNanos, lastNanos;
+
+        app.display.setup();
+
+        Rect2D.init();
+
+        lastNanos = System.nanoTime();
+
+        do {
+            nanos = System.nanoTime();
+            deltaNanos = nanos - lastNanos;
+            lastNanos = nanos;
+
+            app.update(deltaNanos / 1000000000f);
+            app.display.beginRenderFrame();
+            app.draw();
+            app.display.finishRenderFrame();
+            app.display.pollEvents();
+        } while (!app.display.windowShouldClose());
+
+        app.display.destroy();
+    }
 }

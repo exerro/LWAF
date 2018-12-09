@@ -53,6 +53,8 @@ public class Display {
     // sets up the display
     // must be called for window to become visible
     public void setup() throws WindowCreationError {
+        if (isSetup) return;
+
         setupGLFWWindow();
         setupOpenGL();
         isSetup = true;

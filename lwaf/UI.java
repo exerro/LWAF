@@ -10,6 +10,14 @@ public abstract class UI {
         this.colour = colour;
     }
 
+    public vec2f getPosition() {
+        return position;
+    }
+
+    public vec3f getColour() {
+        return colour;
+    }
+
     public void moveTo(vec2f position) {
         this.position = position;
     }
