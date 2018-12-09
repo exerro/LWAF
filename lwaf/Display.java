@@ -16,6 +16,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 // handles creating and rendering to a window
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Display {
 
     public static final int DEFAULT_WIDTH = 1280;
@@ -95,9 +96,7 @@ public class Display {
                         (videoMode.height() - pHeight.get(0)) / 2
                 );
             }
-            else {
-                // do nothing, centering isn't that important...
-            }
+            // otherwise, do nothing, centering isn't that important...
         }
 
         // don't really know what these are for but I found them online so fuck it
@@ -119,23 +118,39 @@ public class Display {
 
     // returns true if the window should close (e.g. close button pressed)
     public boolean windowShouldClose() {
+        if (!isSetup) {
+            throw new IllegalStateException("Display is not yet setup, call setup() first");
+        }
+
         return glfwWindowShouldClose(windowID);
     }
 
     // begins a render frame, clearing the screen
     public void beginRenderFrame() {
+        if (!isSetup) {
+            throw new IllegalStateException("Display is not yet setup, call setup() first");
+        }
+
         glClearColor(cr, cg, cb, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     // finishes a render frame, swapping buffers
     public void finishRenderFrame() {
+        if (!isSetup) {
+            throw new IllegalStateException("Display is not yet setup, call setup() first");
+        }
+
         glfwSwapBuffers(windowID);
     }
 
     // polls events
     // don't forget to call this...
     public void pollEvents() {
+        if (!isSetup) {
+            throw new IllegalStateException("Display is not yet setup, call setup() first");
+        }
+
         glfwPollEvents();
     }
 
