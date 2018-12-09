@@ -114,12 +114,13 @@ public class Display {
         GL.createCapabilities();
 
         glClearColor(cr, cg, cb, 1.0f);
-        glEnable(GL_CULL_FACE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
+
+        glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     // returns true if the window should close (e.g. close button pressed)

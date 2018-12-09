@@ -22,7 +22,9 @@ public class View {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (var renderer : renderers) {
+            renderer.preDraw(fbo);
             renderer.draw(fbo);
+            renderer.postDraw(fbo);
         }
 
         fbo.unbind();

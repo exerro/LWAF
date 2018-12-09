@@ -16,7 +16,7 @@ public class LWAF_Main extends Application {
     private View view;
     private Texture texture;
     private Font font;
-    private Text text1, text2, text3, text4;
+    private Text text1, text2, text3, text4, text5;
 
     private LWAF_Main(Display display) {
         super(display);
@@ -30,6 +30,7 @@ public class LWAF_Main extends Application {
             text2 = new Text("Hello world!", 0, font, 64);
             text3 = new Text("Hello world!", 0, font, 32);
             text4 = new Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", 0, font, 32);
+            text5 = new Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", 0, font, 16);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -57,6 +58,7 @@ public class LWAF_Main extends Application {
         Draw.image(texture, new vec2f(0, 0), new vec2f(0.3f, 0.3f));
         Draw.view(view, new vec2f(0, 400));
         Draw.text(text4, new vec2f(200, 0));
+        Draw.text(text5, new vec2f(200, 64));
         Draw.setColour(0, 0, 0);
         Draw.rectangle(200, 200, 1000, 128);
         Draw.rectangle(200, 400, 1000, 64);

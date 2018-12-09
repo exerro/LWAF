@@ -127,9 +127,7 @@ public class Draw {
         shaderProgram2D.setUniform("useTexture", texture != null);
         shaderProgram2D.start();
         vao.load();
-        glDisable(GL_CULL_FACE);
-        glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-        glEnable(GL_CULL_FACE);
+        glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
         vao.unload();
         shaderProgram2D.stop();
 
