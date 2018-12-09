@@ -1,5 +1,6 @@
 package lwaf;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public abstract class Application {
         return display;
     }
 
-    public static void run(Application app) throws Display.WindowCreationError {
+    public static void run(Application app) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
         long nanos, deltaNanos, lastNanos;
 
         app.display.setup();

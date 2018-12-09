@@ -35,6 +35,10 @@ public class vec2f {
         return new vec2f(x * s, y * s);
     }
 
+    public vec2f div(vec2f v) {
+        return new vec2f(x / v.x, y / v.y);
+    }
+
     public vec2f div(float s) {
         return new vec2f(x / s, y / s);
     }

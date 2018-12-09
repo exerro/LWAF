@@ -23,6 +23,8 @@ public class Display {
     public static final int DEFAULT_HEIGHT = 720;
     public static final String DEFAULT_TITLE = "Unnamed LWAF Window";
 
+    private static Display active;
+
     long windowID;
 
     private int width, height;
@@ -135,6 +137,8 @@ public class Display {
 
         glClearColor(cr, cg, cb, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        active = this;
     }
 
     // finishes a render frame, swapping buffers
@@ -215,6 +219,10 @@ public class Display {
         glfwTerminate();
         // TODO: what does this do?
         GLFWErrorCallback x=glfwSetErrorCallback(null);if(x!=null)x.free();
+    }
+
+    public static Display getActive() {
+        return active;
     }
 
     // thrown in setup() when window creation fails

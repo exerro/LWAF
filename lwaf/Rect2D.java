@@ -2,12 +2,15 @@ package lwaf;
 
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
+
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Rect2D extends UI {
 
     private static VAO vao;
+    private static ShaderLoader.Program shader;
 
     private vec2f size;
 
@@ -26,13 +29,21 @@ public class Rect2D extends UI {
 
     @Override
     void draw() {
-        // set shader uniform stuff
+        vec2f displaySize = new vec2f(Display.getActive().getWidth(), Display.getActive().getHeight());
+
+        shader.setUniform("position", getPosition().div(displaySize).mul(2));
+        shader.setUniform("size", getSize().div(displaySize).mul(2));
+        shader.setUniform("colour", getColour());
+        shader.start();
         vao.load();
         GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
         vao.unload();
+        shader.stop();
     }
 
-    public static void init() {
+    public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
+        shader = ShaderLoader.load("lwaf/shader", "vertex2D.glsl","fragment.glsl", false);
+
         vao = new VAO() {
             {
                 int vertexVBOID, normalVBOID, colourVBOID, elementVBOID;
@@ -53,10 +64,10 @@ public class Rect2D extends UI {
                 enableAttribute(2);
 
                 bufferData(vertexVBOID, new float[] {
-                        -0.5f,  0.5f, 0,
-                        -0.5f, -0.5f, 0,
-                         0.5f, -0.5f, 0,
-                         0.5f,  0.5f, 0
+                        0, 1, 0,
+                        0, 0, 0,
+                        1, 0, 0,
+                        1, 1, 0
                 }, GL_STATIC_DRAW);
 
                 bufferData(normalVBOID, new float[] {
@@ -74,8 +85,8 @@ public class Rect2D extends UI {
                 }, GL_STATIC_DRAW);
 
                 bufferElementData(elementVBOID, new int[] {
-                        0, 1, 2,
-                        0, 2, 3
+                        2, 1, 0,
+                        3, 2, 0
                 }, GL_STATIC_DRAW);
             }
         };
