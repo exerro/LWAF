@@ -16,7 +16,7 @@ public class LWAF_Main extends Application {
     private View view;
     private Texture texture;
     private Font font;
-    private Text text1, text2, text3;
+    private Text text1, text2, text3, text4;
 
     private LWAF_Main(Display display) {
         super(display);
@@ -29,6 +29,7 @@ public class LWAF_Main extends Application {
             text1 = new Text("Hello world!", 0, font, 128);
             text2 = new Text("Hello world!", 0, font, 64);
             text3 = new Text("Hello world!", 0, font, 32);
+            text4 = new Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", 0, font, 32);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -42,7 +43,7 @@ public class LWAF_Main extends Application {
             @Override
             protected void draw(FBO framebuffer) {
                 Draw.setColour(0, 0, 1);
-                Draw.rectangle(new vec2f(10, 10), new vec2f(64, 64));
+                Draw.rectangle(10, 10, 64, 64);
                 Draw.setColour(1, 1, 1);
             }
         });
@@ -52,8 +53,10 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void draw() {
-        Draw.view(view);
-        // Draw.image(text.getFont().getTexture());
+        Draw.setColour(1, 1, 1);
+        Draw.image(texture, new vec2f(0, 0), new vec2f(0.3f, 0.3f));
+        Draw.view(view, new vec2f(0, 400));
+        Draw.text(text4, new vec2f(200, 0));
         Draw.setColour(0, 0, 0);
         Draw.rectangle(200, 200, 1000, 128);
         Draw.rectangle(200, 400, 1000, 64);

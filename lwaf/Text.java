@@ -35,7 +35,8 @@ public class Text {
 
     private void initialiseVAO() {
         // 8 because 4 vec2fs per quad
-        var vertices = new float[text.length() * 8];
+        var vertices = new float[text.length() * 12];
+        var colours = new float[text.length() * 12];
         var uvs = new float[text.length() * 8];
         var elements = new int[text.length() * 6];
 
@@ -45,39 +46,41 @@ public class Text {
         float sizeScale = size / lineHeight;
         float x = 0, y = (lineHeight - base) * sizeScale;
 
+        for (int i = 0; i < colours.length; ++i) {
+            colours[i] = 1;
+        }
+
         for (int i = 0; i < text.length(); ++i) {
             char c = text.charAt(i);
-            int vi = i * 8;
+            int vi = i * 12;
+            int uvi = i * 8;
 
             var width  = font.getCharWidth(c) * sizeScale;
             var size   = font.getCharSize(c).mul(sizeScale);
             var offset = font.getCharOffset(c).mul(sizeScale);
             var cuvs   = font.getCharUVPositions(c);
 
-            uvs[vi    ] = cuvs[0].x;
-            uvs[vi + 1] = cuvs[0].y;
-            uvs[vi + 2] = cuvs[1].x;
-            uvs[vi + 3] = cuvs[1].y;
-            uvs[vi + 4] = cuvs[2].x;
-            uvs[vi + 5] = cuvs[2].y;
-            uvs[vi + 6] = cuvs[3].x;
-            uvs[vi + 7] = cuvs[3].y;
+            uvs[uvi    ] = cuvs[0].x;
+            uvs[uvi + 1] = cuvs[0].y;
+            uvs[uvi + 2] = cuvs[1].x;
+            uvs[uvi + 3] = cuvs[1].y;
+            uvs[uvi + 4] = cuvs[2].x;
+            uvs[uvi + 5] = cuvs[2].y;
+            uvs[uvi + 6] = cuvs[3].x;
+            uvs[uvi + 7] = cuvs[3].y;
 
-            vertices[vi    ] = x + offset.x;
-            vertices[vi + 1] = y - offset.y;
-            vertices[vi + 2] = x + offset.x;
-            vertices[vi + 3] = y - offset.y + size.y;
-            vertices[vi + 4] = x + offset.x + size.x;
-            vertices[vi + 5] = y - offset.y + size.y;
-            vertices[vi + 6] = x + offset.x + size.x;
-            vertices[vi + 7] = y - offset.y;
-
-            System.out.println("Char: " + c);
-            System.out.println("Top left UV: " + cuvs[0].toString());
-            System.out.println("Top left vertex: (" + (x + offset.x) + ", " + (y + offset.y) + ")");
-            System.out.println("Character size: " + size.toString());
-            System.out.println("Advancing: " + width);
-            System.out.println("Scale: " + sizeScale);
+            vertices[vi     ] = x + offset.x;
+            vertices[vi +  1] = y - offset.y;
+            vertices[vi +  2] = 0;
+            vertices[vi +  3] = x + offset.x;
+            vertices[vi +  4] = y - offset.y + size.y;
+            vertices[vi +  5] = 0;
+            vertices[vi +  6] = x + offset.x + size.x;
+            vertices[vi +  7] = y - offset.y + size.y;
+            vertices[vi +  8] = 0;
+            vertices[vi +  9] = x + offset.x + size.x;
+            vertices[vi + 10] = y - offset.y;
+            vertices[vi + 11] = 0;
 
             x += width;
         }
@@ -96,16 +99,20 @@ public class Text {
         vao.setVertexCount(elements.length);
 
         int vertexVBOID = vao.genBuffer();
+        int colourVBOID = vao.genBuffer();
         int uvVBOID = vao.genBuffer();
         int elementVBOID = vao.genBuffer();
 
-        vao.bindBuffer(vertexVBOID, 0, 2, GL_FLOAT);
-        vao.bindBuffer(uvVBOID, 4, 2, GL_FLOAT);
+        vao.bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
+        vao.bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
+        vao.bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
 
         vao.enableAttribute(0);
-        vao.enableAttribute(4);
+        vao.enableAttribute(2);
+        vao.enableAttribute(3);
 
         vao.bufferData(vertexVBOID, vertices, GL_STATIC_DRAW);
+        vao.bufferData(colourVBOID, colours, GL_STATIC_DRAW);
         vao.bufferData(uvVBOID, uvs, GL_STATIC_DRAW);
 
         vao.bufferElementData(elementVBOID, elements, GL_STATIC_DRAW);

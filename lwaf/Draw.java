@@ -5,7 +5,6 @@ import org.lwjgl.opengl.GL11;
 import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -15,9 +14,7 @@ public class Draw {
 
     private static VAO rectangleVAO;
     private static int rectangleVAOuvVBOID;
-    private static ShaderLoader.Program texturedShaderProgram;
-    private static ShaderLoader.Program textShaderProgram;
-    private static ShaderLoader.Program untexturedShaderProgram;
+    private static ShaderLoader.Program shaderProgram2D;
     private static vec3f colour = new vec3f(1, 1, 1);
     private static vec2f viewportSize;
 
@@ -46,15 +43,14 @@ public class Draw {
 
     public static void rectangle(vec2f position, vec2f size) {
         vec2f displaySize = getViewportSize();
+        mat4f transform = mat4f.identity()
+                .scaleBy(1, -1, 1)
+                .translate(-1, -1, 0)
+                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
+                .translate(position.x, position.y, 0)
+                .scaleBy(size.x, size.y, 1);
 
-        untexturedShaderProgram.setUniform("position", position.div(displaySize).mul(2));
-        untexturedShaderProgram.setUniform("scale", size.div(displaySize).mul(2));
-        untexturedShaderProgram.setUniform("colour", colour);
-        untexturedShaderProgram.start();
-        rectangleVAO.load();
-        GL11.glDrawElements(GL11.GL_TRIANGLES, rectangleVAO.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-        rectangleVAO.unload();
-        untexturedShaderProgram.stop();
+        draw2D(null, rectangleVAO, transform);
     }
 
     public static void rectangle(int x, int y, int width, int height) {
@@ -63,19 +59,15 @@ public class Draw {
 
     public static void image(Texture texture, vec2f position, vec2f scale) {
         vec2f displaySize = getViewportSize();
-        vec2f textureSize = new vec2f(texture.getWidth(), texture.getHeight());
+        mat4f transform = mat4f.identity()
+                .scaleBy(1, -1, 1)
+                .translate(-1, -1, 0)
+                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
+                .translate(position.x, position.y, 0)
+                .scaleBy(texture.getWidth(), texture.getHeight(), 1)
+                .scaleBy(new vec3f(scale, 1));
 
-        texture.bind();
-        glActiveTexture(GL_TEXTURE0);
-        texturedShaderProgram.setUniform("position", position.div(displaySize).mul(2));
-        texturedShaderProgram.setUniform("scale", scale.mul(textureSize).div(displaySize).mul(2));
-        texturedShaderProgram.setUniform("colour", colour);
-        texturedShaderProgram.start();
-        rectangleVAO.load();
-        GL11.glDrawElements(GL11.GL_TRIANGLES, rectangleVAO.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-        rectangleVAO.unload();
-        texturedShaderProgram.stop();
-        texture.unbind();
+        draw2D(texture, rectangleVAO, transform);
     }
 
     public static void image(Texture texture, vec2f position) {
@@ -89,24 +81,18 @@ public class Draw {
     public static void view(View view, vec2f position, vec2f scale) {
         view.render();
 
-        // flip the V coordinate of texture coordinates
-        rectangleVAO.bufferData(rectangleVAOuvVBOID, new float[] {
-                0, 0,
-                0, 1,
-                1, 1,
-                1, 0
-        }, GL_STATIC_DRAW);
-        glEnable(GL_DEPTH_TEST);
+        vec2f displaySize = getViewportSize();
+        mat4f transform = mat4f.identity()
+                .scaleBy(1, -1, 1)
+                .translate(-1, -1, 0)
+                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
+                .translate(position.x, position.y, 0)
+                .scaleBy(view.getTexture().getWidth(), view.getTexture().getHeight(), 1)
+                .scaleBy(new vec3f(scale, 1))
+                .translate(0, 1, 0)
+                .scaleBy(1, -1, 0);
 
-        image(view.getTexture(), position, scale);
-
-        glDisable(GL_DEPTH_TEST);
-        rectangleVAO.bufferData(rectangleVAOuvVBOID, new float[] {
-                0, 1,
-                0, 0,
-                1, 0,
-                1, 1
-        }, GL_STATIC_DRAW);
+        draw2D(view.getTexture(), rectangleVAO, transform);
     }
 
     public static void view(View view, vec2f position) {
@@ -119,26 +105,41 @@ public class Draw {
 
     public static void text(Text text, vec2f position) {
         vec2f displaySize = getViewportSize();
+        mat4f transform = mat4f.identity()
+                .translate(-1, 1, 0)
+                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
+                .scaleBy(1, -1, 0)
+                .translate(position.x, position.y, 0);
 
-        text.getFont().getTexture().bind();
-        glActiveTexture(GL_TEXTURE0);
-        textShaderProgram.setUniform("position", position.div(displaySize).mul(2));
-        textShaderProgram.setUniform("scale", new vec2f(2, 2).div(displaySize));
-        textShaderProgram.setUniform("colour", colour);
-        textShaderProgram.start();
-        text.getVAO().load();
-        GL11.glDrawElements(GL11.GL_TRIANGLES, text.getVAO().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-        text.getVAO().unload();
-        textShaderProgram.stop();
-        text.getFont().getTexture().unbind();
+        draw2D(text.getFont().getTexture(), text.getVAO(), transform);
+    }
 
-        // if (glGetError() != GL_NO_ERROR) throw new Error("aagh");
+    private static void draw2D(Texture texture, VAO vao, mat4f transform) {
+        vec2f displaySize = getViewportSize();
+
+        if (texture != null) {
+            texture.bind();
+            glActiveTexture(GL_TEXTURE0);
+        }
+
+        shaderProgram2D.setUniform("transform", transform);
+        shaderProgram2D.setUniform("colour", colour);
+        shaderProgram2D.setUniform("useTexture", texture != null);
+        shaderProgram2D.start();
+        vao.load();
+        glDisable(GL_CULL_FACE);
+        glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+        glEnable(GL_CULL_FACE);
+        vao.unload();
+        shaderProgram2D.stop();
+
+        if (texture != null) {
+            texture.unbind();
+        }
     }
 
     public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        untexturedShaderProgram = ShaderLoader.load("lwaf/shader", "untextured.vertex-2D.glsl", "untextured.fragment.glsl", false);
-        texturedShaderProgram = ShaderLoader.load("lwaf/shader", "textured.vertex-2D.glsl", "textured.fragment.glsl", false);
-        textShaderProgram = ShaderLoader.load("lwaf/shader", "text.vertex-2D.glsl", "text.fragment.glsl", false);
+        shaderProgram2D = ShaderLoader.load("lwaf/shader", "2D.vertex.glsl", "2D.fragment.glsl", false);
 
         rectangleVAO = new VAO() {
             {
@@ -155,12 +156,12 @@ public class Draw {
                 bindBuffer(vertexVBOID, 0, 3, GL11.GL_FLOAT);
                 bindBuffer(normalVBOID, 1, 3, GL11.GL_FLOAT);
                 bindBuffer(colourVBOID, 2, 3, GL11.GL_FLOAT);
-                bindBuffer(uvVBOID, 4, 2, GL11.GL_FLOAT);
+                bindBuffer(uvVBOID, 3, 2, GL11.GL_FLOAT);
 
                 enableAttribute(0);
                 enableAttribute(1);
                 enableAttribute(2);
-                enableAttribute(4);
+                enableAttribute(3);
 
                 bufferData(vertexVBOID, new float[] {
                         0, 1, 0,
@@ -202,7 +203,6 @@ public class Draw {
 
     public static void destroy() {
         rectangleVAO.destroy();
-        texturedShaderProgram.destroy();
-        untexturedShaderProgram.destroy();
+        shaderProgram2D.destroy();
     }
 }

@@ -12,6 +12,10 @@ public class vec3f {
         this.z = z;
     }
 
+    public vec3f(vec2f v, float z) {
+        this(v.x, v.y, z);
+    }
+
     public vec3f() {
         this(0, 0, 0);
     }

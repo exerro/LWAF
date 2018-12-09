@@ -38,28 +38,30 @@ public class Font {
                         "y=\"(\\d+)\"\\s+" +
                         "width=\"(\\d+)\"\\s+" +
                         "height=\"(\\d+)\"\\s+" +
-                        "xoffset=\"(\\d+)\"\\s+" +
-                        "yoffset=\"(\\d+)\"\\s+" +
+                        "xoffset=\"([\\+\\-]?\\d+)\"\\s+" +
+                        "yoffset=\"([\\+\\-]?\\d+)\"\\s+" +
                         "xadvance=\"(\\d+)\"\\s+" +
                         "page=\"0\" chnl=\"\\d+\"\\s*" +
                         "/>"
         );
     }
 
-    private final int lineHeight, base, scaleW, scaleH;
+    private final int lineHeight, base;
     private final Texture texture;
     private final vec2f[][] textureAtlas = new vec2f[256][4];
-    private final boolean[] charSet = new boolean[256];
     private final vec2f[] charOffsets = new vec2f[256];
     private final vec2f[] charSizes = new vec2f[256];
     private final float[] charWidths = new float[256];
 
-    public Font(String filepath) throws IOException {
-        var fileContent = new String(Files.readAllBytes(Paths.get(filepath)));
+    public Font(String filePath) throws IOException {
+        var fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
         var fontFileMatcher = fontFilePatternMatcher.matcher(fileContent);
         var commonMatcher = commonPatternMatcher.matcher(fileContent);
         var charMatcher = charPatternMatcher.matcher(fileContent);
         var charsFound = 0;
+        var charSet = new boolean[256];
+        int scaleW;
+        int scaleH;
 
         if (fontFileMatcher.find()) {
             texture = new Texture(fontFileMatcher.group(1));
@@ -107,6 +109,15 @@ public class Font {
                 charSizes[id] = new vec2f(width, height);
                 charWidths[id] = xadvance;
                 ++charsFound;
+            }
+        }
+
+        for (int i = 0; i < 256; ++i) {
+            if (!charSet[i]) {
+                textureAtlas[i] = textureAtlas['_'];
+                charOffsets[i] = charOffsets['_'];
+                charSizes[i] = charSizes['_'];
+                charWidths[i] = charWidths['_'];
             }
         }
 

@@ -2,6 +2,7 @@ package lwaf;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 
 import java.io.IOException;
@@ -139,6 +140,12 @@ public abstract class ShaderLoader {
             return instanced;
         }
 
+        public void setUniform(String uniform, boolean value) {
+            if (!active) GL20.glUseProgram(programID);
+            GL20.glUniform1i(GL20.glGetUniformLocation(programID, uniform), value ? 1 : 0);
+            if (!active) GL20.glUseProgram(0);
+        }
+
         public void setUniform(String uniform, float value) {
             if (!active) GL20.glUseProgram(programID);
             GL20.glUniform1f(GL20.glGetUniformLocation(programID, uniform), value);
@@ -171,11 +178,11 @@ public abstract class ShaderLoader {
             if (!active) GL20.glUseProgram(0);
         }
 
-//        public void setUniform(String uniform, mat4f value) {
-//            if (!active) GL20.glUseProgram(programID);
-//            GL20.glUniformMatrix4fv(GL20.glGetUniformLocation(programID, uniform), true, value.getElements());
-//            if (!active) GL20.glUseProgram(0);
-//        }
+        public void setUniform(String uniform, mat4f value) {
+            if (!active) GL20.glUseProgram(programID);
+            GL20.glUniformMatrix4fv(GL20.glGetUniformLocation(programID, uniform), true, value.el);
+            if (!active) GL20.glUseProgram(0);
+        }
 
         public void start() {
             GL20.glUseProgram(programID);
