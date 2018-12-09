@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -11,9 +12,26 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 public class Draw {
 
     private static VAO rectangleVAO;
+    private static int rectangleVAOuvVBOID;
     private static ShaderLoader.Program texturedShaderProgram;
     private static ShaderLoader.Program untexturedShaderProgram;
     private static vec3f colour = new vec3f(1, 1, 1);
+    private static vec2f viewportSize;
+
+    public static vec2f getViewportSize() {
+        return viewportSize;
+    }
+
+    public static void viewport(vec2f size) {
+        viewportSize = size;
+        glViewport(0, 0, (int) size.x, (int) size.y);
+    }
+
+    public static void viewport() {
+        int w = Display.getActive().getWidth(), h = Display.getActive().getHeight();
+        viewportSize = new vec2f(w, h);
+        glViewport(0, 0, w, h);
+    }
 
     public static void setColour(vec3f colour) {
         Draw.colour = colour;
@@ -24,7 +42,7 @@ public class Draw {
     }
 
     public static void rectangle(vec2f position, vec2f size) {
-        vec2f displaySize = getDisplaySize();
+        vec2f displaySize = getViewportSize();
 
         untexturedShaderProgram.setUniform("position", position.div(displaySize).mul(2));
         untexturedShaderProgram.setUniform("scale", size.div(displaySize).mul(2));
@@ -37,7 +55,7 @@ public class Draw {
     }
 
     public static void image(Texture texture, vec2f position, vec2f scale) {
-        vec2f displaySize = getDisplaySize();
+        vec2f displaySize = getViewportSize();
         vec2f textureSize = new vec2f(texture.getWidth(), texture.getHeight());
 
         texture.bind();
@@ -63,17 +81,31 @@ public class Draw {
 
     public static void view(View view, vec2f position, vec2f scale) {
         view.render();
+
+        // flip the V coord of texture coordinates
+        rectangleVAO.bufferData(rectangleVAOuvVBOID, new float[] {
+                0, 0,
+                0, 1,
+                1, 1,
+                1, 0
+        }, GL_STATIC_DRAW);
+
         image(view.getTexture(), position, scale);
+
+        rectangleVAO.bufferData(rectangleVAOuvVBOID, new float[] {
+                0, 1,
+                0, 0,
+                1, 0,
+                1, 1
+        }, GL_STATIC_DRAW);
     }
 
     public static void view(View view, vec2f position) {
-        view.render();
-        image(view.getTexture(), position);
+        view(view, position, new vec2f(1, 1));
     }
 
     public static void view(View view) {
-        view.render();
-        image(view.getTexture());
+        view(view, new vec2f(0, 0), new vec2f(1, 1));
     }
 
     public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
@@ -134,6 +166,8 @@ public class Draw {
                         1, 0,
                         1, 1
                 }, GL_STATIC_DRAW);
+
+                rectangleVAOuvVBOID = uvVBOID;
             }
         };
     }
@@ -142,10 +176,6 @@ public class Draw {
         rectangleVAO.destroy();
         texturedShaderProgram.destroy();
         untexturedShaderProgram.destroy();
-    }
-
-    private static vec2f getDisplaySize() {
-        return new vec2f(Display.getActive().getWidth(), Display.getActive().getHeight());
     }
 
 }

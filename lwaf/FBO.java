@@ -61,12 +61,12 @@ public class FBO {
 
     public void bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-        glViewport(0, 0, width, height);
+        Draw.viewport(new vec2f(texture.getWidth(), texture.getHeight()));
     }
 
     public void unbind() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Display.getActive().getWidth(), Display.getActive().getHeight());
+        Draw.viewport();
     }
 
     public int getWidth() {

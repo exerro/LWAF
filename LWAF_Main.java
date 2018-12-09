@@ -1,13 +1,7 @@
 
 import lwaf.*;
-import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
-
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 public class LWAF_Main extends Application {
     public static void main(String[] args) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
@@ -34,7 +28,7 @@ public class LWAF_Main extends Application {
             @Override
             protected void draw(FBO framebuffer) {
                 Draw.setColour(0, 0, 1);
-                Draw.rectangle(new vec2f(1280/4, 720/4), new vec2f(1280/2, 720/2));
+                Draw.rectangle(new vec2f(10, 10), new vec2f(64, 64));
                 Draw.setColour(1, 1, 1);
             }
         });
