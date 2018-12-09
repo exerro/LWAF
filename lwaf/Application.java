@@ -12,7 +12,7 @@ public abstract class Application {
         this.display = display;
     }
 
-    protected abstract void load();
+    protected abstract boolean load();
     protected abstract void draw();
     protected abstract void update(float dt);
     protected abstract void unload();
@@ -32,7 +32,11 @@ public abstract class Application {
 
         Draw.init();
 
-        app.load();
+        if (!app.load()) {
+            app.display.destroy();
+            Draw.destroy();
+            return;
+        }
 
         lastNanos = System.nanoTime();
 
@@ -49,9 +53,7 @@ public abstract class Application {
         } while (app.running && !app.display.windowShouldClose());
 
         app.unload();
-
         app.display.destroy();
-
         Draw.destroy();
     }
 }

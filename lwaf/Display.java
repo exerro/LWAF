@@ -117,7 +117,9 @@ public class Display {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
-        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     // returns true if the window should close (e.g. close button pressed)
@@ -137,7 +139,7 @@ public class Display {
 
         glClearColor(cr, cg, cb, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, width, height);
+        Draw.viewport(new vec2f(width, height));
 
         active = this;
     }

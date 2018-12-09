@@ -1,5 +1,6 @@
 package lwaf;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -8,7 +9,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class View {
 
     private final FBO fbo;
-    private List<Renderer> renderers;
+    private List<Renderer> renderers = new ArrayList<>();
     private vec3f colour = new vec3f(0, 0, 0);
 
     public View(int width, int height) {
