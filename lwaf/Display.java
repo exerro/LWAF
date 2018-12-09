@@ -29,7 +29,7 @@ public class Display {
 
     private int width, height;
     private String title;
-    private int cr = 0, cg = 0, cb = 0;
+    private float cr = 0, cg = 0, cb = 0;
     private boolean isSetup = false;
 
     public Display(int width, int height, String title) {
@@ -201,7 +201,14 @@ public class Display {
     }
 
     // sets the colour of the background of each frame prior to any rendering
-    public void setBackgroundColour(int r, int g, int b) {
+    public void setBackgroundColour(vec3f colour) {
+        cr = colour.x;
+        cg = colour.y;
+        cb = colour.z;
+    }
+
+    // sets the colour of the background of each frame prior to any rendering
+    public void setBackgroundColour(float r, float g, float b) {
         cr = r;
         cg = g;
         cb = b;

@@ -1,5 +1,7 @@
 package lwaf;
 
+import org.lwjgl.openvr.Texture;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,10 @@ public abstract class Application {
 
     protected Application(Display display) {
         this.display = display;
+    }
+
+    protected void load() {
+
     }
 
     protected void draw() {
@@ -49,7 +55,9 @@ public abstract class Application {
 
         app.display.setup();
 
-        Rect2D.init();
+        Draw.init();
+
+        app.load();
 
         lastNanos = System.nanoTime();
 

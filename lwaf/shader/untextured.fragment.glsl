@@ -1,6 +1,5 @@
 #version 400 core
 
-// from vertex shader
 in vec3 fragment_colour;
 
 void main(void) {
