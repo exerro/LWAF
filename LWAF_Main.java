@@ -1,5 +1,6 @@
 
 import lwaf.*;
+import lwaf.util.CubeVAO;
 
 import java.io.IOException;
 
@@ -14,9 +15,6 @@ public class LWAF_Main extends Application {
     }
 
     private View view;
-    private Texture texture;
-    private Font font;
-    private Text text1, text2, text3, text4, text5;
 
     private LWAF_Main(Display display) {
         super(display);
@@ -24,28 +22,39 @@ public class LWAF_Main extends Application {
 
     @Override
     protected boolean load() {
-        try {
-            font = new Font("lwaf/font/open-sans/OpenSans-Regular.fnt");
-            text1 = new Text("Hello world!", 0, font, 128);
-            text2 = new Text("Hello world!", 0, font, 64);
-            text3 = new Text("Hello world!", 0, font, 32);
-            text4 = new Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", 0, font, 32);
-            text5 = new Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", 0, font, 16);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
 
-        texture = new Texture("im.png");
+        view = new View(1200, 680);
+        view.attachRenderer(new Renderer.VAORenderer3D() {
+            {
+                setShader(ShaderLoader.safeLoad(
+                        "lwaf/shader",
+                        "vertex-3D.glsl",
+                        "fragment-3D.glsl",
+                        false
+                ));
 
-        view = new View(128, 128);
-        view.attachRenderer(new Renderer() {
+                setVAO(new CubeVAO());
+            }
+
             @Override
-            protected void draw(FBO framebuffer) {
-                Draw.setColour(0, 0, 1);
-                Draw.rectangle(10, 10, 64, 64);
-                Draw.setColour(1, 1, 1);
+            public void setUniforms() {
+
+                getShader().setUniform("projectionTransform", mat4f.projection(
+                        70,
+                        Draw.getViewportSize(),
+                        0.1f,
+                        1000f
+                ));
+                getShader().setUniform("viewTransform", mat4f.translation(0, -1, -4));
+                getShader().setUniform("transform", mat4f.rotation(new vec3f(0, 1, 0), Application.getActive().getTime()));
+
+                getShader().setUniform("useTexture", false);
+                getShader().setUniform("colour", new vec3f(1, 0.5f, 1));
+
+                getShader().setUniform("lightMinimum", 0.5f);
+                getShader().setUniform("lightColour", new vec3f(1, 1, 1));
+                getShader().setUniform("lightPosition", new vec3f(0, -1, 3));
+
             }
         });
 
@@ -55,18 +64,7 @@ public class LWAF_Main extends Application {
     @Override
     protected void draw() {
         Draw.setColour(1, 1, 1);
-        Draw.image(texture, new vec2f(0, 0), new vec2f(0.3f, 0.3f));
-        Draw.view(view, new vec2f(0, 400));
-        Draw.text(text4, new vec2f(200, 0));
-        Draw.text(text5, new vec2f(200, 64));
-        Draw.setColour(0, 0, 0);
-        Draw.rectangle(200, 200, 1000, 128);
-        Draw.rectangle(200, 400, 1000, 64);
-        Draw.rectangle(200, 600, 1000, 32);
-        Draw.setColour(1, 1, 1);
-        Draw.text(text1, new vec2f(200, 200));
-        Draw.text(text2, new vec2f(200, 400));
-        Draw.text(text3, new vec2f(200, 600));
+        Draw.view(view, new vec2f(40, 20));
     }
 
     @Override

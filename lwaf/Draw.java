@@ -137,7 +137,7 @@ public class Draw {
     }
 
     public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        shaderProgram2D = ShaderLoader.load("lwaf/shader", "2D.vertex.glsl", "2D.fragment.glsl", false);
+        shaderProgram2D = ShaderLoader.load("lwaf/shader", "vertex-2D.glsl", "fragment-2D.glsl", false);
 
         rectangleVAO = new VAO() {
             {

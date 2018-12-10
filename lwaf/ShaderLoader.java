@@ -34,6 +34,38 @@ public abstract class ShaderLoader {
         );
     }
 
+    public static Program safeLoad(String basePath, String vertexShader, String geometryShader, String fragmentShader, boolean instanced) {
+        try {
+            return loadShaders(
+                    Paths.get(basePath, vertexShader).toString(),
+                    Paths.get(basePath, geometryShader).toString(),
+                    Paths.get(basePath, fragmentShader).toString(),
+                    instanced
+            );
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+            while (true);
+        }
+    }
+
+    public static Program safeLoad(String basePath, String vertexShader, String fragmentShader, boolean instanced) {
+        try {
+            return loadShaders(
+                    Paths.get(basePath, vertexShader).toString(),
+                    null,
+                    Paths.get(basePath, fragmentShader).toString(),
+                    instanced
+            );
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+            while (true);
+        }
+    }
+
     private static Program loadShaders(String vertexShader, String geometryShader, String fragmentShader, boolean instanced) throws ProgramLoadException, IOException, ShaderLoadException {
         int programID  = GL20.glCreateProgram(),
             vertexID   = loadShader(vertexShader, GL20.GL_VERTEX_SHADER),

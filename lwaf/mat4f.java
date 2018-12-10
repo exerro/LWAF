@@ -2,10 +2,14 @@ package lwaf;
 
 public class mat4f {
 
-    float el[];
+    final float el[];
 
     private mat4f() {
         el = new float[16];
+    }
+
+    private mat4f(float[] els) {
+        el = els;
     }
 
     public static mat4f identity() {
@@ -45,6 +49,44 @@ public class mat4f {
 
     public static mat4f scale(vec3f scale) {
         return scale(scale.x, scale.y, scale.z);
+    }
+
+    public static mat4f rotation(vec3f axis, float theta) {
+        float sin = (float) Math.sin(theta);
+        float cos = (float) Math.cos(theta);
+        float ux = axis.x, uy = axis.y, uz = axis.z;
+        float ux2 = ux*ux, uy2 = uy*uy, uz2 = uz*uz;
+
+        return new mat4f(new float[] {
+                cos + ux2*(1-cos),        ux*uy*(1-cos) - uz*sin,   ux*uz*(1-cos) + uy*sin,   0,
+                uy*ux*(1-cos) + uz*sin,   cos + uy2*(1-cos),        uy*uz*(1-cos) - ux*sin,   0,
+                uz*ux*(1-cos) - uy*sin,   uz*uy*(1-cos) + ux*sin,   cos + uz2*(1-cos),        0,
+                0,                        0,                        0,                        1
+        });
+    }
+
+    public static mat4f projection(float FOV, float aspect, float near, float far) {
+        float S = (float) (1 / Math.tan(FOV * Math.PI / 360));
+
+        return new mat4f(new float[] {
+                S / aspect, 0, 0, 0,
+                0, S, 0, 0,
+                0, 0, -(far+near)/(far-near), -2*far*near/(far-near),
+                0, 0, -1, 0
+        });
+    }
+
+    public static mat4f projection(float FOV, vec2f aspect, float near, float far) {
+        return projection(FOV, aspect.x / aspect.y, near, far);
+    }
+
+    public static mat4f orthographicProjection(float aspect, float near, float far) {
+        return new mat4f(new float[] {
+                1 / aspect, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 1
+        });
     }
 
     public mat4f copy() {
@@ -121,4 +163,43 @@ public class mat4f {
         return mul(v, 1);
     }
 
+    @Override
+    public String toString() {
+        String[] colA = new String[4], colB = new String[4], colC = new String[4], colD = new String[4];
+        String[][] cols = new String[][] { colA, colB, colC, colD };
+        int[] lens = new int[] { 0, 0, 0, 0 };
+        StringBuilder result = new StringBuilder();
+
+        for (int x = 0; x < 4; ++x) {
+            for (int y = 0; y < 4; ++y) {
+                String s = String.valueOf(el[4 * y + x]);
+                cols[x][y] = s;
+                lens[x] = Math.max(lens[x], s.length());
+            }
+        }
+
+        for (int y = 0; y < 4; ++y) {
+            result.append("[ ");
+
+            for (int x = 0; x < 4; ++x) {
+                result.append(cols[x][y]);
+
+                for (int i = 0; i < lens[x] - cols[x][y].length(); ++i) {
+                    result.append(" ");
+                }
+
+                if (x != 3) {
+                    result.append(", ");
+                }
+            }
+
+            result.append(" ]");
+
+            if (y != 3) {
+                result.append("\n");
+            }
+        }
+
+        return result.toString();
+    }
 }

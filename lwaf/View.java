@@ -16,20 +16,6 @@ public class View {
         fbo = new FBO(width, height);
     }
 
-    void render() {
-        fbo.bind();
-        glClearColor(colour.x, colour.y, colour.z, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        for (var renderer : renderers) {
-            renderer.preDraw(fbo);
-            renderer.draw(fbo);
-            renderer.postDraw(fbo);
-        }
-
-        fbo.unbind();
-    }
-
     public <T extends Renderer> T attachRenderer(T renderer) {
         renderer.load();
         renderers.add(renderer);
@@ -52,6 +38,20 @@ public class View {
         for (var renderer : renderers) {
             renderer.unload();
         }
+    }
+
+    void render() {
+        fbo.bind();
+        glClearColor(colour.x, colour.y, colour.z, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for (var renderer : renderers) {
+            renderer.preDraw(fbo);
+            renderer.draw(fbo);
+            renderer.postDraw(fbo);
+        }
+
+        fbo.unbind();
     }
 
 }
