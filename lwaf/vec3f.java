@@ -4,6 +4,12 @@ import static java.util.Objects.hash;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class vec3f {
+    public final static vec3f
+            x_axis = new vec3f(1, 0, 0),
+            y_axis = new vec3f(0, 1, 0),
+            z_axis = new vec3f(0, 0, 1),
+            one = new vec3f(1, 1, 1),
+            zero = new vec3f(0, 0, 0);
     public final float x, y, z;
 
     public vec3f(float x, float y, float z) {

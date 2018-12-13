@@ -4,11 +4,11 @@ public class mat4f {
 
     final float el[];
 
-    private mat4f() {
+    mat4f() {
         el = new float[16];
     }
 
-    private mat4f(float[] els) {
+    mat4f(float[] els) {
         el = els;
     }
 
@@ -65,30 +65,6 @@ public class mat4f {
         });
     }
 
-    public static mat4f projection(float FOV, float aspect, float near, float far) {
-        float S = (float) (1 / Math.tan(FOV * Math.PI / 360));
-
-        return new mat4f(new float[] {
-                S / aspect, 0, 0, 0,
-                0, S, 0, 0,
-                0, 0, -(far+near)/(far-near), -2*far*near/(far-near),
-                0, 0, -1, 0
-        });
-    }
-
-    public static mat4f projection(float FOV, vec2f aspect, float near, float far) {
-        return projection(FOV, aspect.x / aspect.y, near, far);
-    }
-
-    public static mat4f orthographicProjection(float aspect, float near, float far) {
-        return new mat4f(new float[] {
-                1 / aspect, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 1
-        });
-    }
-
     public mat4f copy() {
         mat4f m = new mat4f();
 
@@ -125,6 +101,10 @@ public class mat4f {
 
     public mat4f scaleBy(vec3f scale) {
         return scaleBy(scale.x, scale.y, scale.z);
+    }
+
+    public mat4f rotate(vec3f axis, float theta) {
+        return mul(rotation(axis, theta));
     }
 
     public mat4f mul(mat4f m) {

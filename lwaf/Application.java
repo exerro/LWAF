@@ -45,13 +45,14 @@ public abstract class Application {
 
         Draw.init();
 
+        active = app;
+
         if (!app.load()) {
             app.display.destroy();
             Draw.destroy();
+            active = null;
             return;
         }
-
-        active = app;
 
         lastNanos = System.nanoTime();
 

@@ -4,6 +4,12 @@ import static java.util.Objects.hash;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class vec2f {
+    public final static vec2f
+            x_axis = new vec2f(1, 0),
+            y_axis = new vec2f(0, 1),
+            one = new vec2f(1, 1),
+            zero = new vec2f(0, 0);
+
     public final float x, y;
 
     public vec2f(float x, float y) {

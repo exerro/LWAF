@@ -1,8 +1,22 @@
 package lwaf;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class Renderer {
+    public static void drawElements(VAO vao) {
+        vao.load();
+        glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
+        vao.unload();
+    }
+
+    public static void drawElementsInstanced(VAO vao) {
+        vao.load();
+        glDrawElementsInstanced(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0, vao.getInstanceCount());
+        vao.unload();
+    }
+
     protected void load() {
 
     }
@@ -33,7 +47,7 @@ public abstract class Renderer {
             this.shader = shader;
         }
 
-        public abstract void setUniforms();
+        protected abstract void setUniforms();
 
         @Override
         protected void preDraw(FBO framebuffer) {
@@ -51,22 +65,16 @@ public abstract class Renderer {
         }
     }
 
-    public static abstract class VAORenderer3D extends Renderer3D {
-        private VAO vao;
-
-        public VAO getVAO() {
-            return vao;
-        }
-
-        public void setVAO(VAO vao) {
-            this.vao = vao;
-        }
+    public static abstract class CameraRenderer3D extends Renderer3D {
+        protected abstract Camera getCamera();
 
         @Override
-        protected void draw(FBO framebuffer) {
-            vao.load();
-            glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
-            vao.unload();
+        protected void setUniforms() {
+            Camera camera = getCamera();
+            ShaderLoader.Program shader = getShader();
+
+            shader.setUniform("projectionTransform", camera.getProjectionMatrix());
+            shader.setUniform("viewTransform", camera.getViewMatrix());
         }
     }
 }
