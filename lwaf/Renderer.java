@@ -66,7 +66,7 @@ public abstract class Renderer {
     }
 
     public static abstract class CameraRenderer3D extends Renderer3D {
-        protected abstract Camera getCamera();
+        public abstract Camera getCamera();
 
         @Override
         protected void setUniforms() {

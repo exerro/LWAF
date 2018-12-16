@@ -95,6 +95,10 @@ public class mat4f {
         return translate(translation.x, translation.y, translation.z);
     }
 
+    public mat4f scaleBy(float s) {
+        return mul(scale(s, s, s));
+    }
+
     public mat4f scaleBy(float x, float y, float z) {
         return mul(scale(x, y, z));
     }

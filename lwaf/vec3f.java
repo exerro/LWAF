@@ -62,7 +62,7 @@ public class vec3f {
         return (float) Math.sqrt(x * x + y * y + z * z);
     }
 
-    public vec3f unit() {
+    public vec3f normalise() {
         float s = 1 / length();
         return new vec3f(x * s, y * s, z * s);
     }

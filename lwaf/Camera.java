@@ -13,11 +13,11 @@ public class Camera implements ITranslated<Camera>, IRotated<Camera> {
 
     public mat4f getViewMatrix() {
         return mat4f.identity()
-                    .translate(position.unm())
-                    .rotate(vec3f.y_axis, -rotation.y)
-                    .rotate(vec3f.x_axis, -rotation.x)
                     .rotate(vec3f.z_axis, -rotation.z)
-                    ;
+                    .rotate(vec3f.x_axis, -rotation.x)
+                    .rotate(vec3f.y_axis, -rotation.y)
+                    .translate(position.unm())
+                ;
     }
 
     public mat4f getProjectionMatrix() {
@@ -66,7 +66,7 @@ public class Camera implements ITranslated<Camera>, IRotated<Camera> {
     }
 
     public static class PerspectiveProjection extends Projection {
-        public static float DEFAULT_FOV = 70;
+        public static float DEFAULT_FOV = 60;
         public static float DEFAULT_NEAR = 0.1f;
         public static float DEFAULT_FAR = 1000.0f;
 

@@ -1,17 +1,19 @@
 package lwaf;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 @SuppressWarnings("unused")
 public abstract class Application {
-
     private final Display display;
     private boolean running = true;
     private float time = 0;
+    private Set<String> keysHeld = new HashSet<>();
 
     private static Application active;
 
@@ -30,6 +32,10 @@ public abstract class Application {
     protected void onPaste() {}
     protected void onCopy() {}
     protected void onCut() {}
+
+    public boolean isKeyDown(String key) {
+        return keysHeld.contains(key);
+    }
 
     public void stop() {
         running = false;
@@ -118,9 +124,11 @@ public abstract class Application {
                         return;
                     }
 
+                    app.keysHeld.add(keyName);
                     app.onKeyDown(keyName, mods);
                 }
                 else if (action == GLFW_RELEASE) {
+                    app.keysHeld.remove(keyName);
                     app.onKeyUp(keyName, mods);
                 }
             }

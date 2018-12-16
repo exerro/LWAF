@@ -61,7 +61,7 @@ public class vec2f {
         return (float) Math.sqrt(x * x + y * y);
     }
 
-    public vec2f unit() {
+    public vec2f normalise() {
         float s = 1 / length();
         return new vec2f(x * s, y * s);
     }

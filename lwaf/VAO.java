@@ -166,4 +166,16 @@ public class VAO {
         }
     }
 
+    protected static float[] vec3fToFloatArray(vec3f[] vs) {
+        float[] result = new float[vs.length * 3];
+
+        for (int i = 0; i < vs.length; ++i) {
+            result[i * 3    ] = vs[i].x;
+            result[i * 3 + 1] = vs[i].y;
+            result[i * 3 + 2] = vs[i].z;
+        }
+
+        return result;
+    }
+
 }
