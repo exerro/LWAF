@@ -11,6 +11,40 @@ public class Camera implements ITranslated<Camera>, IRotated<Camera> {
         this.rotation = vec3f.zero;
     }
 
+    private mat4f getTransformMatrix() {
+        return mat4f.identity()
+                .rotate(vec3f.z_axis, rotation.z)
+                .rotate(vec3f.x_axis, rotation.x)
+                .rotate(vec3f.y_axis, rotation.y)
+                ;
+    }
+
+    public vec3f getForward() {
+        return getTransformMatrix().mul(vec3f.z_axis.unm());
+    }
+
+    public vec3f getRight() {
+        return getTransformMatrix().mul(vec3f.x_axis);
+    }
+
+    public vec3f getUp() {
+        return getTransformMatrix().mul(vec3f.y_axis);
+    }
+
+    public vec3f getFlatForward() {
+        var fwd = getForward();
+        return new vec3f(fwd.x, 0, fwd.z).normalise();
+    }
+
+    public vec3f getFlatRight() {
+        var fwd = getRight();
+        return new vec3f(fwd.x, 0, fwd.z).normalise();
+    }
+
+    public vec3f getFlatUp() {
+        return vec3f.y_axis;
+    }
+
     public mat4f getViewMatrix() {
         return mat4f.identity()
                     .rotate(vec3f.z_axis, -rotation.z)

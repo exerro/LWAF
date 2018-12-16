@@ -140,21 +140,25 @@ public class LWAF_Main extends Application {
     protected void update(float dt) {
         var translation = renderer.getCamera().getTranslation();
         var rotation = renderer.getCamera().getRotation();
+        var forward = renderer.getCamera().getFlatForward();
+        var right = renderer.getCamera().getFlatRight();
         var speed = dt * 5;
         var rspeed = dt * (float) Math.PI / 2;
 
+        System.out.println(forward);
+
         if (isKeyDown("a")) {
-            translation = translation.add(vec3f.x_axis.unm().mul(speed));
+            translation = translation.sub(right.mul(speed));
         }
         if (isKeyDown("d")) {
-            translation = translation.add(vec3f.x_axis.mul(speed));
+            translation = translation.add(right.mul(speed));
         }
 
         if (isKeyDown("w")) {
-            translation = translation.add(vec3f.z_axis.unm().mul(speed));
+            translation = translation.add(forward.mul(speed));
         }
         if (isKeyDown("s")) {
-            translation = translation.add(vec3f.z_axis.mul(speed));
+            translation = translation.sub(forward.mul(speed));
         }
 
         if (isKeyDown("q")) {
