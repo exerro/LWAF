@@ -27,6 +27,9 @@ public abstract class Application {
     protected abstract void onKeyDown(String key, int modifiers);
     protected abstract void onTextInput(String text);
     protected void onKeyUp(String key, int modifiers) {}
+    protected void onPaste() {}
+    protected void onCopy() {}
+    protected void onCut() {}
 
     public void stop() {
         running = false;
@@ -68,24 +71,58 @@ public abstract class Application {
             String keyName = glfwGetKeyName(key, scancode);
 
             switch (key) {
-                case GLFW_KEY_SPACE: keyName = "space"; break;
-                case GLFW_KEY_BACKSPACE: keyName = "backspace"; break;
-                case GLFW_KEY_ENTER: keyName = "enter"; break;
-                case GLFW_KEY_UP: keyName = "up"; break;
-                case GLFW_KEY_DOWN: keyName = "down"; break;
-                case GLFW_KEY_LEFT: keyName = "left"; break;
-                case GLFW_KEY_RIGHT: keyName = "right"; break;
-                case GLFW_KEY_TAB: keyName = "tab"; break;
-                case GLFW_KEY_ESCAPE: keyName = "escape"; break;
-                case GLFW_KEY_DELETE: keyName = "delete"; break;
+                case GLFW_KEY_SPACE:
+                    keyName = "space";
+                    break;
+                case GLFW_KEY_BACKSPACE:
+                    keyName = "backspace";
+                    break;
+                case GLFW_KEY_ENTER:
+                    keyName = "enter";
+                    break;
+                case GLFW_KEY_UP:
+                    keyName = "up";
+                    break;
+                case GLFW_KEY_DOWN:
+                    keyName = "down";
+                    break;
+                case GLFW_KEY_LEFT:
+                    keyName = "left";
+                    break;
+                case GLFW_KEY_RIGHT:
+                    keyName = "right";
+                    break;
+                case GLFW_KEY_TAB:
+                    keyName = "tab";
+                    break;
+                case GLFW_KEY_ESCAPE:
+                    keyName = "escape";
+                    break;
+                case GLFW_KEY_DELETE:
+                    keyName = "delete";
+                    break;
             }
 
-            if (keyName != null)
-            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                app.onKeyDown(keyName, mods);
-            }
-            else if (action == GLFW_RELEASE) {
-                app.onKeyUp(keyName, mods);
+            if (keyName != null) {
+                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                    if (key == GLFW_KEY_V && (mods & GLFW_MOD_CONTROL) != 0) {
+                        app.onPaste();
+                        return;
+                    }
+                    else if (key == GLFW_KEY_C && (mods & GLFW_MOD_CONTROL) != 0) {
+                        app.onCopy();
+                        return;
+                    }
+                    else if (key == GLFW_KEY_X && (mods & GLFW_MOD_CONTROL) != 0) {
+                        app.onCut();
+                        return;
+                    }
+
+                    app.onKeyDown(keyName, mods);
+                }
+                else if (action == GLFW_RELEASE) {
+                    app.onKeyUp(keyName, mods);
+                }
             }
         });
 

@@ -2,6 +2,7 @@
 import lwaf.*;
 import lwaf.util.CubeVAO;
 
+import java.awt.datatransfer.Clipboard;
 import java.io.IOException;
 
 class CustomRenderer extends Renderer.CameraRenderer3D {
@@ -118,6 +119,6 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void onTextInput(String text) {
-
+        System.out.println(text);
     }
 }
