@@ -87,7 +87,7 @@ public class LWAF_Main extends Application {
             return false;
         }
 
-        text = new Text("Hello world", 100, font, 32);
+        text = new Text("Hello world", 100, font, 512);
         view = new View(1200, 680);
         view.attachRenderer(new CustomRenderer());
 
@@ -109,5 +109,15 @@ public class LWAF_Main extends Application {
     @Override
     protected void unload() {
         view.destroy();
+    }
+
+    @Override
+    protected void onKeyDown(String key, int modifier) {
+        System.out.println("Key pressed: " + MOD(key, modifier));
+    }
+
+    @Override
+    protected void onTextInput(String text) {
+
     }
 }

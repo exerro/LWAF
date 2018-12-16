@@ -1,6 +1,10 @@
 package lwaf;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 @SuppressWarnings("unused")
 public abstract class Application {
@@ -20,6 +24,10 @@ public abstract class Application {
     protected abstract void update(float dt);
     protected abstract void unload();
 
+    protected abstract void onKeyDown(String key, int modifiers);
+    protected abstract void onTextInput(String text);
+    protected void onKeyUp(String key, int modifiers) {}
+
     public void stop() {
         running = false;
     }
@@ -38,6 +46,8 @@ public abstract class Application {
 
     public static void run(Application app) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
         long nanos, deltaNanos, lastNanos;
+        Map<Integer, Boolean> heldKeys;
+        List<String> keyModifiers;
         float dt;
 
         app.display.setup();
@@ -53,6 +63,35 @@ public abstract class Application {
             active = null;
             return;
         }
+
+        glfwSetKeyCallback(app.getDisplay().windowID, (window, key, scancode, action, mods) -> {
+            String keyName = glfwGetKeyName(key, scancode);
+
+            switch (key) {
+                case GLFW_KEY_SPACE: keyName = "space"; break;
+                case GLFW_KEY_BACKSPACE: keyName = "backspace"; break;
+                case GLFW_KEY_ENTER: keyName = "enter"; break;
+                case GLFW_KEY_UP: keyName = "up"; break;
+                case GLFW_KEY_DOWN: keyName = "down"; break;
+                case GLFW_KEY_LEFT: keyName = "left"; break;
+                case GLFW_KEY_RIGHT: keyName = "right"; break;
+                case GLFW_KEY_TAB: keyName = "tab"; break;
+                case GLFW_KEY_ESCAPE: keyName = "escape"; break;
+                case GLFW_KEY_DELETE: keyName = "delete"; break;
+            }
+
+            if (keyName != null)
+            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                app.onKeyDown(keyName, mods);
+            }
+            else if (action == GLFW_RELEASE) {
+                app.onKeyUp(keyName, mods);
+            }
+        });
+
+        glfwSetCharCallback(app.getDisplay().windowID, (window, unicode) -> {
+            app.onTextInput(new String(Character.toChars(unicode)));
+        });
 
         lastNanos = System.nanoTime();
 
@@ -74,6 +113,28 @@ public abstract class Application {
         app.display.destroy();
         Draw.destroy();
 
+        glfwSetCharCallback(app.getDisplay().windowID, null);
+        glfwSetKeyCallback(app.getDisplay().windowID, null);
+
         active = null;
+    }
+
+    protected static boolean CTRL(int modifier) {
+        return (modifier & GLFW_MOD_CONTROL) != 0;
+    }
+
+    protected static boolean ALT(int modifier) {
+        return (modifier & GLFW_MOD_ALT) != 0;
+    }
+
+    protected static boolean SHIFT(int modifier) {
+        return (modifier & GLFW_MOD_SHIFT) != 0;
+    }
+
+    protected static String MOD(String key, int modifier) {
+        if (ALT(modifier)) key = "alt-" + key;
+        if (SHIFT(modifier)) key = "shift-" + key;
+        if (CTRL(modifier)) key = "ctrl-" + key;
+        return key;
     }
 }
