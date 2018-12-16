@@ -19,7 +19,14 @@ public class UVSphereVAO extends VAO {
         var vertices = genVertices(horizontalPoints, verticalPoints);
         var colours = new float[vertices.length * 3];
 
+        var normal_floats = vec3fToFloatArray(vertices);
+        var vertex_floats = new float[vertices.length * 3];
+
         int vertexVBOID, normalVBOID, colourVBOID, elementVBOID;
+
+        for (int i = 0; i < normal_floats.length; ++i) {
+            vertex_floats[i] = normal_floats[i] / 2;
+        }
 
         setVertexCount(elements.length);
 
@@ -38,8 +45,8 @@ public class UVSphereVAO extends VAO {
         enableAttribute(1);
         enableAttribute(2);
 
-        bufferData(vertexVBOID, vec3fToFloatArray(vertices), GL_STATIC_DRAW);
-        bufferData(normalVBOID, vec3fToFloatArray(vertices), GL_STATIC_DRAW);
+        bufferData(vertexVBOID, vertex_floats, GL_STATIC_DRAW);
+        bufferData(normalVBOID, normal_floats, GL_STATIC_DRAW);
         bufferData(colourVBOID, colours, GL_STATIC_DRAW);
         bufferElementData(elementVBOID, elements, GL_STATIC_DRAW);
     }

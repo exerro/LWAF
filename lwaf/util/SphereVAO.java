@@ -61,6 +61,8 @@ public class SphereVAO extends VAO {
         int[][] faces;
         int[] elements;
 
+        float[] vertex_floats, normal_floats;
+
         vertices = icosahedron_vertices;
         faces = icosahedron_faces;
 
@@ -75,6 +77,13 @@ public class SphereVAO extends VAO {
 
         colours = new float[vertices.length * 3];
         elements = new int[faceCount * 3];
+
+        normal_floats = vec3fToFloatArray(vertices);
+        vertex_floats = new float[normal_floats.length];
+
+        for (int i = 0; i < normal_floats.length; ++i) {
+            vertex_floats[i] = normal_floats[i] / 2;
+        }
 
         Arrays.fill(colours, 1);
 
@@ -99,8 +108,8 @@ public class SphereVAO extends VAO {
         enableAttribute(1);
         enableAttribute(2);
 
-        bufferData(vertexVBOID, vec3fToFloatArray(vertices), GL_STATIC_DRAW);
-        bufferData(normalVBOID, vec3fToFloatArray(vertices), GL_STATIC_DRAW);
+        bufferData(vertexVBOID, vertex_floats, GL_STATIC_DRAW);
+        bufferData(normalVBOID, normal_floats, GL_STATIC_DRAW);
         bufferData(colourVBOID, colours, GL_STATIC_DRAW);
         bufferElementData(elementVBOID, elements, GL_STATIC_DRAW);
     }
