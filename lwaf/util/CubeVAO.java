@@ -7,27 +7,11 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 public class CubeVAO extends VAO {
     public CubeVAO() {
-        int vertexVBOID, normalVBOID, colourVBOID, elementVBOID;
-
         setVertexCount(36);
-
-        vertexVBOID = genBuffer();
-        normalVBOID = genBuffer();
-        colourVBOID = genBuffer();
-        elementVBOID = genBuffer();
-
-        bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
-        bindBuffer(normalVBOID, 1, 3, GL_FLOAT);
-        bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
-
-        enableAttribute(0);
-        enableAttribute(1);
-        enableAttribute(2);
-
-        bufferData(vertexVBOID, vertices, GL_STATIC_DRAW);
-        bufferData(normalVBOID, normals, GL_STATIC_DRAW);
-        bufferData(colourVBOID, colours, GL_STATIC_DRAW);
-        bufferElementData(elementVBOID, elements, GL_STATIC_DRAW);
+        genVertexBuffer(vertices);
+        genNormalBuffer(normals);
+        genColourBuffer();
+        genElementBuffer(elements);
     }
 
     protected static final float[] vertices = new float[] {
@@ -104,44 +88,6 @@ public class CubeVAO extends VAO {
             0f, -1f,  0f,
             0f, -1f,  0f,
             0f, -1f,  0f,
-    };
-
-    protected static final float[] colours = new float[] {
-            // front face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-
-            // back face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-
-            // left face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-
-            // right face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-
-            // top face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-
-            // bottom face
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
-            1f, 1f, 1f,
     };
 
     protected static final int[] elements = new int[] {

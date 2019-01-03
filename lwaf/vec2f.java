@@ -49,6 +49,10 @@ public class vec2f {
         return new vec2f(x / s, y / s);
     }
 
+    public vec2f inverse() {
+        return new vec2f(1/x, 1/y);
+    }
+
     public float dot(vec2f v) {
         return x * v.x + y * v.y;
     }

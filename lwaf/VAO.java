@@ -5,10 +5,10 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL40;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 /*
     genBuffer();
@@ -58,6 +58,64 @@ public class VAO {
         }
 
         unbindVAO();
+    }
+
+    // generates a default vertex buffer using given data and binds it to attribute 0
+    protected int genVertexBuffer(float[] data) {
+        int vertexVBOID = genBuffer();
+
+        bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
+        enableAttribute(0);
+        bufferData(vertexVBOID, data, GL_STATIC_DRAW);
+
+        return vertexVBOID;
+    }
+
+    // generates a default normal buffer using given data and binds it to attribute 1
+    protected int genNormalBuffer(float[] data) {
+        int normalVBOID = genBuffer();
+
+        bindBuffer(normalVBOID, 1, 3, GL_FLOAT);
+        enableAttribute(1);
+        bufferData(normalVBOID, data, GL_STATIC_DRAW);
+
+        return normalVBOID;
+    }
+
+    // generates a default colour buffer using given data and binds it to attribute 2
+    protected int genColourBuffer(float[] data) {
+        int colourVBOID = genBuffer();
+
+        bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
+        enableAttribute(2);
+        bufferData(colourVBOID, data, GL_STATIC_DRAW);
+
+        return colourVBOID;
+    }
+
+    // generates a default colour using default data and binds it to attribute 2
+    // NOTE: this must be called after setVertexCount to work correctly
+    protected int genColourBuffer() {
+        float[] data = new float[getVertexCount() * 3];
+        Arrays.fill(data, 1);
+        return genColourBuffer(data);
+    }
+
+    protected int genUVBuffer(float[] data) {
+        int uvVBOID = genBuffer();
+
+        bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
+        enableAttribute(3);
+        bufferData(uvVBOID, data, GL_STATIC_DRAW);
+
+        return uvVBOID;
+    }
+
+    // generates a default element buffer
+    protected int genElementBuffer(int[] data) {
+        int elementVBOID = genBuffer();
+        bufferElementData(elementVBOID, data, GL_STATIC_DRAW);
+        return elementVBOID;
     }
 
     protected void bindVAO() {
@@ -173,6 +231,17 @@ public class VAO {
             result[i * 3    ] = vs[i].x;
             result[i * 3 + 1] = vs[i].y;
             result[i * 3 + 2] = vs[i].z;
+        }
+
+        return result;
+    }
+
+    protected static float[] vec2fToFloatArray(vec2f[] vs) {
+        float[] result = new float[vs.length * 2];
+
+        for (int i = 0; i < vs.length; ++i) {
+            result[i * 2    ] = vs[i].x;
+            result[i * 2 + 1] = vs[i].y;
         }
 
         return result;

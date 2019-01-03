@@ -8,9 +8,19 @@ import java.io.IOException;
 
 class CustomRenderer extends Renderer.CameraRenderer3D {
     private Camera camera;
-    private VAO vao = new CubeVAO();
-    private SphereVAO vao2 = new SphereVAO(4);
-    private VAO vao3 = new UVSphereVAO(15, 24);
+    private VAO[] vaos = new VAO[] {
+            new SphereVAO(1),
+            new CubeVAO(),
+            new UVSphereVAO(40, 80),
+            new SphereVAO(7),
+
+    };
+    private vec3f[] vao_colours = new vec3f[] {
+            new vec3f(0, 1, 1),
+            new vec3f(1, 0, 1),
+            new vec3f(1, 1, 1),
+            new vec3f(1, 1, 0),
+    };
     private VAO vao4 = new UVSphereVAO(4, 8);
     private vec3f lightPosition = new vec3f(0, -1, 3);
     private Texture texture = new Texture("im.png");
@@ -31,15 +41,6 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
                 Camera.PerspectiveProjection.DEFAULT_NEAR,
                 Camera.PerspectiveProjection.DEFAULT_FAR
         );
-    }
-
-    public void increaseResolution() {
-        vao2 = new SphereVAO(vao2.resolution + 1);
-    }
-
-    public void decreaseResolution() {
-        if (vao2.resolution == 1) return;
-        vao2 = new SphereVAO(vao2.resolution - 1);
     }
 
     public void setLightPosition(vec3f position) {
@@ -73,22 +74,22 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
 
     @Override
     protected void draw(FBO framebuffer) {
-        getShader().setUniform("transform", mat4f.identity());
-        getShader().setUniform("colour", new vec3f(0.3f, 0.6f, 0.9f));
-        Renderer.drawElements(vao);
+        for (int i = 0; i < vaos.length; ++i) {
+            getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0)/*.rotate(vec3f.y_axis, Application.getActive().getTime())*/);
+            getShader().setUniform("colour", vao_colours[i]);
 
-        getShader().setUniform("transform", mat4f.translation(2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
-        getShader().setUniform("colour", new vec3f(0.9f, 0.3f, 0.6f));
-        Renderer.drawElements(vao2);
+            if (vaos[i] instanceof UVSphereVAO) {
+                getShader().setUniform("useTexture", true);
+                texture.bind();
+            }
 
-        getShader().setUniform("transform", mat4f.translation(-2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
-        // getShader().setUniform("colour", new vec3f(0.3f, 0.9f, 0.6f));
-        getShader().setUniform("colour", vec3f.one);
-        getShader().setUniform("useTexture", true);
-        texture.bind();
-        Renderer.drawElements(vao3);
-        texture.unbind();
-        getShader().setUniform("useTexture", false);
+            Renderer.drawElements(vaos[i]);
+
+            if (vaos[i] instanceof UVSphereVAO) {
+                texture.unbind();
+                getShader().setUniform("useTexture", false);
+            }
+        }
 
         getShader().setUniform("lightMinimum", 1f);
         getShader().setUniform("transform", mat4f.translation(lightPosition).scaleBy(0.1f));
@@ -187,6 +188,7 @@ public class LWAF_Main extends Application {
                 vec3f.y_axis.mul((float) Math.sin(Application.getActive().getTime()))
            .add(vec3f.x_axis.mul((float) Math.cos(1.5 * Application.getActive().getTime())))
            .add(vec3f.z_axis.mul(1 + (float) Math.sin(0.3 * Application.getActive().getTime())))
+           .add(vec3f.x_axis.mul(6))
         );
 
         renderer.getCamera().setTranslation(translation);
@@ -201,8 +203,7 @@ public class LWAF_Main extends Application {
     @Override
     protected void onKeyDown(String key, int modifier) {
         switch (MOD(key, modifier)) {
-            case "ctrl-up": renderer.increaseResolution(); break;
-            case "ctrl-down": renderer.decreaseResolution(); break;
+
         }
     }
 

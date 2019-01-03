@@ -46,8 +46,16 @@ public class vec3f {
         return new vec3f(x * s, y * s, z * s);
     }
 
+    public vec3f div(vec3f v) {
+        return new vec3f(x / v.x, y / v.y, z / v.z);
+    }
+
     public vec3f div(float s) {
         return new vec3f(x / s, y / s, z / s);
+    }
+
+    public vec3f inverse() {
+        return new vec3f(1/x, 1/y, 1/z);
     }
 
     public float dot(vec3f v) {
