@@ -11,6 +11,7 @@ public class CubeVAO extends VAO {
         genVertexBuffer(vertices);
         genNormalBuffer(normals);
         genColourBuffer();
+        genUVBuffer(uvs);
         genElementBuffer(elements);
     }
 
@@ -18,14 +19,14 @@ public class CubeVAO extends VAO {
             // front face
             -0.5f,  0.5f,  0.5f,
             -0.5f, -0.5f,  0.5f,
-            0.5f, -0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
 
             // back face
             -0.5f,  0.5f, -0.5f,
             -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f,  0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
 
             // left face
             -0.5f,  0.5f, -0.5f,
@@ -40,16 +41,54 @@ public class CubeVAO extends VAO {
             0.5f,  0.5f, -0.5f,
 
             // top face
-            0.5f,  0.5f,  0.5f,
-            0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f, -0.5f,
             -0.5f,  0.5f, -0.5f,
             -0.5f,  0.5f,  0.5f,
 
             // bottom face
             -0.5f, -0.5f,  0.5f,
             -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f,  0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,
+    };
+
+    protected static final float[] uvs = new float[] {
+            // front face
+            0.25f, 0.3333f,
+            0.25f, 0.6667f,
+            0.50f, 0.6667f,
+            0.50f, 0.3333f,
+
+            // back face
+            1.00f, 0.3333f,
+            1.00f, 0.6667f,
+            0.75f, 0.6667f,
+            0.75f, 0.3333f,
+
+            // left face
+            0.00f, 0.3333f,
+            0.00f, 0.6667f,
+            0.25f, 0.6667f,
+            0.25f, 0.3333f,
+
+            // right face
+            0.50f, 0.3333f,
+            0.50f, 0.6667f,
+            0.75f, 0.6667f,
+            0.75f, 0.3333f,
+
+            // top face
+            0.50f, 0.3333f,
+            0.50f, 0.0000f,
+            0.25f, 0.0000f,
+            0.25f, 0.3333f,
+
+            // bottom face
+            0.25f, 0.6667f,
+            0.25f, 1.0000f,
+            0.50f, 1.0000f,
+            0.50f, 0.6667f,
     };
 
     protected static final float[] normals = new float[] {

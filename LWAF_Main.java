@@ -17,13 +17,13 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     };
     private vec3f[] vao_colours = new vec3f[] {
             new vec3f(0, 1, 1),
-            new vec3f(1, 0, 1),
+            new vec3f(1, 1, 1),
             new vec3f(1, 1, 1),
             new vec3f(1, 1, 0),
     };
     private VAO vao4 = new UVSphereVAO(4, 8);
     private vec3f lightPosition = new vec3f(0, -1, 3);
-    private Texture texture = new Texture("im.png");
+    private Texture texture = new Texture("lwaf/img/no-texture-light.png");
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -78,14 +78,14 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
             getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0)/*.rotate(vec3f.y_axis, Application.getActive().getTime())*/);
             getShader().setUniform("colour", vao_colours[i]);
 
-            if (vaos[i] instanceof UVSphereVAO) {
+            if (vaos[i] instanceof UVSphereVAO || vaos[i] instanceof CubeVAO) {
                 getShader().setUniform("useTexture", true);
                 texture.bind();
             }
 
             Renderer.drawElements(vaos[i]);
 
-            if (vaos[i] instanceof UVSphereVAO) {
+            if (vaos[i] instanceof UVSphereVAO || vaos[i] instanceof CubeVAO) {
                 texture.unbind();
                 getShader().setUniform("useTexture", false);
             }
@@ -168,20 +168,25 @@ public class LWAF_Main extends Application {
             translation = translation.sub(forward.mul(speed));
         }
 
-        if (!CTRL()) {
-            if (isKeyDown("up")) {
-                translation = translation.add(vec3f.y_axis.mul(speed));
-            }
-            if (isKeyDown("down")) {
-                translation = translation.sub(vec3f.y_axis.mul(speed));
-            }
+        if (isKeyDown("space")) {
+            translation = translation.add(vec3f.y_axis.mul(speed));
+        }
+        if (SHIFT()) {
+            translation = translation.sub(vec3f.y_axis.mul(speed));
         }
 
-        if (isKeyDown("q")) {
+        if (isKeyDown("left")) {
             rotation = rotation.add(vec3f.y_axis.mul(rspeed));
         }
-        if (isKeyDown("e")) {
+        if (isKeyDown("right")) {
             rotation = rotation.sub(vec3f.y_axis.mul(rspeed));
+        }
+
+        if (isKeyDown("up")) {
+            rotation = rotation.add(vec3f.x_axis.mul(rspeed));
+        }
+        if (isKeyDown("down")) {
+            rotation = rotation.sub(vec3f.x_axis.mul(rspeed));
         }
 
         renderer.setLightPosition(
