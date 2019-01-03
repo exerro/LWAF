@@ -10,9 +10,10 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     private Camera camera;
     private VAO vao = new CubeVAO();
     private SphereVAO vao2 = new SphereVAO(4);
-    private VAO vao3 = new UVSphereVAO(4, 8);
-    private VAO vao4 = new UVSphereVAO(10, 11);
+    private VAO vao3 = new UVSphereVAO(15, 24);
+    private VAO vao4 = new UVSphereVAO(4, 8);
     private vec3f lightPosition = new vec3f(0, -1, 3);
+    private Texture texture = new Texture("im.png");
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -81,8 +82,13 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
         Renderer.drawElements(vao2);
 
         getShader().setUniform("transform", mat4f.translation(-2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
-        getShader().setUniform("colour", new vec3f(0.3f, 0.9f, 0.6f));
+        // getShader().setUniform("colour", new vec3f(0.3f, 0.9f, 0.6f));
+        getShader().setUniform("colour", vec3f.one);
+        getShader().setUniform("useTexture", true);
+        texture.bind();
         Renderer.drawElements(vao3);
+        texture.unbind();
+        getShader().setUniform("useTexture", false);
 
         getShader().setUniform("lightMinimum", 1f);
         getShader().setUniform("transform", mat4f.translation(lightPosition).scaleBy(0.1f));
@@ -161,6 +167,15 @@ public class LWAF_Main extends Application {
             translation = translation.sub(forward.mul(speed));
         }
 
+        if (!CTRL()) {
+            if (isKeyDown("up")) {
+                translation = translation.add(vec3f.y_axis.mul(speed));
+            }
+            if (isKeyDown("down")) {
+                translation = translation.sub(vec3f.y_axis.mul(speed));
+            }
+        }
+
         if (isKeyDown("q")) {
             rotation = rotation.add(vec3f.y_axis.mul(rspeed));
         }
@@ -185,9 +200,9 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void onKeyDown(String key, int modifier) {
-        switch (key) {
-            case "up": renderer.increaseResolution(); break;
-            case "down": renderer.decreaseResolution(); break;
+        switch (MOD(key, modifier)) {
+            case "ctrl-up": renderer.increaseResolution(); break;
+            case "ctrl-down": renderer.decreaseResolution(); break;
         }
     }
 

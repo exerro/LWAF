@@ -176,6 +176,18 @@ public abstract class Application {
         return (modifier & GLFW_MOD_SHIFT) != 0;
     }
 
+    protected static boolean CTRL() {
+        return glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+    }
+
+    protected static boolean ALT() {
+        return glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
+    }
+
+    protected static boolean SHIFT() {
+        return glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(getActive().getDisplay().windowID, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+    }
+
     protected static String MOD(String key, int modifier) {
         if (ALT(modifier)) key = "alt-" + key;
         if (SHIFT(modifier)) key = "shift-" + key;
