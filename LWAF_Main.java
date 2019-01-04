@@ -64,7 +64,8 @@ class CustomRenderer extends ModelRenderer {
                 .setTranslation(6, 0, 0);
 
         add(new Model<>(new ConeVAO(360)))
-                .setTranslation(-2, 0, 0);
+                .setTranslation(-2, 0, 0)
+                .setScale(1, 0.1f, 1);
 
         add(new Model<>(new CylinderVAO(100)))
                 .setTranslation(-2, 2, 0);
