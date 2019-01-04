@@ -95,7 +95,7 @@ public class Font {
         kernings = new HashMap<>();
 
         if (fontFileMatcher.find()) {
-            texture = new Texture(fontFileMatcher.group(1));
+            texture = Texture.load(fontFileMatcher.group(1));
         }
         else {
             throw new IOException("Invalid .fnt file format: no page file found");

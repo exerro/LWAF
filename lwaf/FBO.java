@@ -20,7 +20,7 @@ public class FBO {
         this.height = height;
 
         frameBufferID = glGenFramebuffers();
-        texture = new Texture(width, height);
+        texture = Texture.create(width, height);
         depthTextureID = glGenTextures();
         depthBufferID = glGenRenderbuffers();
 

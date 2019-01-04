@@ -23,7 +23,7 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     };
     private VAO vao4 = new UVSphereVAO(4, 8);
     private vec3f lightPosition = new vec3f(0, -1, 3);
-    private Texture texture = new Texture("lwaf/img/no-texture-light.png");
+    private Texture texture = Texture.load("lwaf/img/no-texture-light.png");
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -66,6 +66,8 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
 
     @Override
     protected void draw(FBO framebuffer) {
+        getShader().setUniform("lightMinimum", 0.3f);
+
         for (int i = 0; i < vaos.length; ++i) {
             getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
             getShader().setUniform("colour", vao_colours[i]);

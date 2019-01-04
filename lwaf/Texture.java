@@ -15,7 +15,7 @@ public class Texture {
     private final int textureID;
     private final int width, height;
 
-    public Texture(int width, int height) {
+    private Texture(int width, int height) {
         this.width = width;
         this.height = height;
 
@@ -29,7 +29,7 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    public Texture(String filePath) {
+    private Texture(String filePath) {
         ByteBuffer data;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -56,6 +56,18 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         STBImage.stbi_image_free(data);
+    }
+
+    public static Texture load(String filePath) {
+        return new Texture(filePath);
+    }
+
+    public static Texture safeLoad(String filePath) {
+        return load(filePath);
+    }
+
+    public static Texture create(int width, int height) {
+        return new Texture(width, height);
     }
 
     public void bind() {
