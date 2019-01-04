@@ -2,11 +2,13 @@ package lwaf_primitive;
 
 import lwaf.vec3f;
 
+// FIXME: non-optimal number of vertices are created by the upscaling method, this should be fixed
+// TODO: add texturing support with calculated UV coords
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class SphereVAO extends GenericSmoothSpheroidVAO {
+public class IcoSphereVAO extends GenericSmoothSpheroidVAO {
     public final int resolution;
 
-    public SphereVAO(int resolution) {
+    public IcoSphereVAO(int resolution) {
         this.resolution = resolution;
 
         var faceCount = icosahedron_faces.length;
