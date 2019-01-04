@@ -1,19 +1,17 @@
 package lwaf;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class Application {
     private final Display display;
     private boolean running = true;
     private float time = 0;
     private Set<String> keysHeld = new HashSet<>();
+    private boolean mouseLocked = false;
 
     private static Application active;
 
@@ -26,12 +24,22 @@ public abstract class Application {
     protected abstract void update(float dt);
     protected abstract void unload();
 
-    protected abstract void onKeyDown(String key, int modifiers);
-    protected abstract void onTextInput(String text);
+    protected void onKeyDown(String key, int modifiers) {}
+    protected void onTextInput(String text) {}
     protected void onKeyUp(String key, int modifiers) {}
+    protected void onMouseEvent(MouseEvent event) {}
+    protected void onMouseMove(vec2f position, boolean free) {} // free is true if no mouse buttons are currently held
     protected void onPaste() {}
     protected void onCopy() {}
     protected void onCut() {}
+
+    public vec2f getMousePosition() {
+        double[] x = new double[1], y = new double[1];
+
+        glfwGetCursorPos(getDisplay().windowID, x, y);
+
+        return new vec2f((float) x[0], (float) y[0]);
+    }
 
     public boolean isKeyDown(String key) {
         return keysHeld.contains(key);
@@ -55,6 +63,7 @@ public abstract class Application {
 
     public static void run(Application app) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
         long nanos, deltaNanos, lastNanos;
+        Map<Integer, MouseEvent> mouseEvents = new HashMap<>();
         Map<Integer, Boolean> heldKeys;
         List<String> keyModifiers;
         float dt;
@@ -73,59 +82,59 @@ public abstract class Application {
             return;
         }
 
+        glfwSetCursorPosCallback(app.getDisplay().windowID, (window, x, y) -> {
+            vec2f position = new vec2f((float) x, (float) y);
+
+            app.onMouseMove(position, mouseEvents.isEmpty());
+
+            for (MouseEvent event : mouseEvents.values()) {
+                event.moved = true;
+                event.move(position);
+            }
+        });
+
+        glfwSetMouseButtonCallback(app.getDisplay().windowID, (window, button, action, mods) -> {
+            vec2f position = app.getMousePosition();
+
+            if (action == GLFW_PRESS) {
+                if (mouseEvents.containsKey(button)) mouseEvents.get(button).up(position);
+                MouseEvent event = new MouseEvent(position, button, mods);
+                mouseEvents.put(button, event);
+                app.onMouseEvent(event);
+            }
+            else {
+                if (mouseEvents.containsKey(button)) {
+                    mouseEvents.get(button).up(position);
+                    mouseEvents.remove(button);
+                }
+            }
+        });
+
         glfwSetKeyCallback(app.getDisplay().windowID, (window, key, scancode, action, mods) -> {
             String keyName = glfwGetKeyName(key, scancode);
 
             switch (key) {
-                case GLFW_KEY_SPACE:
-                    keyName = "space";
-                    break;
-                case GLFW_KEY_BACKSPACE:
-                    keyName = "backspace";
-                    break;
-                case GLFW_KEY_ENTER:
-                    keyName = "enter";
-                    break;
-                case GLFW_KEY_UP:
-                    keyName = "up";
-                    break;
-                case GLFW_KEY_DOWN:
-                    keyName = "down";
-                    break;
-                case GLFW_KEY_LEFT:
-                    keyName = "left";
-                    break;
-                case GLFW_KEY_RIGHT:
-                    keyName = "right";
-                    break;
-                case GLFW_KEY_TAB:
-                    keyName = "tab";
-                    break;
-                case GLFW_KEY_ESCAPE:
-                    keyName = "escape";
-                    break;
-                case GLFW_KEY_DELETE:
-                    keyName = "delete";
-                    break;
+                case GLFW_KEY_SPACE: keyName = "space"; break;
+                case GLFW_KEY_BACKSPACE: keyName = "backspace"; break;
+                case GLFW_KEY_ENTER: keyName = "enter"; break;
+                case GLFW_KEY_UP: keyName = "up"; break;
+                case GLFW_KEY_DOWN: keyName = "down"; break;
+                case GLFW_KEY_LEFT: keyName = "left"; break;
+                case GLFW_KEY_RIGHT: keyName = "right"; break;
+                case GLFW_KEY_TAB: keyName = "tab"; break;
+                case GLFW_KEY_ESCAPE: keyName = "escape"; break;
+                case GLFW_KEY_DELETE: keyName = "delete"; break;
             }
 
             if (keyName != null) {
                 if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                    if (key == GLFW_KEY_V && (mods & GLFW_MOD_CONTROL) != 0) {
-                        app.onPaste();
-                        return;
+                    if      (key == GLFW_KEY_V && CTRL(mods)) app.onPaste();
+                    else if (key == GLFW_KEY_C && CTRL(mods)) app.onCopy();
+                    else if (key == GLFW_KEY_X && CTRL(mods)) app.onCut();
+                    else {
+                        app.keysHeld.add(keyName);
+                        app.onKeyDown(keyName, mods);
                     }
-                    else if (key == GLFW_KEY_C && (mods & GLFW_MOD_CONTROL) != 0) {
-                        app.onCopy();
-                        return;
-                    }
-                    else if (key == GLFW_KEY_X && (mods & GLFW_MOD_CONTROL) != 0) {
-                        app.onCut();
-                        return;
-                    }
-
-                    app.keysHeld.add(keyName);
-                    app.onKeyDown(keyName, mods);
                 }
                 else if (action == GLFW_RELEASE) {
                     app.keysHeld.remove(keyName);
@@ -134,9 +143,7 @@ public abstract class Application {
             }
         });
 
-        glfwSetCharCallback(app.getDisplay().windowID, (window, unicode) -> {
-            app.onTextInput(new String(Character.toChars(unicode)));
-        });
+        glfwSetCharCallback(app.getDisplay().windowID, (window, unicode) -> app.onTextInput(new String(Character.toChars(unicode))));
 
         lastNanos = System.nanoTime();
 

@@ -144,6 +144,13 @@ public class LWAF_Main extends Application {
     }
 
     @Override
+    protected void onMouseEvent(MouseEvent event) {
+        System.out.println(event.position);
+
+        event.onDrag((position) -> System.out.println("Dragged to " + position.toString()));
+    }
+
+    @Override
     protected void update(float dt) {
         var translation = renderer.getCamera().getTranslation();
         var rotation = renderer.getCamera().getRotation();
@@ -152,7 +159,7 @@ public class LWAF_Main extends Application {
         var speed = dt * 5;
         var rspeed = dt * (float) Math.PI / 2;
 
-        System.out.println(forward);
+        text = new Text(getMousePosition().toString(), 700, font, 32);
 
         if (isKeyDown("a")) {
             translation = translation.sub(right.mul(speed));
