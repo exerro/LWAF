@@ -1,8 +1,6 @@
 package lwaf;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Text {
 
     private final String text;
@@ -40,20 +38,17 @@ public class Text {
         var uvs = new float[text.length() * 8];
         var elements = new int[text.length() * 6];
 
-        int base = font.getBase();
-        int lineHeight = font.getLineHeight();
-        int ei = 0;
-        float sizeScale = size / lineHeight;
-        float x = 0, y = (lineHeight - base) * sizeScale;
-
-        for (int i = 0; i < colours.length; ++i) {
-            colours[i] = 1;
-        }
+        var base = font.getBase();
+        var lineHeight = font.getLineHeight();
+        var ei = 0;
+        var sizeScale = size / lineHeight;
+        var x = 0;
+        var y = (lineHeight - base) * sizeScale;
 
         for (int i = 0; i < text.length(); ++i) {
-            char c = text.charAt(i);
-            int vi = i * 12;
-            int uvi = i * 8;
+            var c = text.charAt(i);
+            var vi = i * 12;
+            var uvi = i * 8;
 
             var width  = font.getCharWidth(c) * sizeScale;
             var size   = font.getCharSize(c).mul(sizeScale);
@@ -86,10 +81,10 @@ public class Text {
         }
 
         for (int i = 0; i < text.length(); ++i, ei += 6) {
-            elements[ei    ] = 4 * i + 0;
+            elements[ei    ] = 4 * i    ;
             elements[ei + 1] = 4 * i + 1;
             elements[ei + 2] = 4 * i + 2;
-            elements[ei + 3] = 4 * i + 0;
+            elements[ei + 3] = 4 * i    ;
             elements[ei + 4] = 4 * i + 2;
             elements[ei + 5] = 4 * i + 3;
         }
@@ -97,25 +92,10 @@ public class Text {
         // TODO: populate vertices, uvs, and elements
 
         vao.setVertexCount(elements.length);
-
-        int vertexVBOID = vao.genBuffer();
-        int colourVBOID = vao.genBuffer();
-        int uvVBOID = vao.genBuffer();
-        int elementVBOID = vao.genBuffer();
-
-        vao.bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
-        vao.bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
-        vao.bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
-
-        vao.enableAttribute(0);
-        vao.enableAttribute(2);
-        vao.enableAttribute(3);
-
-        vao.bufferData(vertexVBOID, vertices, GL_STATIC_DRAW);
-        vao.bufferData(colourVBOID, colours, GL_STATIC_DRAW);
-        vao.bufferData(uvVBOID, uvs, GL_STATIC_DRAW);
-
-        vao.bufferElementData(elementVBOID, elements, GL_STATIC_DRAW);
+        vao.genVertexBuffer(vertices);
+        vao.genColourBuffer(vertices.length / 3);
+        vao.genUVBuffer(uvs);
+        vao.genElementBuffer(elements);
     }
 
 }

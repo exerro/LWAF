@@ -2,9 +2,7 @@ package lwaf.util;
 
 import lwaf.VAO;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class CubeVAO extends VAO {
     public CubeVAO() {
         setVertexCount(36);

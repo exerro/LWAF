@@ -2,6 +2,7 @@ package lwaf.util;
 
 import lwaf.vec3f;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class UVSphereVAO extends GenericSmoothSpheroidVAO {
     public final int verticalPoints, horizontalPoints;
 
@@ -13,7 +14,7 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
         var vertices = genVertices(horizontalPoints, verticalPoints);
 
         setVertexCount(elements.length);
-        genSpheroidBuffers(vertices, vec3f.one);
+        genSpheroidBuffers(vertices);
         genColourBuffer(vertices.length);
         genUVBuffer(genUVs(horizontalPoints, verticalPoints));
         genElementBuffer(elements);
@@ -66,17 +67,17 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
     }
 
     private static int[] genElements(int w, int h) {
-        int[] elements = new int[6 * h * (w + 1)];
-        int i = 0;
-        int top = (w + 1) * h;
-        int bottom = top + 1;
+        var elements = new int[6 * h * (w + 1)];
+        var i = 0;
+        var top = (w + 1) * h;
+        var bottom = top + 1;
 
         for (int y = 0; y < h - 1; ++y) {
             for (int x = 0; x <= w; ++x) {
-                int a = y * (w + 1) + x,
-                    b = y * (w + 1) + (x+1),
-                    c = (y+1) * (w + 1) + x,
-                    d = (y+1) * (w + 1) + (x+1);
+                var a = y * (w + 1) + x;
+                var b = y * (w + 1) + (x+1);
+                var c = (y+1) * (w + 1) + x;
+                var d = (y+1) * (w + 1) + (x+1);
 
                 elements[i++] = c;
                 elements[i++] = b;
@@ -88,8 +89,8 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
         }
 
         for (int x = 0; x <= w; ++x) {
-            int a = x % (w + 1),
-                b = (x+1) % (w + 1);
+            var a = x % (w + 1);
+            var b = (x+1) % (w + 1);
 
             elements[i++] = top + x * 2;
             elements[i++] = a;

@@ -89,12 +89,12 @@ public class Display {
 
         // think this makes the window centered?
         try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
+            var pWidth = stack.mallocInt(1);
+            var pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(windowID, pWidth, pHeight);
 
-            GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
             if (videoMode != null) {
                 glfwSetWindowPos(windowID,

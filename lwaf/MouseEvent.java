@@ -3,6 +3,7 @@ package lwaf;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public class MouseEvent {
     public final vec2f start;
     public final int button;
@@ -48,6 +49,6 @@ public class MouseEvent {
 
     @FunctionalInterface
     public interface MouseCallback {
-        public void apply(vec2f position);
+        void apply(vec2f position);
     }
 }

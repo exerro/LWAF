@@ -70,8 +70,8 @@ public abstract class Renderer {
 
         @Override
         protected void setUniforms() {
-            Camera camera = getCamera();
-            ShaderLoader.Program shader = getShader();
+            var camera = getCamera();
+            var shader = getShader();
 
             shader.setUniform("projectionTransform", camera.getProjectionMatrix());
             shader.setUniform("viewTransform", camera.getViewMatrix());

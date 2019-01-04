@@ -1,14 +1,8 @@
 package lwaf.util;
 
-import lwaf.VAO;
 import lwaf.vec3f;
 
-import java.util.Arrays;
-import java.util.function.Function;
-
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class SphereVAO extends GenericSmoothSpheroidVAO {
     public final int resolution;
 
@@ -39,14 +33,14 @@ public class SphereVAO extends GenericSmoothSpheroidVAO {
         }
 
         setVertexCount(faceCount * 3);
-        genSpheroidBuffers(vertices, vec3f.one);
+        genSpheroidBuffers(vertices);
         genColourBuffer(vertices.length);
         genElementBuffer(elements);
     }
 
     private static void upscaleVertices(vec3f[] vertices_in, vec3f[] vertices_out, int[][] faces_in, int[][] faces_out) {
-        int f = 0;
-        int v = vertices_in.length;
+        var f = 0;
+        var v = vertices_in.length;
 
         System.arraycopy(vertices_in, 0, vertices_out, 0, vertices_in.length);
 

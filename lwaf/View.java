@@ -5,7 +5,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public class View {
 
     private final FBO fbo;

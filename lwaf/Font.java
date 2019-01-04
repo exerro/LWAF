@@ -13,9 +13,10 @@ import java.util.regex.Pattern;
 //  something to do with nice spacing between characters
 
 // supports single page fonts only (no idea what pages are tbh)
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Font {
 
-    private static Pattern fontFilePatternMatcher, commonPatternMatcher, charPatternMatcher; {
+    private static Pattern fontFilePatternMatcher, commonPatternMatcher, charPatternMatcher; static {
         fontFilePatternMatcher = Pattern.compile(
                 "<page\\s+" +
                         "id=\"\\d+\"\\s+" +
@@ -38,8 +39,8 @@ public class Font {
                         "y=\"(\\d+)\"\\s+" +
                         "width=\"(\\d+)\"\\s+" +
                         "height=\"(\\d+)\"\\s+" +
-                        "xoffset=\"([\\+\\-]?\\d+)\"\\s+" +
-                        "yoffset=\"([\\+\\-]?\\d+)\"\\s+" +
+                        "xoffset=\"([+\\-]?\\d+)\"\\s+" +
+                        "yoffset=\"([+\\-]?\\d+)\"\\s+" +
                         "xadvance=\"(\\d+)\"\\s+" +
                         "page=\"0\" chnl=\"\\d+\"\\s*" +
                         "/>"
@@ -81,21 +82,21 @@ public class Font {
         }
 
         while (charMatcher.find()) {
-            int id = Integer.parseInt(charMatcher.group(1));
-            int x = Integer.parseInt(charMatcher.group(2));
-            int y = Integer.parseInt(charMatcher.group(3));
-            int width = Integer.parseInt(charMatcher.group(4));
-            int height = Integer.parseInt(charMatcher.group(5));
-            int xoffset = Integer.parseInt(charMatcher.group(6));
-            int yoffset = Integer.parseInt(charMatcher.group(7));
-            int xadvance = Integer.parseInt(charMatcher.group(8));
+            var id = Integer.parseInt(charMatcher.group(1));
+            var x = Integer.parseInt(charMatcher.group(2));
+            var y = Integer.parseInt(charMatcher.group(3));
+            var width = Integer.parseInt(charMatcher.group(4));
+            var height = Integer.parseInt(charMatcher.group(5));
+            var xoffset = Integer.parseInt(charMatcher.group(6));
+            var yoffset = Integer.parseInt(charMatcher.group(7));
+            var xadvance = Integer.parseInt(charMatcher.group(8));
 
             // non ascii characters are not supported
             if (id < 256) {
-                float u = (float) x / scaleW;
-                float v = (float) y / scaleH;
-                float w = (float) width / scaleW;
-                float h = (float) height / scaleH;
+                var u = (float) x / scaleW;
+                var v = (float) y / scaleH;
+                var w = (float) width / scaleW;
+                var h = (float) height / scaleH;
 
                 textureAtlas[id] = new vec2f[] {
                         new vec2f(u    , v    ),
@@ -124,6 +125,22 @@ public class Font {
         if (charsFound == 0) {
             throw new IOException("Invalid .fnt file format: no characters included");
         }
+    }
+
+    // TODO: fix this
+    public float getWidth(String text) {
+        var total = 0.f;
+
+        for (int i = 0; i < text.length(); ++i) {
+            total += getCharWidth(text.charAt(i));
+            if (i > 0) {} // apply kerning
+        }
+
+        return total;
+    }
+
+    public float getHeight() {
+        return lineHeight;
     }
 
     int getLineHeight() {

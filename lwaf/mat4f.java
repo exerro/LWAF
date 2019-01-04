@@ -1,5 +1,6 @@
 package lwaf;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class mat4f {
 
     final float el[];
@@ -13,7 +14,7 @@ public class mat4f {
     }
 
     public static mat4f identity() {
-        mat4f m = new mat4f();
+        var m = new mat4f();
 
         m.el[0] = 1;
         m.el[5] = 1;
@@ -24,7 +25,7 @@ public class mat4f {
     }
 
     public static mat4f translation(float x, float y, float z) {
-        mat4f m = mat4f.identity();
+        var m = mat4f.identity();
 
         m.el[ 3]  = x;
         m.el[ 7]  = y;
@@ -38,7 +39,7 @@ public class mat4f {
     }
 
     public static mat4f scale(float x, float y, float z) {
-        mat4f m = mat4f.identity();
+        var m = mat4f.identity();
 
         m.el[0]  = x;
         m.el[5]  = y;
@@ -52,10 +53,14 @@ public class mat4f {
     }
 
     public static mat4f rotation(vec3f axis, float theta) {
-        float sin = (float) Math.sin(theta);
-        float cos = (float) Math.cos(theta);
-        float ux = axis.x, uy = axis.y, uz = axis.z;
-        float ux2 = ux*ux, uy2 = uy*uy, uz2 = uz*uz;
+        var sin = (float) Math.sin(theta);
+        var cos = (float) Math.cos(theta);
+        var ux = axis.x;
+        var uy = axis.y;
+        var uz = axis.z;
+        var ux2 = ux*ux;
+        var uy2 = uy*uy;
+        var uz2 = uz*uz;
 
         return new mat4f(new float[] {
                 cos + ux2*(1-cos),        ux*uy*(1-cos) - uz*sin,   ux*uz*(1-cos) + uy*sin,   0,
@@ -66,17 +71,15 @@ public class mat4f {
     }
 
     public mat4f copy() {
-        mat4f m = new mat4f();
+        var m = new mat4f();
 
-        for (int i = 0; i < 16; ++i) {
-            m.el[i] = el[i];
-        }
+        System.arraycopy(el, 0, m.el, 0, 16);
 
         return m;
     }
 
     public mat4f transpose() {
-        mat4f m = new mat4f();
+        var m = new mat4f();
 
         for (int y = 0; y < 4; ++y) {
             for (int x = 0; x < 4; ++x) {
@@ -112,7 +115,7 @@ public class mat4f {
     }
 
     public mat4f mul(mat4f m) {
-        mat4f result = new mat4f();
+        var result = new mat4f();
 
         for (int y = 0; y < 4; ++y) {
             for (int x = 0; x < 4; ++x) {
@@ -149,14 +152,18 @@ public class mat4f {
 
     @Override
     public String toString() {
-        String[] colA = new String[4], colB = new String[4], colC = new String[4], colD = new String[4];
-        String[][] cols = new String[][] { colA, colB, colC, colD };
-        int[] lens = new int[] { 0, 0, 0, 0 };
-        StringBuilder result = new StringBuilder();
+        var colA = new String[4];
+        var colB = new String[4];
+        var colC = new String[4];
+        var colD = new String[4];
+        var cols = new String[][] { colA, colB, colC, colD };
+        var lens = new int[] { 0, 0, 0, 0 };
+        var result = new StringBuilder();
 
         for (int x = 0; x < 4; ++x) {
             for (int y = 0; y < 4; ++y) {
-                String s = String.valueOf(el[4 * y + x]);
+                var s = String.valueOf(el[4 * y + x]);
+
                 cols[x][y] = s;
                 lens[x] = Math.max(lens[x], s.length());
             }

@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
     bufferData();
  */
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public class VAO {
     private int vertexCount = 0, instanceCount = 0;
     private final int vaoID;
@@ -62,7 +62,7 @@ public class VAO {
 
     // generates a default vertex buffer using given data and binds it to attribute 0
     protected int genVertexBuffer(float[] data) {
-        int vertexVBOID = genBuffer();
+        var vertexVBOID = genBuffer();
 
         bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
         enableAttribute(0);
@@ -73,7 +73,7 @@ public class VAO {
 
     // generates a default normal buffer using given data and binds it to attribute 1
     protected int genNormalBuffer(float[] data) {
-        int normalVBOID = genBuffer();
+        var normalVBOID = genBuffer();
 
         bindBuffer(normalVBOID, 1, 3, GL_FLOAT);
         enableAttribute(1);
@@ -84,7 +84,7 @@ public class VAO {
 
     // generates a default colour buffer using given data and binds it to attribute 2
     protected int genColourBuffer(float[] data) {
-        int colourVBOID = genBuffer();
+        var colourVBOID = genBuffer();
 
         bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
         enableAttribute(2);
@@ -94,15 +94,14 @@ public class VAO {
     }
 
     // generates a default colour using default data and binds it to attribute 2
-    // NOTE: this must be called after setVertexCount to work correctly
     protected int genColourBuffer(int vertices) {
-        float[] data = new float[vertices * 3];
+        var data = new float[vertices * 3];
         Arrays.fill(data, 1);
         return genColourBuffer(data);
     }
 
     protected int genUVBuffer(float[] data) {
-        int uvVBOID = genBuffer();
+        var uvVBOID = genBuffer();
 
         bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
         enableAttribute(3);
@@ -113,8 +112,10 @@ public class VAO {
 
     // generates a default element buffer
     protected int genElementBuffer(int[] data) {
-        int elementVBOID = genBuffer();
+        var elementVBOID = genBuffer();
+
         bufferElementData(elementVBOID, data, GL_STATIC_DRAW);
+
         return elementVBOID;
     }
 
@@ -225,7 +226,7 @@ public class VAO {
     }
 
     protected static float[] vec3fToFloatArray(vec3f[] vs) {
-        float[] result = new float[vs.length * 3];
+        var result = new float[vs.length * 3];
 
         for (int i = 0; i < vs.length; ++i) {
             result[i * 3    ] = vs[i].x;
@@ -237,7 +238,7 @@ public class VAO {
     }
 
     protected static float[] vec2fToFloatArray(vec2f[] vs) {
-        float[] result = new float[vs.length * 2];
+        var result = new float[vs.length * 2];
 
         for (int i = 0; i < vs.length; ++i) {
             result[i * 2    ] = vs[i].x;

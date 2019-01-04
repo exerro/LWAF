@@ -101,9 +101,9 @@ public abstract class ShaderLoader {
             return shaderIDLookup.get(shaderPath);
         }
 
-        int shaderID = GL20.glCreateShader(shaderType);
+        var shaderID = GL20.glCreateShader(shaderType);
+        var fileContent = new String(Files.readAllBytes(Paths.get(shaderPath)));
 
-        String fileContent = new String(Files.readAllBytes(Paths.get(shaderPath)));
         GL20.glShaderSource(shaderID, fileContent);
         GL20.glCompileShader(shaderID);
 

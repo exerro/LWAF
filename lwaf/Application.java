@@ -34,7 +34,8 @@ public abstract class Application {
     protected void onCut() {}
 
     public vec2f getMousePosition() {
-        double[] x = new double[1], y = new double[1];
+        var x = new double[1];
+        var y = new double[1];
 
         glfwGetCursorPos(getDisplay().windowID, x, y);
 
@@ -63,10 +64,8 @@ public abstract class Application {
 
     public static void run(Application app) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
         long nanos, deltaNanos, lastNanos;
-        Map<Integer, MouseEvent> mouseEvents = new HashMap<>();
-        Map<Integer, Boolean> heldKeys;
-        List<String> keyModifiers;
         float dt;
+        var mouseEvents = new HashMap<Integer, MouseEvent>();
 
         app.display.setup();
         app.time = 0;
@@ -83,22 +82,22 @@ public abstract class Application {
         }
 
         glfwSetCursorPosCallback(app.getDisplay().windowID, (window, x, y) -> {
-            vec2f position = new vec2f((float) x, (float) y);
+            var position = new vec2f((float) x, (float) y);
 
             app.onMouseMove(position, mouseEvents.isEmpty());
 
-            for (MouseEvent event : mouseEvents.values()) {
+            for (var event : mouseEvents.values()) {
                 event.moved = true;
                 event.move(position);
             }
         });
 
         glfwSetMouseButtonCallback(app.getDisplay().windowID, (window, button, action, mods) -> {
-            vec2f position = app.getMousePosition();
+            var position = app.getMousePosition();
 
             if (action == GLFW_PRESS) {
                 if (mouseEvents.containsKey(button)) mouseEvents.get(button).up(position);
-                MouseEvent event = new MouseEvent(position, button, mods);
+                var event = new MouseEvent(position, button, mods);
                 mouseEvents.put(button, event);
                 app.onMouseEvent(event);
             }
@@ -111,7 +110,7 @@ public abstract class Application {
         });
 
         glfwSetKeyCallback(app.getDisplay().windowID, (window, key, scancode, action, mods) -> {
-            String keyName = glfwGetKeyName(key, scancode);
+            var keyName = glfwGetKeyName(key, scancode);
 
             switch (key) {
                 case GLFW_KEY_SPACE: keyName = "space"; break;

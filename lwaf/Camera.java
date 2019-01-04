@@ -107,7 +107,7 @@ public class Camera implements ITranslated<Camera>, IRotated<Camera> {
         private final mat4f matrix;
 
         public PerspectiveProjection(float aspect, float FOV, float near, float far) {
-            float S = (float) (1 / Math.tan(FOV * Math.PI / 360));
+            var S = (float) (1 / Math.tan(FOV * Math.PI / 360));
 
             matrix = new mat4f(new float[] {
                     S / aspect, 0, 0, 0,

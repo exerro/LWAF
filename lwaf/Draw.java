@@ -42,8 +42,8 @@ public class Draw {
     }
 
     public static void rectangle(vec2f position, vec2f size) {
-        vec2f displaySize = getViewportSize();
-        mat4f transform = mat4f.identity()
+        var displaySize = getViewportSize();
+        var transform   = mat4f.identity()
                 .scaleBy(1, -1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
@@ -58,8 +58,8 @@ public class Draw {
     }
 
     public static void image(Texture texture, vec2f position, vec2f scale) {
-        vec2f displaySize = getViewportSize();
-        mat4f transform = mat4f.identity()
+        var displaySize = getViewportSize();
+        var transform   = mat4f.identity()
                 .scaleBy(1, -1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
@@ -81,8 +81,8 @@ public class Draw {
     public static void view(View view, vec2f position, vec2f scale) {
         view.render();
 
-        vec2f displaySize = getViewportSize();
-        mat4f transform = mat4f.identity()
+        var displaySize = getViewportSize();
+        var transform   = mat4f.identity()
                 .scaleBy(1, -1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
@@ -104,8 +104,8 @@ public class Draw {
     }
 
     public static void text(Text text, vec2f position) {
-        vec2f displaySize = getViewportSize();
-        mat4f transform = mat4f.identity()
+        var displaySize = getViewportSize();
+        var transform   = mat4f.identity()
                 .translate(-1, 1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .scaleBy(1, -1, 0)
@@ -115,7 +115,7 @@ public class Draw {
     }
 
     private static void draw2D(Texture texture, VAO vao, mat4f transform) {
-        vec2f displaySize = getViewportSize();
+        var displaySize = getViewportSize();
 
         if (texture != null) {
             texture.bind();
@@ -141,60 +141,35 @@ public class Draw {
 
         rectangleVAO = new VAO() {
             {
-                int vertexVBOID, normalVBOID, colourVBOID, elementVBOID, uvVBOID;
-
                 setVertexCount(6);
 
-                vertexVBOID = genBuffer();
-                normalVBOID = genBuffer();
-                colourVBOID = genBuffer();
-                elementVBOID = genBuffer();
-                uvVBOID = genBuffer();
-
-                bindBuffer(vertexVBOID, 0, 3, GL11.GL_FLOAT);
-                bindBuffer(normalVBOID, 1, 3, GL11.GL_FLOAT);
-                bindBuffer(colourVBOID, 2, 3, GL11.GL_FLOAT);
-                bindBuffer(uvVBOID, 3, 2, GL11.GL_FLOAT);
-
-                enableAttribute(0);
-                enableAttribute(1);
-                enableAttribute(2);
-                enableAttribute(3);
-
-                bufferData(vertexVBOID, new float[] {
+                genVertexBuffer(new float[] {
                         0, 1, 0,
                         0, 0, 0,
                         1, 0, 0,
                         1, 1, 0
-                }, GL_STATIC_DRAW);
+                });
 
-                bufferData(normalVBOID, new float[] {
+                genNormalBuffer(new float[] {
                         0, 0, 1,
                         0, 0, 1,
                         0, 0, 1,
                         0, 0, 1
-                }, GL_STATIC_DRAW);
+                });
 
-                bufferData(colourVBOID, new float[] {
-                        1, 1, 1,
-                        1, 1, 1,
-                        1, 1, 1,
-                        1, 1, 1
-                }, GL_STATIC_DRAW);
+                genColourBuffer(4);
 
-                bufferElementData(elementVBOID, new int[] {
+                genElementBuffer(new int[] {
                         2, 1, 0,
                         3, 2, 0
-                }, GL_STATIC_DRAW);
+                });
 
-                bufferData(uvVBOID, new float[] {
+                rectangleVAOuvVBOID = genUVBuffer(new float[] {
                         0, 1,
                         0, 0,
                         1, 0,
                         1, 1
-                }, GL_STATIC_DRAW);
-
-                rectangleVAOuvVBOID = uvVBOID;
+                });
             }
         };
     }

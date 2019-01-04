@@ -3,16 +3,14 @@ package lwaf.util;
 import lwaf.VAO;
 import lwaf.vec3f;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class GenericSmoothSpheroidVAO extends VAO {
     // assumes vertices are already normalised
-    protected void genSpheroidBuffers(vec3f[] vertices, vec3f scale) {
+    protected void genSpheroidBuffers(vec3f[] vertices) {
         float[] vertex_floats, normal_floats;
-        var normal_scale = scale.normalise().inverse();
         var normals = new vec3f[vertices.length];
 
-        for (int i = 0; i < vertices.length; ++i) {
-            normals[i] = vertices[i].mul(normal_scale);
-        }
+        System.arraycopy(vertices, 0, normals, 0, vertices.length);
 
         normal_floats = vec3fToFloatArray(normals);
         vertex_floats = vec3fToFloatArray(vertices);
