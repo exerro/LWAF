@@ -3,27 +3,15 @@ import lwaf.*;
 import lwaf.util.CubeVAO;
 import lwaf.util.SphereVAO;
 import lwaf.util.UVSphereVAO;
+import lwaf_model.Model;
+import lwaf_model.ModelRenderer;
 
 import java.io.IOException;
 
-class CustomRenderer extends Renderer.CameraRenderer3D {
+class CustomRenderer extends ModelRenderer {
     private Camera camera;
-    private VAO[] vaos = new VAO[] {
-            new SphereVAO(1),
-            new CubeVAO(),
-            new UVSphereVAO(40, 80),
-            new SphereVAO(7),
-
-    };
-    private vec3f[] vao_colours = new vec3f[] {
-            new vec3f(0, 1, 1),
-            new vec3f(1, 1, 1),
-            new vec3f(1, 1, 1),
-            new vec3f(1, 1, 0),
-    };
-    private VAO vao4 = new UVSphereVAO(4, 8);
     private vec3f lightPosition = new vec3f(0, -1, 3);
-    private Texture texture = Texture.load("lwaf/img/no-texture-light.png");
+    private Model<SphereVAO> lightModel;
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -41,6 +29,41 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
                 Camera.PerspectiveProjection.DEFAULT_NEAR,
                 Camera.PerspectiveProjection.DEFAULT_FAR
         );
+
+        var dark_texture = Texture.load("lwaf/img/no-texture-light.png");
+
+        for (int i = 0; i < 5; ++i) {
+            add(new Model<>(new SphereVAO(i + 1)))
+                    .setTranslation(i * 2, -3, -2);
+        }
+
+        for (int i = 0; i < 10; ++i) {
+            for (int j = 0; j < 10; ++j) {
+                add(new Model<>(new UVSphereVAO(j + 1, i + 3)))
+                        .setTranslation(i * 2, 3 + j * 2, -2)
+                        .setTexture(dark_texture);
+            }
+        }
+
+        add(new Model<>(new SphereVAO(1)))
+                .setColour(0, 1, 1)
+                .setTranslation(0, 0, 0);
+
+        add(new Model<>(new CubeVAO()))
+                .setTexture(Texture.load("lwaf/img/no-texture-light.png"))
+                .setTranslation(2, 0, 0);
+
+        add(new Model<>(new UVSphereVAO(40, 80)))
+                .setTexture(Texture.load("lwaf/img/no-texture-dark.png"))
+                .setTranslation(4, 0, 0);
+
+        add(new Model<>(new SphereVAO(7)))
+                .setColour(1, 1, 0)
+                .setTranslation(6, 0, 0);
+
+        lightModel = new Model<>(new SphereVAO(5))
+                .setColour(0.9f, 0.9f, 0.3f)
+                .setScale(0.1f);
     }
 
     public void setLightPosition(vec3f position) {
@@ -51,7 +74,6 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     public void setUniforms() {
         super.setUniforms();
 
-        getShader().setUniform("useTexture", false);
         getShader().setUniform("lightPosition", lightPosition);
     }
 
@@ -66,30 +88,17 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
 
     @Override
     protected void draw(FBO framebuffer) {
-        getShader().setUniform("lightMinimum", 0.3f);
-
-        for (int i = 0; i < vaos.length; ++i) {
-            getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
-            getShader().setUniform("colour", vao_colours[i]);
-
-            if (vaos[i] instanceof UVSphereVAO || vaos[i] instanceof CubeVAO) {
-                getShader().setUniform("useTexture", true);
-                texture.bind();
-            }
-
-            Renderer.drawElements(vaos[i]);
-
-            if (vaos[i] instanceof UVSphereVAO || vaos[i] instanceof CubeVAO) {
-                texture.unbind();
-                getShader().setUniform("useTexture", false);
-            }
+        for (var model : getModels()) {
+            model.setRotation(0, Application.getActive().getTime(), 0);
         }
 
-        getShader().setUniform("lightMinimum", 1f);
-        getShader().setUniform("transform", mat4f.translation(lightPosition).scaleBy(0.1f));
-        getShader().setUniform("colour", new vec3f(0.9f, 0.9f, 0.3f));
-        Renderer.drawElements(vao4);
+        getShader().setUniform("lightMinimum", 0.3f);
 
+        super.draw(framebuffer);
+
+        lightModel.setTranslation(lightPosition);
+        getShader().setUniform("lightMinimum", 1f);
+        lightModel.draw(getShader());
     }
 }
 

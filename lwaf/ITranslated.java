@@ -8,4 +8,12 @@ public interface ITranslated<R> {
     default R translateBy(vec3f translation) {
         return setTranslation(getTranslation().add(translation));
     }
+
+    default R setTranslation(float x, float y, float z) {
+        return setTranslation(new vec3f(x, y, z));
+    }
+
+    default R translateBy(float x, float y, float z) {
+        return setTranslation(getTranslation().add(new vec3f(x, y, z)));
+    }
 }

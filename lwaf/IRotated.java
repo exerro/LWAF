@@ -8,4 +8,12 @@ public interface IRotated<R> {
     default R rotateBy(vec3f rotation) {
         return setRotation(getRotation().add(rotation));
     }
+
+    default R setRotation(float x, float y, float z) {
+        return setRotation(new vec3f(x, y, z));
+    }
+
+    default R rotateBy(float x, float y, float z) {
+        return setRotation(getRotation().add(new vec3f(x, y, z)));
+    }
 }
