@@ -6,14 +6,12 @@ public class Text {
     private final String text;
     private final int lineWidth;
     private final Font font;
-    private final float size;
     private final VAO vao;
 
-    public Text(String text, int lineWidth, Font font, float size) {
+    public Text(String text, int lineWidth, Font font) {
         this.text = text;
         this.lineWidth = lineWidth;
         this.font = font;
-        this.size = size;
         this.vao = new VAO();
 
         initialiseVAO();
@@ -32,7 +30,6 @@ public class Text {
     }
 
     private void initialiseVAO() {
-        // 8 because 4 vec2fs per quad
         var vertices = new float[text.length() * 12];
         var colours = new float[text.length() * 12];
         var uvs = new float[text.length() * 8];
@@ -41,18 +38,17 @@ public class Text {
         var base = font.getBase();
         var lineHeight = font.getLineHeight();
         var ei = 0;
-        var sizeScale = size / lineHeight;
         var x = 0;
-        var y = (lineHeight - base) * sizeScale;
+        var y = lineHeight - base;
 
         for (int i = 0; i < text.length(); ++i) {
             var c = text.charAt(i);
             var vi = i * 12;
             var uvi = i * 8;
 
-            var width  = font.getCharWidth(c) * sizeScale;
-            var size   = font.getCharSize(c).mul(sizeScale);
-            var offset = font.getCharOffset(c).mul(sizeScale);
+            var width  = font.getCharAdvance(c);
+            var size   = font.getCharSize(c);
+            var offset = font.getCharOffset(c);
             var cuvs   = font.getCharUVPositions(c);
 
             uvs[uvi    ] = cuvs[0].x;
@@ -88,8 +84,6 @@ public class Text {
             elements[ei + 4] = 4 * i + 2;
             elements[ei + 5] = 4 * i + 3;
         }
-
-        // TODO: populate vertices, uvs, and elements
 
         vao.setVertexCount(elements.length);
         vao.genVertexBuffer(vertices);

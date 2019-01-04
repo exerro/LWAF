@@ -1,13 +1,10 @@
 package lwaf;
 
-import org.lwjgl.opengl.GL11;
-
 import java.io.IOException;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Draw {
@@ -53,7 +50,7 @@ public class Draw {
         draw2D(null, rectangleVAO, transform);
     }
 
-    public static void rectangle(int x, int y, int width, int height) {
+    public static void rectangle(float x, float y, float width, float height) {
         rectangle(new vec2f(x, y), new vec2f(width, height));
     }
 
@@ -126,9 +123,7 @@ public class Draw {
         shaderProgram2D.setUniform("colour", colour);
         shaderProgram2D.setUniform("useTexture", texture != null);
         shaderProgram2D.start();
-        vao.load();
-        glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
-        vao.unload();
+        Renderer.drawElements(vao);
         shaderProgram2D.stop();
 
         if (texture != null) {

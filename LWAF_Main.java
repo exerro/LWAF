@@ -67,7 +67,7 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     @Override
     protected void draw(FBO framebuffer) {
         for (int i = 0; i < vaos.length; ++i) {
-            getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0)/*.rotate(vec3f.y_axis, Application.getActive().getTime())*/);
+            getShader().setUniform("transform", mat4f.translation(i * 2, 0, 0).rotate(vec3f.y_axis, Application.getActive().getTime()));
             getShader().setUniform("colour", vao_colours[i]);
 
             if (vaos[i] instanceof UVSphereVAO || vaos[i] instanceof CubeVAO) {
@@ -113,15 +113,8 @@ public class LWAF_Main extends Application {
 
     @Override
     protected boolean load() {
-        try {
-            font = new Font("lwaf/font/open-sans/OpenSans-Regular.fnt");
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        text = new Text("Hello world", 100, font, 64);
+        font = Font.safeLoad("lwaf/font/open-sans/OpenSans-Regular.fnt");
+        text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", 100, font);
         view = new View(1200, 680);
         view.attachRenderer(renderer = new CustomRenderer());
 
@@ -132,7 +125,19 @@ public class LWAF_Main extends Application {
     protected void draw() {
         Draw.setColour(1, 1, 1);
         Draw.view(view, new vec2f(40, 20));
-        Draw.text(text, new vec2f(100, 100));
+
+        Draw.setColour(0.5f, 0.5f, 0.5f);
+        Draw.rectangle(0, 0, font.getWidth(text.getText()), font.getHeight());
+
+        Draw.setColour(1, 1, 1);
+        Draw.text(text, new vec2f(0, 0));
+
+        Draw.setColour(1, 1, 1);
+        Draw.text(new Text(
+                String.valueOf(font.getWidth(text.getText())) + " |",
+                1000,
+                font.resizeTo(32)
+        ), new vec2f(0, font.getHeight() + 5));
     }
 
     @Override
@@ -151,7 +156,7 @@ public class LWAF_Main extends Application {
         var speed = dt * 5;
         var rspeed = dt * (float) Math.PI / 2;
 
-        text = new Text(getMousePosition().toString(), 700, font, 32);
+        text = new Text(getMousePosition().toString(), 700, font);
 
         if (isKeyDown("a")) {
             translation = translation.sub(right.mul(speed));
