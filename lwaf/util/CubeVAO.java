@@ -10,7 +10,7 @@ public class CubeVAO extends VAO {
         setVertexCount(36);
         genVertexBuffer(vertices);
         genNormalBuffer(normals);
-        genColourBuffer();
+        genColourBuffer(24);
         genUVBuffer(uvs);
         genElementBuffer(elements);
     }

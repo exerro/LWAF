@@ -40,7 +40,7 @@ public class SphereVAO extends GenericSmoothSpheroidVAO {
 
         setVertexCount(faceCount * 3);
         genSpheroidBuffers(vertices, vec3f.one);
-        genColourBuffer();
+        genColourBuffer(vertices.length);
         genElementBuffer(elements);
     }
 

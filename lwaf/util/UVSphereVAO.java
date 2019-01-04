@@ -10,10 +10,11 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
         this.horizontalPoints = horizontalPoints;
 
         var elements = genElements(horizontalPoints, verticalPoints);
+        var vertices = genVertices(horizontalPoints, verticalPoints);
 
         setVertexCount(elements.length);
-        genSpheroidBuffers(genVertices(horizontalPoints, verticalPoints), vec3f.one);
-        genColourBuffer();
+        genSpheroidBuffers(vertices, vec3f.one);
+        genColourBuffer(vertices.length);
         genUVBuffer(genUVs(horizontalPoints, verticalPoints));
         genElementBuffer(elements);
     }

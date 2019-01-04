@@ -95,8 +95,8 @@ public class VAO {
 
     // generates a default colour using default data and binds it to attribute 2
     // NOTE: this must be called after setVertexCount to work correctly
-    protected int genColourBuffer() {
-        float[] data = new float[getVertexCount() * 3];
+    protected int genColourBuffer(int vertices) {
+        float[] data = new float[vertices * 3];
         Arrays.fill(data, 1);
         return genColourBuffer(data);
     }

@@ -51,15 +51,7 @@ class CustomRenderer extends Renderer.CameraRenderer3D {
     public void setUniforms() {
         super.setUniforms();
 
-        // getShader().setUniform("projectionTransform", new Camera(vec3f.zero).setPerspectiveProjection(Display.getActive().getAspectRatio()).getProjectionMatrix());
-        // .rotate(new vec3f(1, 0, 0), (float) (Math.PI * 0.3))
-        // getShader().setUniform("viewTransform", mat4f.translation(0, -1f, -5));
-        getShader().setUniform("transform", mat4f.rotation(vec3f.y_axis, Application.getActive().getTime()));
-
         getShader().setUniform("useTexture", false);
-
-        getShader().setUniform("lightMinimum", 0.5f);
-        getShader().setUniform("lightColour", new vec3f(1, 1, 1));
         getShader().setUniform("lightPosition", lightPosition);
     }
 

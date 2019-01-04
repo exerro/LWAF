@@ -8,16 +8,16 @@ in vec3 fragment_normal;
 in vec3 fragment_colour;
 in vec2 fragment_uv;
 
-uniform mat4 viewTransform;
+uniform mat4 viewTransform = mat4(1);
 
 uniform sampler2D textureSampler;
-uniform bool useTexture;
+uniform bool useTexture = false;
 
-uniform vec3 colour;
+uniform vec3 colour = vec3(1, 1, 1);
 
-uniform float lightMinimum;
-uniform vec3 lightColour;
-uniform vec3 lightPosition;
+uniform float lightMinimum = 0.3;
+uniform vec3 lightColour = vec3(1, 1, 1);
+uniform vec3 lightPosition = vec3(0, 10000, 0);
 
 void main(void) {
     vec3 cameraPosition = (inverse(viewTransform)[3]).xyz;
