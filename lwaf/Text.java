@@ -2,15 +2,12 @@ package lwaf;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Text {
-
     private final String text;
-    private final int lineWidth;
     private final Font font;
     private final VAO vao;
 
-    public Text(String text, int lineWidth, Font font) {
+    public Text(String text, Font font) {
         this.text = text;
-        this.lineWidth = lineWidth;
         this.font = font;
         this.vao = new VAO();
 
