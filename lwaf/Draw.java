@@ -71,6 +71,10 @@ public class Draw {
         image(texture, position, new vec2f(1, 1));
     }
 
+    public static void image(Texture texture, float x, float y) {
+        image(texture, new vec2f(x, y), new vec2f(1, 1));
+    }
+
     public static void image(Texture texture) {
         image(texture, new vec2f(0, 0), new vec2f(1, 1));
     }

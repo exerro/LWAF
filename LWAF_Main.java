@@ -5,6 +5,8 @@ import lwaf.util.SphereVAO;
 import lwaf.util.UVSphereVAO;
 import lwaf_model.Model;
 import lwaf_model.ModelRenderer;
+import lwaf_primitive.ConeVAO;
+import lwaf_primitive.CylinderVAO;
 
 import java.io.IOException;
 
@@ -60,6 +62,12 @@ class CustomRenderer extends ModelRenderer {
         add(new Model<>(new SphereVAO(7)))
                 .setColour(1, 1, 0)
                 .setTranslation(6, 0, 0);
+
+        add(new Model<>(new ConeVAO(360)))
+                .setTranslation(-2, 0, 0);
+
+        add(new Model<>(new CylinderVAO(100)))
+                .setTranslation(-2, 2, 0);
 
         lightModel = new Model<>(new SphereVAO(5))
                 .setColour(0.9f, 0.9f, 0.3f)
