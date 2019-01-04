@@ -1,8 +1,8 @@
 
 import lwaf.*;
-import lwaf.util.CubeVAO;
-import lwaf.util.SphereVAO;
-import lwaf.util.UVSphereVAO;
+import lwaf_primitive.CubeVAO;
+import lwaf_primitive.SphereVAO;
+import lwaf_primitive.UVSphereVAO;
 import lwaf_model.Model;
 import lwaf_model.ModelRenderer;
 import lwaf_primitive.ConeVAO;

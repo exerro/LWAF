@@ -1,10 +1,10 @@
-package lwaf.util;
+package lwaf_primitive;
 
 import lwaf.VAO;
 import lwaf.vec3f;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class GenericSmoothSpheroidVAO extends VAO {
+abstract class GenericSmoothSpheroidVAO extends VAO {
     // assumes vertices are already normalised
     protected void genSpheroidBuffers(vec3f[] vertices) {
         float[] vertex_floats, normal_floats;

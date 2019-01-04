@@ -1,4 +1,4 @@
-package lwaf.util;
+package lwaf_primitive;
 
 import lwaf.vec3f;
 
