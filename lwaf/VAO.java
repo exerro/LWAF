@@ -23,6 +23,7 @@ public class VAO {
     private final int vaoID;
     private final List<Integer> vboIDs = new ArrayList<>();
     private final Set<Integer> enabledAttributes = new HashSet<>();
+    private boolean areTexturesSupported;
 
     public VAO() {
         vaoID = GL30.glGenVertexArrays();
@@ -39,12 +40,20 @@ public class VAO {
         }};
     }
 
+    public void enableTextures() {
+        areTexturesSupported = true;
+    }
+
     public void setVertexCount(int vertexCount) {
         this.vertexCount = vertexCount;
     }
 
     public void setInstanceCount(int instanceCount) {
         this.instanceCount = instanceCount;
+    }
+
+    public boolean areTexturesSupported() {
+        return areTexturesSupported;
     }
 
     public int getVertexCount() {
@@ -117,6 +126,7 @@ public class VAO {
         bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
         enableAttribute(3);
         bufferData(uvVBOID, data, GL_STATIC_DRAW);
+        enableTextures();
 
         return uvVBOID;
     }

@@ -44,6 +44,9 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
     }
 
     public Model<T> setTexture(Texture texture) {
+        if (!vao.areTexturesSupported())
+            throw new IllegalStateException("Model VAO does not support textures (" + vao.getClass().getName() + ")");
+
         this.texture = texture;
         return this;
     }

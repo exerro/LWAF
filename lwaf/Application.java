@@ -164,9 +164,6 @@ public abstract class Application {
         app.display.destroy();
         Draw.destroy();
 
-        glfwSetCharCallback(app.getDisplay().windowID, null);
-        glfwSetKeyCallback(app.getDisplay().windowID, null);
-
         active = null;
     }
 

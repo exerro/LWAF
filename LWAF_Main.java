@@ -1,18 +1,21 @@
 
 import lwaf.*;
-import lwaf.util.CubeVAO;
-import lwaf.util.SphereVAO;
-import lwaf.util.UVSphereVAO;
 import lwaf_graph.Graph3D;
+import lwaf_primitive.CubeVAO;
+import lwaf_primitive.IcoSphereVAO;
+import lwaf_primitive.UVSphereVAO;
 import lwaf_model.Model;
 import lwaf_model.ModelRenderer;
+import lwaf_primitive.ConeVAO;
+import lwaf_primitive.CylinderVAO;
+import lwaf_primitive.PyramidVAO;
 
 import java.io.IOException;
 
 class CustomRenderer extends ModelRenderer {
     private Camera camera;
     private vec3f lightPosition = new vec3f(0, -1, 3);
-    private Model<SphereVAO> lightModel;
+    private Model<IcoSphereVAO> lightModel;
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -34,7 +37,7 @@ class CustomRenderer extends ModelRenderer {
         var dark_texture = Texture.load("lwaf/img/no-texture-light.png");
 
         for (int i = 0; i < 5; ++i) {
-            add(new Model<>(new SphereVAO(i + 1)))
+            add(new Model<>(new IcoSphereVAO(i + 1)))
                     .setTranslation(i * 2, -3, -2);
         }
 
@@ -46,7 +49,7 @@ class CustomRenderer extends ModelRenderer {
             }
         }
 
-        add(new Model<>(new SphereVAO(1)))
+        add(new Model<>(new IcoSphereVAO(1)))
                 .setColour(0, 1, 1)
                 .setTranslation(0, 0, 0);
 
@@ -58,7 +61,7 @@ class CustomRenderer extends ModelRenderer {
                 .setTexture(Texture.load("lwaf/img/no-texture-dark.png"))
                 .setTranslation(4, 0, 0);
 
-        add(new Model<>(new SphereVAO(7)))
+        add(new Model<>(new IcoSphereVAO(7)))
                 .setColour(1, 1, 0)
                 .setTranslation(6, 0, 0);
 
@@ -103,7 +106,18 @@ class CustomRenderer extends ModelRenderer {
                 .setScale(40, 1, 40)
         ;
 
-        lightModel = new Model<>(new SphereVAO(5))
+        lightModel = new Model<>(new IcoSphereVAO(5));
+
+        add(new Model<>(new ConeVAO(360)))
+                .setTranslation(-2, 0, 0);
+
+        add(new Model<>(new CylinderVAO(100)))
+                .setTranslation(-2, 2, 0);
+
+        add(new Model<>(new PyramidVAO(4)))
+                .setTranslation(-2, 4, 0);
+
+        lightModel = new Model<>(new IcoSphereVAO(5))
                 .setColour(0.9f, 0.9f, 0.3f)
                 .setScale(0.1f);
     }

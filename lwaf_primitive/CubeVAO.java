@@ -1,14 +1,14 @@
-package lwaf.util;
+package lwaf_primitive;
 
 import lwaf.VAO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class CubeVAO extends VAO {
     public CubeVAO() {
-        setVertexCount(36);
+        setVertexCount(elements.length);
         genVertexBuffer(vertices);
         genNormalBuffer(normals);
-        genColourBuffer(24);
+        genColourBuffer(vertices.length / 3);
         genUVBuffer(uvs);
         genElementBuffer(elements);
     }
