@@ -12,9 +12,9 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 /*
     genBuffer();
-    bindBuffer();
+    bindBufferToAttribute();
     enableAttribute();
-    bufferData();
+    setBufferData();
  */
 
 @SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
@@ -25,18 +25,34 @@ public class VAO {
     private final Set<Integer> enabledAttributes = new HashSet<>();
     private boolean areTexturesSupported;
 
+    public static final int VERTEX_POSITION_ATTRIBUTE = 0;
+    public static final int VERTEX_TEXTURE_ATTRIBUTE = 1;
+    public static final int VERTEX_NORMAL_ATTRIBUTE = 2;
+    public static final int VERTEX_COLOUR_ATTRIBUTE = 3;
+
     public VAO() {
         vaoID = GL30.glGenVertexArrays();
     }
 
-    public static VAO createDefault(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
-        return new DefinedVAO(vertices, normals, colours, uvs, elements);
+    public VAO(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
+        this();
+
+        setVertexCount(elements.length);
+        genVertexBuffer(vec3fToFloatArray(vertices));
+        genNormalBuffer(vec3fToFloatArray(normals));
+        genElementBuffer(elements);
+
+        if (uvs != null) genUVBuffer(vec2fToFloatArray(uvs));
+        if (colours != null) genColourBuffer(vec3fToFloatArray(colours));
+        else                 genColourBuffer(vertices.length);
     }
 
+    // registers that this VAO supports texturing
     public void enableTextures() {
         areTexturesSupported = true;
     }
 
+    // sets the vertex count (number of integers in the element buffer)
     public void setVertexCount(int vertexCount) {
         this.vertexCount = vertexCount;
     }
@@ -57,110 +73,104 @@ public class VAO {
         return instanceCount;
     }
 
+    public void bind() {
+        GL30.glBindVertexArray(vaoID);
+    }
+
+    public void unbind() {
+        GL30.glBindVertexArray(0);
+    }
+
+    // loads the VAO for drawing
     public void load() {
-        bindVAO();
+        bind();
 
         for (int attribute : enabledAttributes) {
             GL20.glEnableVertexAttribArray(attribute);
         }
     }
 
+    // unloads the VAO from drawing
     public void unload() {
         for (int attribute : enabledAttributes) {
             GL20.glDisableVertexAttribArray(attribute);
         }
 
-        unbindVAO();
+        unbind();
     }
 
-    // generates a default vertex buffer using given data and binds it to attribute 0
+    // destroys the VAO and VBOs associated with it
+    public void destroy() {
+        GL30.glBindVertexArray(vaoID);
+
+        for (int attribute : enabledAttributes) {
+            GL20.glDisableVertexAttribArray(attribute);
+        }
+
+        GL30.glBindVertexArray(0);
+        GL30.glDeleteVertexArrays(vaoID);
+
+        for (int vboID : vboIDs) {
+            GL15.glDeleteBuffers(vboID);
+        }
+    }
+
+    // generates a new buffer
+    protected int genBuffer() {
+        int vboID = GL20.glGenBuffers();
+        vboIDs.add(vboID);
+        return vboID;
+    }
+
+    // generates a default vertex buffer using given data and binds it
     protected int genVertexBuffer(float[] data) {
-        var vertexVBOID = genBuffer();
-
-        bindBuffer(vertexVBOID, 0, 3, GL_FLOAT);
-        enableAttribute(0);
-        bufferData(vertexVBOID, data, GL_STATIC_DRAW);
-
-        return vertexVBOID;
+        return genAttributeFloatBuffer(data, VERTEX_POSITION_ATTRIBUTE, 3, GL_STATIC_DRAW);
     }
 
-    // generates a default normal buffer using given data and binds it to attribute 1
+    // generates a default normal buffer using given data and binds it
     protected int genNormalBuffer(float[] data) {
-        var normalVBOID = genBuffer();
-
-        bindBuffer(normalVBOID, 1, 3, GL_FLOAT);
-        enableAttribute(1);
-        bufferData(normalVBOID, data, GL_STATIC_DRAW);
-
-        return normalVBOID;
+        return genAttributeFloatBuffer(data, VERTEX_NORMAL_ATTRIBUTE, 3, GL_STATIC_DRAW);
     }
 
-    // generates a default colour buffer using given data and binds it to attribute 2
+    // generates a default colour buffer using given data and binds it
     protected int genColourBuffer(float[] data) {
-        var colourVBOID = genBuffer();
-
-        bindBuffer(colourVBOID, 2, 3, GL_FLOAT);
-        enableAttribute(2);
-        bufferData(colourVBOID, data, GL_STATIC_DRAW);
-
-        return colourVBOID;
+        return genAttributeFloatBuffer(data, VERTEX_COLOUR_ATTRIBUTE, 3, GL_STATIC_DRAW);
     }
 
-    // generates a default colour using default data and binds it to attribute 2
+    // generates a default UV buffer using given data and binds it
+    protected int genUVBuffer(float[] data) {
+        enableTextures();
+        return genAttributeFloatBuffer(data, VERTEX_TEXTURE_ATTRIBUTE, 2, GL_STATIC_DRAW);
+    }
+
+    // generates a default colour using default data and binds it
     protected int genColourBuffer(int vertices) {
         var data = new float[vertices * 3];
         Arrays.fill(data, 1);
         return genColourBuffer(data);
     }
 
-    protected int genUVBuffer(float[] data) {
-        var uvVBOID = genBuffer();
-
-        bindBuffer(uvVBOID, 3, 2, GL_FLOAT);
-        enableAttribute(3);
-        bufferData(uvVBOID, data, GL_STATIC_DRAW);
-        enableTextures();
-
-        return uvVBOID;
-    }
-
     // generates a default element buffer
     protected int genElementBuffer(int[] data) {
         var elementVBOID = genBuffer();
-
-        bufferElementData(elementVBOID, data, GL_STATIC_DRAW);
-
+        setBufferElementData(elementVBOID, data, GL_STATIC_DRAW);
         return elementVBOID;
     }
 
-    protected void bindVAO() {
-        GL30.glBindVertexArray(vaoID);
-    }
-
-    protected void unbindVAO() {
-        GL30.glBindVertexArray(0);
-    }
-
-    // generates a new buffer
-    protected int genBuffer() {
-        int vboID = GL20.glGenBuffers();
-
-        vboIDs.add(vboID);
-
-        return vboID;
+    // enables an attribute for draw calls
+    protected void enableAttribute(int attribute) {
+        enabledAttributes.add(attribute);
     }
 
     // binds a buffer to an attribute
     // `attribute` is for linking with the shader
     // `dataSize` is the number of components for each item in the buffer (e.g. 3 for (float, float, float))
     // `dataType` is the type of the items in the buffer (e.g. GL_FLOAT)
-    protected void bindBuffer(int vboID, int attribute, int dataSize, int dataType) {
+    protected void bindBufferToAttribute(int vboID, int attribute, int dataSize, int dataType) {
         GL30.glBindVertexArray(vaoID);
-
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
         GL20.glVertexAttribPointer(attribute, dataSize, dataType, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
         GL30.glBindVertexArray(0);
     }
 
@@ -168,7 +178,7 @@ public class VAO {
     // controls which item in the buffer is passed to the shader
     // default is 0
     // use 1 with instancing if the buffer contains instance-specific data
-    protected void attributeDivisor(int attribute, int divisor) {
+    protected void setAttributeDivisor(int attribute, int divisor) {
         GL30.glBindVertexArray(vaoID);
         GL40.glVertexAttribDivisor(attribute, divisor);
         GL30.glBindVertexArray(0);
@@ -176,7 +186,7 @@ public class VAO {
 
     // sets buffer data
     // usage should be GL_STATIC_DRAW or GL_DYNAMIC_DRAW
-    protected void bufferData(int vboID, float[] data, int usage) {
+    protected void setBufferData(int vboID, float[] data, int usage) {
         GL30.glBindVertexArray(vaoID);
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -187,7 +197,8 @@ public class VAO {
     }
 
     // sets the buffer data to be empty
-    protected void bufferData(int vboID, int usage) {
+    // this can be useful for instance buffers
+    protected void setBufferData(int vboID, int usage) {
         GL30.glBindVertexArray(vaoID);
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -209,34 +220,13 @@ public class VAO {
     }
 
     // sets buffer data for element array buffers
-    protected void bufferElementData(int vboID, int[] data, int usage) {
+    protected void setBufferElementData(int vboID, int[] data, int usage) {
         GL30.glBindVertexArray(vaoID);
 
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboID);
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, data, usage);
 
         GL30.glBindVertexArray(0);
-    }
-
-    // enables an attribute for draw calls
-    protected void enableAttribute(int attribute) {
-        enabledAttributes.add(attribute);
-    }
-
-    // destroys the VAO and VBOs associated with it
-    public void destroy() {
-        GL30.glBindVertexArray(vaoID);
-
-        for (int attribute : enabledAttributes) {
-            GL20.glDisableVertexAttribArray(attribute);
-        }
-
-        GL30.glBindVertexArray(0);
-        GL30.glDeleteVertexArrays(vaoID);
-
-        for (int vboID : vboIDs) {
-            GL15.glDeleteBuffers(vboID);
-        }
     }
 
     protected static float[] vec3fToFloatArray(vec3f[] vs) {
@@ -262,16 +252,14 @@ public class VAO {
         return result;
     }
 
-    public static class DefinedVAO extends VAO {
-        public DefinedVAO(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
-            setVertexCount(elements.length);
-            genVertexBuffer(vec3fToFloatArray(vertices));
-            genNormalBuffer(vec3fToFloatArray(normals));
-            if (colours != null) genColourBuffer(vec3fToFloatArray(colours));
-            else                 genColourBuffer(vertices.length);
-            if (uvs != null) genUVBuffer(vec2fToFloatArray(uvs));
-            genElementBuffer(elements);
-        }
+    private int genAttributeFloatBuffer(float[] data, int attribute, int dataSize, int usage) {
+        var VBOID = genBuffer();
+
+        bindBufferToAttribute(VBOID, attribute, dataSize, GL_FLOAT);
+        enableAttribute(attribute);
+        setBufferData(VBOID, data, usage);
+
+        return VBOID;
     }
 
 }

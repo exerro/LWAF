@@ -37,7 +37,7 @@ public class ModelLoader {
             }
         }
 
-        return VAO.createDefault(
+        return new VAO(
                 vertices.toArray(new vec3f[0]),
                 new_normals.toArray(new vec3f[0]),
                 null,

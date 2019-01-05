@@ -70,7 +70,7 @@ public class Graph3D {
             elements[i] = i;
         }
 
-        return VAO.createDefault(vertices, normals, colours, uvs, elements);
+        return new VAO(vertices, normals, colours, uvs, elements);
     }
 
     public VAO getSmoothVAO(EvaluationStrategy strategy) {
@@ -153,7 +153,7 @@ public class Graph3D {
             el += 3;
         }
 
-        return VAO.createDefault(vertices, normals, colours, uvs, elements);
+        return new VAO(vertices, normals, colours, uvs, elements);
     }
 
     public Map<vec2f, vec3f> buildVertexLookup(List<Tri> triangles) {
