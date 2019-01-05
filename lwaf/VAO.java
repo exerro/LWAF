@@ -30,14 +30,7 @@ public class VAO {
     }
 
     public static VAO createDefault(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
-        return new VAO() {{
-            setVertexCount(elements.length);
-            genVertexBuffer(vec3fToFloatArray(vertices));
-            genNormalBuffer(vec3fToFloatArray(normals));
-            genColourBuffer(vec3fToFloatArray(colours));
-            if (uvs != null) genUVBuffer(vec2fToFloatArray(uvs));
-            genElementBuffer(elements);
-        }};
+        return new DefinedVAO(vertices, normals, colours, uvs, elements);
     }
 
     public void enableTextures() {
@@ -267,6 +260,18 @@ public class VAO {
         }
 
         return result;
+    }
+
+    public static class DefinedVAO extends VAO {
+        public DefinedVAO(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
+            setVertexCount(elements.length);
+            genVertexBuffer(vec3fToFloatArray(vertices));
+            genNormalBuffer(vec3fToFloatArray(normals));
+            if (colours != null) genColourBuffer(vec3fToFloatArray(colours));
+            else                 genColourBuffer(vertices.length);
+            if (uvs != null) genUVBuffer(vec2fToFloatArray(uvs));
+            genElementBuffer(elements);
+        }
     }
 
 }

@@ -2,6 +2,7 @@
 import lwaf.*;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
+import lwaf_model.ModelLoader;
 import lwaf_primitive.CubeVAO;
 import lwaf_primitive.IcoSphereVAO;
 import lwaf_primitive.UVSphereVAO;
@@ -70,6 +71,12 @@ class CustomRenderer extends ModelRenderer {
         add(new Model<>(new IcoSphereVAO(7)))
                 .setColour(1, 1, 0)
                 .setTranslation(6, 0, 0);
+
+        add(ModelLoader.safeLoad("stall.obj"))
+                .setTexture(Texture.load("stall_texture.png"))
+                .setTranslation(0, 0, 10)
+                .setSpecularLighting(0)
+        ;
 
         var graph = new Graph3D(v -> (float) (
                 // (float) 1 / (0.1f + v.length())
