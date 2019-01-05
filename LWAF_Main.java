@@ -27,7 +27,7 @@ class CustomRenderer extends ModelRenderer {
                 false
         ));
 
-        lighting = new Lighting(0.9f, 0.5f, 10);
+        lighting = new Lighting(0.9f, 0.4f, 10);
 
         camera = new Camera(new vec3f(0, 1, 5));
         camera.rotateBy(new vec3f((float) Math.PI * -0.1f, 0, 0));
@@ -49,7 +49,9 @@ class CustomRenderer extends ModelRenderer {
             for (int j = 0; j < 10; ++j) {
                 add(new Model<>(new UVSphereVAO(j + 1, i + 3)))
                         .setTranslation(i * 2, 3 + j * 2, -2)
-                        .setTexture(dark_texture);
+                        .setTexture(dark_texture)
+                        .setSpecularLighting(0)
+                ;
             }
         }
 

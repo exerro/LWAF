@@ -8,6 +8,7 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
                   scale = vec3f.one;
     private vec3f colour = vec3f.one;
     private Texture texture = null;
+    private Lighting lighting = new Lighting();
     private final T vao;
 
     public Model(T vao) {
@@ -19,6 +20,8 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
 
         shader.setUniform("transform", getTransformationMatrix());
         shader.setUniform("colour", getColour());
+
+        lighting.setShaderUniforms(shader);
 
         if (texture != null) {
             shader.setUniform("useTexture", true);
@@ -48,6 +51,20 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
             throw new IllegalStateException("Model VAO does not support textures (" + vao.getClass().getName() + ")");
 
         this.texture = texture;
+        return this;
+    }
+
+    public Lighting getLighting() {
+        return lighting;
+    }
+
+    public Model<T> setLighting(Lighting lighting) {
+        this.lighting = lighting;
+        return this;
+    }
+
+    public Model<T> setSpecularLighting(float specularLightingIntensity) {
+        lighting.setSpecularLightingIntensity(specularLightingIntensity);
         return this;
     }
 

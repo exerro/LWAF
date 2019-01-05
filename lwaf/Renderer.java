@@ -69,9 +69,7 @@ public abstract class Renderer {
         }
 
         public void setLighting(Lighting lighting) {
-            getShader().setUniform("diffuseLightingIntensity", lighting.getDiffuseLightingIntensity());
-            getShader().setUniform("specularLightingIntensity", lighting.getSpecularLightingIntensity());
-            getShader().setUniform("specularLightingPower", lighting.getSpecularLightingPower());
+            lighting.setShaderUniforms(getShader());
         }
 
         public void setAmbientLighting(float ambientLightingIntensity) {
