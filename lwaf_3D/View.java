@@ -1,4 +1,8 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.FBO;
+import lwaf.Texture;
+import lwaf.vec3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +44,7 @@ public class View {
         }
     }
 
-    void render() {
+    public void render() {
         fbo.bind();
         glClearColor(colour.x, colour.y, colour.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

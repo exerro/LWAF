@@ -1,6 +1,7 @@
 package lwaf_model;
 
 import lwaf.*;
+import lwaf_3D.Lighting;
 
 public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Model<T>> {
     private vec3f position = vec3f.zero,
@@ -31,7 +32,7 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
             shader.setUniform("useTexture", false);
         }
 
-        Renderer.drawElements(getVAO());
+        Draw.drawElements(getVAO());
 
         if (texture != null) {
             texture.unbind();

@@ -1,10 +1,13 @@
 package lwaf;
 
+import lwaf_3D.View;
+
 import java.io.IOException;
 
-import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Draw {
@@ -19,12 +22,12 @@ public class Draw {
         return viewportSize;
     }
 
-    static void viewport(vec2f size) {
+    static void setViewport(vec2f size) {
         viewportSize = size;
         glViewport(0, 0, (int) size.x, (int) size.y);
     }
 
-    static void viewport() {
+    static void setViewport() {
         int w = Display.getActive().getWidth(), h = Display.getActive().getHeight();
         viewportSize = new vec2f(w, h);
         glViewport(0, 0, w, h);
@@ -127,12 +130,24 @@ public class Draw {
         shaderProgram2D.setUniform("colour", colour);
         shaderProgram2D.setUniform("useTexture", texture != null);
         shaderProgram2D.start();
-        Renderer.drawElements(vao);
+        drawElements(vao);
         shaderProgram2D.stop();
 
         if (texture != null) {
             texture.unbind();
         }
+    }
+
+    public static void drawElements(VAO vao) {
+        vao.load();
+        glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
+        vao.unload();
+    }
+
+    public static void drawElementsInstanced(VAO vao) {
+        vao.load();
+        glDrawElementsInstanced(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0, vao.getInstanceCount());
+        vao.unload();
     }
 
     public static void init() throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {

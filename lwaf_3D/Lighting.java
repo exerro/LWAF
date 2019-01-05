@@ -1,4 +1,6 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.ShaderLoader;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Lighting {

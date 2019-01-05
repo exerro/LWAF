@@ -1,4 +1,9 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.IRotated;
+import lwaf.ITranslated;
+import lwaf.mat4f;
+import lwaf.vec3f;
 
 @SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public class Camera implements ITranslated<Camera>, IRotated<Camera> {

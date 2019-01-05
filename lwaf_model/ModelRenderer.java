@@ -1,6 +1,7 @@
 package lwaf_model;
 
 import lwaf.*;
+import lwaf_3D.Renderer;
 
 import java.util.ArrayList;
 import java.util.List;

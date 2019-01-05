@@ -1,5 +1,8 @@
 
 import lwaf.*;
+import lwaf_3D.Camera;
+import lwaf_3D.Lighting;
+import lwaf_3D.View;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.ModelLoader;

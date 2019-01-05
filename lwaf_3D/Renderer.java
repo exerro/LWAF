@@ -1,21 +1,14 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.FBO;
+import lwaf.ShaderLoader;
+import lwaf.vec3f;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class Renderer {
-    public static void drawElements(VAO vao) {
-        vao.load();
-        glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
-        vao.unload();
-    }
-
-    public static void drawElementsInstanced(VAO vao) {
-        vao.load();
-        glDrawElementsInstanced(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0, vao.getInstanceCount());
-        vao.unload();
-    }
 
     protected void load() {
 
