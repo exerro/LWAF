@@ -5,7 +5,12 @@ import lwaf.vec2f;
 import lwaf.vec3f;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Graph3D {
     private final SurfaceMap function;
     private ColourMap colouring = v -> vec3f.one;
@@ -33,13 +38,13 @@ public class Graph3D {
         var colours = new vec3f[triangles.size() * 3];
         var uvs = new vec2f[triangles.size() * 3];
         var elements = new int[triangles.size() * 3];
-        var functionCache = new HashMap<vec2f, vec3f>();
+        var lookup = buildVertexLookup(triangles);
         var vertex = 0;
 
         for (var tri : triangles) {
-            var p0 = eval(tri.points[0], functionCache);
-            var p1 = eval(tri.points[1], functionCache);
-            var p2 = eval(tri.points[2], functionCache);
+            var p0 = lookup.get(tri.points[0]);
+            var p1 = lookup.get(tri.points[1]);
+            var p2 = lookup.get(tri.points[2]);
             var n  = p1.sub(p0).cross(p2.sub(p0)).normalise();
 
             vertices[vertex    ] = p0;
@@ -57,7 +62,7 @@ public class Graph3D {
             vertex += 3;
         }
 
-        for (int i = 0; i < vertices.length; ++i) {
+        for (int i = 0; i < colours.length; ++i) {
             colours[i] = colouring.apply(vertices[i]);
         }
 
@@ -70,77 +75,118 @@ public class Graph3D {
 
     public VAO getSmoothVAO(EvaluationStrategy strategy) {
         var triangles = strategy.generateTriangles(this);
-        var vertex_set = new ArrayList<vec2f>();
-        var normal_connections = new HashMap<Integer, List<Integer>>();
-        var cache = new HashMap<vec2f, vec3f>();
+        var lookup = buildVertexLookup(triangles);
         var elements = new int[triangles.size() * 3];
         var el = 0;
 
+        List<vec2f> vertex_list;
+        List<vec3f> accumulated_normals;
+        Map<vec2f, Integer> vertex_indexes;
         vec3f[] vertices, normals, colours;
         vec2f[] uvs;
 
-        for (var triangle : triangles) {
-            for (var point : triangle.points) {
-                if (!vertex_set.contains(point)) {
-                    vertex_set.add(point);
-                    normal_connections.put(vertex_set.size() - 1, new ArrayList<>());
-                }
-            }
-        }
+        vertex_list = triangles
+                .stream()
+                .flatMap(tri -> Stream.of(tri.points))
+                .distinct()
+                .collect(Collectors.toList());
+
+        vertex_indexes = IntStream.range(0, vertex_list.size())
+                .parallel()
+                .boxed()
+                .collect(Collectors.toMap(
+                        vertex_list::get,
+                        Function.identity()
+                ));
+
+        accumulated_normals = new ArrayList<>(Collections.nCopies(vertex_list.size(), vec3f.zero));
 
         for (var triangle : triangles) {
             var p0 = triangle.points[0];
             var p1 = triangle.points[1];
             var p2 = triangle.points[2];
-            var p0i = vertex_set.indexOf(p0);
-            var p1i = vertex_set.indexOf(p1);
-            var p2i = vertex_set.indexOf(p2);
+            var p0v = lookup.get(p0);
+            var p1v = lookup.get(p1);
+            var p2v = lookup.get(p2);
+            var p0i = vertex_indexes.get(p0);
+            var p1i = vertex_indexes.get(p1);
+            var p2i = vertex_indexes.get(p2);
+            var p0n = accumulated_normals.get(p0i);
+            var p1n = accumulated_normals.get(p1i);
+            var p2n = accumulated_normals.get(p2i);
+            var n = p1v.sub(p0v).cross(p2v.sub(p0v));
 
-            normal_connections.get(p0i).add(p1i);
-            normal_connections.get(p0i).add(p2i);
-            normal_connections.get(p1i).add(p2i);
-            normal_connections.get(p1i).add(p0i);
-            normal_connections.get(p2i).add(p0i);
-            normal_connections.get(p2i).add(p1i);
+            p0n = p0n.add(n);
+            p1n = p1n.add(n);
+            p2n = p2n.add(n);
+            accumulated_normals.set(p0i, p0n);
+            accumulated_normals.set(p1i, p1n);
+            accumulated_normals.set(p2i, p2n);
         }
 
-        vertices = new vec3f[vertex_set.size()];
-        normals = new vec3f[vertex_set.size()];
-        colours = new vec3f[vertex_set.size()];
-        uvs = new vec2f[vertex_set.size()];
+        accumulated_normals = accumulated_normals
+                .parallelStream()
+                .map(vec3f::normalise)
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < vertices.length; ++i) {
-            vertices[i] = eval(vertex_set.get(i), cache);
-        }
+        vertices = vertex_list
+                .parallelStream()
+                .map(lookup::get)
+                .toArray(vec3f[]::new);
 
-        for (int i = 0; i < normals.length; ++i) {
-            var sum = vec3f.zero;
-            var connections = normal_connections.get(i);
-            var v = vertices[i];
+        normals = accumulated_normals.toArray(new vec3f[0]);
 
-            for (int j = 0; j < connections.size(); j += 2) {
-                sum = sum.add(vertices[connections.get(j)].sub(v).cross(vertices[connections.get(j + 1)].sub(v)));
-            }
-
-            normals[i] = sum.normalise();
-        }
-
+        colours = new vec3f[vertices.length];
         for (int i = 0; i < colours.length; ++i) {
             colours[i] = colouring.apply(vertices[i]);
         }
 
+        uvs = new vec2f[vertices.length];
         for (int i = 0; i < uvs.length; ++i) {
             uvs[i] = new vec2f(vertices[i].x + 0.5f, vertices[i].z + 0.5f);
         }
 
         for (var triangle : triangles) {
-            elements[el    ] = vertex_set.indexOf(triangle.points[0]);
-            elements[el + 1] = vertex_set.indexOf(triangle.points[1]);
-            elements[el + 2] = vertex_set.indexOf(triangle.points[2]);
+            elements[el    ] = vertex_indexes.get(triangle.points[0]);
+            elements[el + 1] = vertex_indexes.get(triangle.points[1]);
+            elements[el + 2] = vertex_indexes.get(triangle.points[2]);
             el += 3;
         }
 
         return VAO.createDefault(vertices, normals, colours, uvs, elements);
+    }
+
+    public Map<vec2f, vec3f> buildVertexLookup(List<Tri> triangles) {
+        var bounds_diff = bounds_max.sub(bounds_min);
+        var half = vec2f.one.mul(0.5f);
+
+        return triangles
+                .parallelStream()
+                .flatMap(tri -> Stream.of(tri.points))
+                .distinct()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        v -> {
+                            var pos = bounds_min.add(bounds_diff.mul(v.add(half)));
+                            var val = function.apply(pos);
+                            return new vec3f(v.x, val, v.y);
+                        }
+                ));
+    }
+
+    public vec3f eval(vec2f v) {
+        var pos = bounds_min.add(bounds_max.sub(bounds_min).mul(v.add(new vec2f(0.5f, 0.5f))));
+        var val = function.apply(pos);
+        return new vec3f(pos.x, val, pos.y);
+    }
+
+    public vec3f evalCached(vec2f v, Map<vec2f, vec3f> cache) {
+        cache.computeIfAbsent(v, this::eval);
+        return cache.get(v);
+    }
+
+    public Map<vec2f, vec3f> generateCache() {
+        return new HashMap<>();
     }
 
     @FunctionalInterface
@@ -151,14 +197,6 @@ public class Graph3D {
     @FunctionalInterface
     public interface ColourMap {
         vec3f apply(vec3f location);
-    }
-
-    public vec3f eval(vec2f position, Map<vec2f, vec3f> cache) {
-        cache.computeIfAbsent(position, v -> {
-            var pos = bounds_min.add(bounds_max.sub(bounds_min).mul(v.add(new vec2f(0.5f, 0.5f))));
-            return new vec3f(v.x, function.apply(pos), v.y);
-        });
-        return cache.get(position);
     }
 
     private static class Tri {
@@ -180,21 +218,31 @@ public class Graph3D {
             this.resolution = resolution;
         }
 
-        @Override
-        protected List<Tri> generateTriangles(Graph3D graph) {
-            List<Tri> result = new ArrayList<>(resolution * resolution * 2);
+        protected vec2f[][] generateVertexArray() {
+            var result = new vec2f[resolution + 1][resolution + 1];
+
+            for (int xi = 0; xi <= resolution; ++xi) {
+                var x = (float) xi / resolution - 0.5f;
+
+                for (int zi = 0; zi <= resolution; ++zi) {
+                    var z = (float) zi / resolution - 0.5f;
+
+                    result[xi][zi] = new vec2f(x, z);
+                }
+            }
+
+            return result;
+        }
+
+        protected List<Tri> generateTrianglesFromVertexArray(vec2f[][] vertices) {
+            var result = new ArrayList<Tri>(resolution * resolution * 2);
 
             for (int xi = 0; xi < resolution; ++xi) {
-                var x0 = (float) xi / resolution - 0.5f;
-                var x1 = (float) (xi + 1) / resolution - 0.5f;
-
                 for (int zi = 0; zi < resolution; ++zi) {
-                    var z0 = (float) zi / resolution - 0.5f;
-                    var z1 = (float) (zi + 1) / resolution - 0.5f;
-                    var a = new vec2f(x0, z0);
-                    var b = new vec2f(x0, z1);
-                    var c = new vec2f(x1, z1);
-                    var d = new vec2f(x1, z0);
+                    var a = vertices[xi][zi];
+                    var b = vertices[xi][zi + 1];
+                    var c = vertices[xi + 1][zi + 1];
+                    var d = vertices[xi + 1][zi];
 
                     result.add(new Tri(a, b, c));
                     result.add(new Tri(a, c, d));
@@ -202,6 +250,11 @@ public class Graph3D {
             }
 
             return result;
+        }
+
+        @Override
+        protected List<Tri> generateTriangles(Graph3D graph) {
+            return generateTrianglesFromVertexArray(generateVertexArray());
         }
     }
 
@@ -212,20 +265,10 @@ public class Graph3D {
 
         @Override
         protected List<Tri> generateTriangles(Graph3D graph) {
-            var points = new vec2f[resolution + 1][resolution + 1];
+            var points = generateVertexArray();
             var points_out = new vec2f[resolution + 1][resolution + 1];
-            var cache = new HashMap<vec2f, vec3f>();
+            var cache = graph.generateCache();
             float max_pull = 0.4f / resolution;
-
-            for (int xi = 0; xi <= resolution; ++xi) {
-                var x = (float) xi / resolution - 0.5f;
-
-                for (int zi = 0; zi <= resolution; ++zi) {
-                    var z = (float) zi / resolution - 0.5f;
-
-                    points[xi][zi] = new vec2f(x, z);
-                }
-            }
 
             for (int xi = 0; xi <= resolution; ++xi) {
                 for (int zi = 0; zi <= resolution; ++zi) {
@@ -234,16 +277,16 @@ public class Graph3D {
                     var k = 2f / resolution;
 
                     if (xi > 0 && xi < resolution) {
-                        var y0x = graph.eval(points[xi - 1][zi], cache).y;
-                        var y1x = graph.eval(points[xi + 1][zi], cache).y;
+                        var y0x = graph.evalCached(points[xi - 1][zi], cache).y;
+                        var y1x = graph.evalCached(points[xi + 1][zi], cache).y;
 
                         grad_x = (y1x - y0x) * k;
                         if (Math.abs(grad_x) > max_pull) grad_x = grad_x > 0 ? max_pull : -max_pull;
                     }
 
                     if (zi > 0 && zi < resolution) {
-                        var y0z = graph.eval(points[xi][zi - 1], cache).y;
-                        var y1z = graph.eval(points[xi][zi + 1], cache).y;
+                        var y0z = graph.evalCached(points[xi][zi - 1], cache).y;
+                        var y1z = graph.evalCached(points[xi][zi + 1], cache).y;
 
                         grad_z = (y1z - y0z) * k;
                         if (Math.abs(grad_z) > max_pull) grad_z = grad_z > 0 ? max_pull : -max_pull;
@@ -253,21 +296,7 @@ public class Graph3D {
                 }
             }
 
-            List<Tri> result = new ArrayList<>(resolution * resolution * 2);
-
-            for (int xi = 0; xi < resolution; ++xi) {
-                for (int zi = 0; zi < resolution; ++zi) {
-                    var a = points_out[xi][zi];
-                    var b = points_out[xi][zi + 1];
-                    var c = points_out[xi + 1][zi + 1];
-                    var d = points_out[xi + 1][zi];
-
-                    result.add(new Tri(a, b, c));
-                    result.add(new Tri(a, c, d));
-                }
-            }
-
-            return result;
+            return generateTrianglesFromVertexArray(points_out);
         }
     }
 }

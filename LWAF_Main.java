@@ -81,6 +81,9 @@ class CustomRenderer extends ModelRenderer {
                 .setScale(scale)
         ;
 
+        add(new Model<>(new CubeVAO())).setTranslation(0, -10, scale.x / 2 + 1);
+        add(new Model<>(new CubeVAO())).setTranslation(scale.x * 0.5f, -10, scale.x / 2 + 1);
+
         add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
                 .setTranslation(0, -10, -scale.x / 2 - 1)
                 .setScale(scale)
@@ -154,7 +157,7 @@ class CustomRenderer extends ModelRenderer {
                 .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)))
         ;
 
-        new Model<>(sea.getSmoothVAO(new Graph3D.UniformGridStrategy(50)))
+        new Model<>(sea.getTriangulatedVAO(new Graph3D.UniformGridStrategy(50)))
                 .setTranslation(50, -10, 0)
                 .setScale(40, 1, 40)
                 .draw(getShader())
