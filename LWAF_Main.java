@@ -64,24 +64,23 @@ class CustomRenderer extends ModelRenderer {
 
         var graph = new Graph3D(v -> (float) (
                 // (float) 1 / (0.1f + v.length())
-                Math.sin(v.length() * 25)
+                Math.sin(1 / (1 + v.length2()) * 25 + 10 * v.y)
         ))
-                .setMinExpansions(3)
-                //.setColouring(v -> new vec3f(1, 1, v.y * 0.5f + 0.5f))
-                .setCurvatureFunction(v -> 0)
-                .setMaxTriangles(100)
+                .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
         ;
 
-        var scale = new vec3f(20, 1, 20);
-        var res = 100;
+        var scale = new vec3f(20, 1f, 20);
+        var res = 200;
 
         add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
                 .setTranslation(0, -10, scale.x / 2 + 1)
-                .setScale(scale);
+                .setScale(scale)
+        ;
 
         add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
                 .setTranslation(0, -10, -scale.x / 2 - 1)
-                .setScale(scale);
+                .setScale(scale)
+        ;
 
         lightModel = new Model<>(new SphereVAO(5))
                 .setColour(0.9f, 0.9f, 0.3f)
@@ -121,6 +120,17 @@ class CustomRenderer extends ModelRenderer {
         lightModel.setTranslation(lightPosition);
         getShader().setUniform("lightMinimum", 1f);
         lightModel.draw(getShader());
+
+        var graph = new Graph3D(v -> (float) (
+                // (float) 1 / (0.1f + v.length())
+                Math.sin(1 / (1 + v.length2()) * 25 + 10 * v.y + 3 * Application.getActive().getTime()) / (0.3f + v.length2())
+        ))
+                .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
+                ;
+        new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(100)))
+                .setTranslation(40, -10, 0)
+                .setScale(20, 1, 20)
+                .draw(getShader());
     }
 }
 

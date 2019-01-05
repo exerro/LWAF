@@ -8,24 +8,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class Graph3D {
     private final SurfaceMap function;
-    private SurfaceMap curvature = v -> 1;
     private ColourMap colouring = v -> vec3f.one;
     private vec2f bounds_min = new vec2f(-1, -1), bounds_max = new vec2f(1, 1);
-    private float curvature_threshold = 0.1f;
-    private int min_expansions = 0;
-    private int max_triangles = 10000;
 
     public Graph3D(SurfaceMap function) {
         this.function = function;
-    }
-
-    public Graph3D setCurvatureFunction(SurfaceMap curvature) {
-        this.curvature = curvature;
-        return this;
     }
 
     public Graph3D setBounds(vec2f min, vec2f max) {
@@ -36,21 +26,6 @@ public class Graph3D {
 
     public Graph3D setColouring(ColourMap colouring) {
         this.colouring = colouring;
-        return this;
-    }
-
-    public Graph3D setCurvatureThreshold(float curvatureThreshold) {
-        this.curvature_threshold = curvatureThreshold;
-        return this;
-    }
-
-    public Graph3D setMinExpansions(int minExpansions) {
-        this.min_expansions = minExpansions;
-        return this;
-    }
-
-    public Graph3D setMaxTriangles(int maxTriangles) {
-        this.max_triangles = maxTriangles;
         return this;
     }
 
@@ -99,13 +74,9 @@ public class Graph3D {
             genVertexBuffer(vec3fToFloatArray(vertices));
             genNormalBuffer(vec3fToFloatArray(normals));
             genColourBuffer(vec3fToFloatArray(colours));
-            // genUVBuffer(vec2fToFloatArray(uvs));
+            genUVBuffer(vec2fToFloatArray(uvs));
             genElementBuffer(elements);
         }};
-    }
-
-    public static SurfaceMap curvatureFromComponents(Function<vec2f, Float> d2fdx2, Function<vec2f, Float> d2fdy2) {
-        return v -> new vec2f(d2fdx2.apply(v), d2fdy2.apply(v)).length();
     }
 
     @FunctionalInterface
@@ -131,21 +102,6 @@ public class Graph3D {
 
         Tri(vec2f... points) {
             this.points = points;
-        }
-
-        vec2f centre() {
-            return points[0].add(points[1]).add(points[2]).div(3);
-        }
-
-        List<Tri> divide() {
-            var c = centre();
-            var result = new ArrayList<Tri>();
-
-            result.add(new Tri(c, points[0], points[1]));
-            result.add(new Tri(c, points[1], points[2]));
-            result.add(new Tri(c, points[2], points[0]));
-
-            return result;
         }
     }
 
@@ -212,7 +168,6 @@ public class Graph3D {
                     var grad_x = 0f;
                     var grad_z = 0f;
                     var k = 2f / resolution;
-                    var y  = graph.eval(points[xi][zi], cache).y;
 
                     if (xi > 0 && xi < resolution) {
                         var y0x = graph.eval(points[xi - 1][zi], cache).y;
@@ -231,8 +186,6 @@ public class Graph3D {
                     }
 
                     points_out[xi][zi] = new vec2f(points[xi][zi].x + grad_x, points[xi][zi].y + grad_z);
-
-                    System.out.println(grad_x + ", " + grad_z);
                 }
             }
 
