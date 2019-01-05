@@ -54,14 +54,28 @@ public abstract class Renderer {
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             setUniforms();
-            if (shader != null) shader.start();
+            if (getShader() != null) getShader().start();
         }
 
         @Override
         protected void postDraw(FBO framebuffer) {
-            if (shader != null) shader.stop();
+            if (getShader() != null) getShader().stop();
             glDisable(GL_CULL_FACE);
             glDisable(GL_DEPTH_TEST);
+        }
+
+        public void setLightingPosition(vec3f position) {
+            getShader().setUniform("lightPosition", position);
+        }
+
+        public void setLighting(Lighting lighting) {
+            getShader().setUniform("diffuseLightingIntensity", lighting.getDiffuseLightingIntensity());
+            getShader().setUniform("specularLightingIntensity", lighting.getSpecularLightingIntensity());
+            getShader().setUniform("specularLightingPower", lighting.getSpecularLightingPower());
+        }
+
+        public void setAmbientLighting(float ambientLightingIntensity) {
+            getShader().setUniform("ambientLightingIntensity", ambientLightingIntensity);
         }
     }
 

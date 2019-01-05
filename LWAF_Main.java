@@ -17,6 +17,7 @@ class CustomRenderer extends ModelRenderer {
     private Camera camera;
     private vec3f lightPosition = new vec3f(0, -1, 3);
     private Model<IcoSphereVAO> lightModel;
+    private Lighting lighting;
 
     CustomRenderer() {
         setShader(ShaderLoader.safeLoad(
@@ -25,6 +26,8 @@ class CustomRenderer extends ModelRenderer {
                 "fragment-3D.glsl",
                 false
         ));
+
+        lighting = new Lighting(0.9f, 0.5f, 10);
 
         camera = new Camera(new vec3f(0, 1, 5));
         camera.rotateBy(new vec3f((float) Math.PI * -0.1f, 0, 0));
@@ -123,7 +126,8 @@ class CustomRenderer extends ModelRenderer {
     public void setUniforms() {
         super.setUniforms();
 
-        getShader().setUniform("lightPosition", lightPosition);
+        setLighting(lighting);
+        setLightingPosition(lightPosition);
     }
 
     public void setCamera(Camera camera) {
@@ -139,11 +143,7 @@ class CustomRenderer extends ModelRenderer {
     protected void draw(FBO framebuffer) {
         var t = Application.getActive().getTime();
 
-        for (var model : getModels()) {
-            // model.setRotation(0, Application.getActive().getTime(), 0);
-        }
-
-        getShader().setUniform("lightMinimum", 0.3f);
+        setAmbientLighting(0.1f);
 
         super.draw(framebuffer);
 
@@ -164,7 +164,7 @@ class CustomRenderer extends ModelRenderer {
         ;
 
         lightModel.setTranslation(lightPosition);
-        getShader().setUniform("lightMinimum", 1f);
+        setAmbientLighting(1f);
         lightModel.draw(getShader());
     }
 }
