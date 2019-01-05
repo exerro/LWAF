@@ -22,6 +22,10 @@ public class vec3f {
         this(v.x, v.y, z);
     }
 
+    public vec3f(float v) {
+        this(v, v, v);
+    }
+
     public vec3f() {
         this(0, 0, 0);
     }
@@ -60,6 +64,14 @@ public class vec3f {
 
     public float dot(vec3f v) {
         return x * v.x + y * v.y + z * v.z;
+    }
+
+    public vec3f cross(vec3f v) {
+        return new vec3f(
+                y*v.z - z*v.y,
+                z*v.x - x*v.z,
+                x*v.y - y*v.x
+        );
     }
 
     public float length2() {

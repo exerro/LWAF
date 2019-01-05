@@ -3,6 +3,7 @@ import lwaf.*;
 import lwaf.util.CubeVAO;
 import lwaf.util.SphereVAO;
 import lwaf.util.UVSphereVAO;
+import lwaf_graph.Graph3D;
 import lwaf_model.Model;
 import lwaf_model.ModelRenderer;
 
@@ -61,6 +62,27 @@ class CustomRenderer extends ModelRenderer {
                 .setColour(1, 1, 0)
                 .setTranslation(6, 0, 0);
 
+        var graph = new Graph3D(v -> (float) (
+                // (float) 1 / (0.1f + v.length())
+                Math.sin(v.length() * 25)
+        ))
+                .setMinExpansions(3)
+                //.setColouring(v -> new vec3f(1, 1, v.y * 0.5f + 0.5f))
+                .setCurvatureFunction(v -> 0)
+                .setMaxTriangles(100)
+        ;
+
+        var scale = new vec3f(20, 1, 20);
+        var res = 100;
+
+        add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
+                .setTranslation(0, -10, scale.x / 2 + 1)
+                .setScale(scale);
+
+        add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
+                .setTranslation(0, -10, -scale.x / 2 - 1)
+                .setScale(scale);
+
         lightModel = new Model<>(new SphereVAO(5))
                 .setColour(0.9f, 0.9f, 0.3f)
                 .setScale(0.1f);
@@ -89,7 +111,7 @@ class CustomRenderer extends ModelRenderer {
     @Override
     protected void draw(FBO framebuffer) {
         for (var model : getModels()) {
-            model.setRotation(0, Application.getActive().getTime(), 0);
+            // model.setRotation(0, Application.getActive().getTime(), 0);
         }
 
         getShader().setUniform("lightMinimum", 0.3f);
