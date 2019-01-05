@@ -4,10 +4,7 @@ import lwaf.VAO;
 import lwaf.vec2f;
 import lwaf.vec3f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Graph3D {
     private final SurfaceMap function;
@@ -30,8 +27,7 @@ public class Graph3D {
     }
 
     public VAO getTriangulatedVAO(EvaluationStrategy strategy) {
-        List<Tri> triangles = strategy.generateTriangles(this);
-
+        var triangles = strategy.generateTriangles(this);
         var vertices = new vec3f[triangles.size() * 3];
         var normals  = new vec3f[triangles.size() * 3];
         var colours = new vec3f[triangles.size() * 3];
@@ -69,14 +65,82 @@ public class Graph3D {
             elements[i] = i;
         }
 
-        return new VAO() {{
-            setVertexCount(elements.length);
-            genVertexBuffer(vec3fToFloatArray(vertices));
-            genNormalBuffer(vec3fToFloatArray(normals));
-            genColourBuffer(vec3fToFloatArray(colours));
-            genUVBuffer(vec2fToFloatArray(uvs));
-            genElementBuffer(elements);
-        }};
+        return VAO.createDefault(vertices, normals, colours, uvs, elements);
+    }
+
+    public VAO getSmoothVAO(EvaluationStrategy strategy) {
+        var triangles = strategy.generateTriangles(this);
+        var vertex_set = new ArrayList<vec2f>();
+        var normal_connections = new HashMap<Integer, List<Integer>>();
+        var cache = new HashMap<vec2f, vec3f>();
+        var elements = new int[triangles.size() * 3];
+        var el = 0;
+
+        vec3f[] vertices, normals, colours;
+        vec2f[] uvs;
+
+        for (var triangle : triangles) {
+            for (var point : triangle.points) {
+                if (!vertex_set.contains(point)) {
+                    vertex_set.add(point);
+                    normal_connections.put(vertex_set.size() - 1, new ArrayList<>());
+                }
+            }
+        }
+
+        for (var triangle : triangles) {
+            var p0 = triangle.points[0];
+            var p1 = triangle.points[1];
+            var p2 = triangle.points[2];
+            var p0i = vertex_set.indexOf(p0);
+            var p1i = vertex_set.indexOf(p1);
+            var p2i = vertex_set.indexOf(p2);
+
+            normal_connections.get(p0i).add(p1i);
+            normal_connections.get(p0i).add(p2i);
+            normal_connections.get(p1i).add(p2i);
+            normal_connections.get(p1i).add(p0i);
+            normal_connections.get(p2i).add(p0i);
+            normal_connections.get(p2i).add(p1i);
+        }
+
+        vertices = new vec3f[vertex_set.size()];
+        normals = new vec3f[vertex_set.size()];
+        colours = new vec3f[vertex_set.size()];
+        uvs = new vec2f[vertex_set.size()];
+
+        for (int i = 0; i < vertices.length; ++i) {
+            vertices[i] = eval(vertex_set.get(i), cache);
+        }
+
+        for (int i = 0; i < normals.length; ++i) {
+            var sum = vec3f.zero;
+            var connections = normal_connections.get(i);
+            var v = vertices[i];
+
+            for (int j = 0; j < connections.size(); j += 2) {
+                sum = sum.add(vertices[connections.get(j)].sub(v).cross(vertices[connections.get(j + 1)].sub(v)));
+            }
+
+            normals[i] = sum.normalise();
+        }
+
+        for (int i = 0; i < colours.length; ++i) {
+            colours[i] = colouring.apply(vertices[i]);
+        }
+
+        for (int i = 0; i < uvs.length; ++i) {
+            uvs[i] = new vec2f(vertices[i].x + 0.5f, vertices[i].z + 0.5f);
+        }
+
+        for (var triangle : triangles) {
+            elements[el    ] = vertex_set.indexOf(triangle.points[0]);
+            elements[el + 1] = vertex_set.indexOf(triangle.points[1]);
+            elements[el + 2] = vertex_set.indexOf(triangle.points[2]);
+            el += 3;
+        }
+
+        return VAO.createDefault(vertices, normals, colours, uvs, elements);
     }
 
     @FunctionalInterface

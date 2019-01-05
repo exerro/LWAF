@@ -69,8 +69,14 @@ class CustomRenderer extends ModelRenderer {
                 .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
         ;
 
+        var sea = new Graph3D(v -> (float) (
+                Math.sin(v.x * 20) * Math.cos(v.y * 20)
+        ))
+                .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)));
+        ;
+
         var scale = new vec3f(20, 1f, 20);
-        var res = 200;
+        var res = 10;
 
         add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
                 .setTranslation(0, -10, scale.x / 2 + 1)
@@ -80,6 +86,21 @@ class CustomRenderer extends ModelRenderer {
         add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
                 .setTranslation(0, -10, -scale.x / 2 - 1)
                 .setScale(scale)
+        ;
+
+        add(new Model<>(graph.getSmoothVAO(new Graph3D.UniformGridStrategy(res))))
+                .setTranslation(-scale.x - 1, -10, scale.x / 2 + 1)
+                .setScale(scale)
+        ;
+
+        add(new Model<>(graph.getSmoothVAO(new Graph3D.GradientPullStrategy(res))))
+                .setTranslation(-scale.x - 1, -10, -scale.x / 2 - 1)
+                .setScale(scale)
+        ;
+
+        add(new Model<>(sea.getTriangulatedVAO(new Graph3D.UniformGridStrategy(50))))
+                .setTranslation(50, 0, 0)
+                .setScale(40, 1, 40)
         ;
 
         lightModel = new Model<>(new SphereVAO(5))
@@ -120,17 +141,6 @@ class CustomRenderer extends ModelRenderer {
         lightModel.setTranslation(lightPosition);
         getShader().setUniform("lightMinimum", 1f);
         lightModel.draw(getShader());
-
-        var graph = new Graph3D(v -> (float) (
-                // (float) 1 / (0.1f + v.length())
-                Math.sin(1 / (1 + v.length2()) * 25 + 10 * v.y + 3 * Application.getActive().getTime()) / (0.3f + v.length2())
-        ))
-                .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
-                ;
-        new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(100)))
-                .setTranslation(40, -10, 0)
-                .setScale(20, 1, 20)
-                .draw(getShader());
     }
 }
 

@@ -28,6 +28,17 @@ public class VAO {
         vaoID = GL30.glGenVertexArrays();
     }
 
+    public static VAO createDefault(vec3f[] vertices, vec3f[] normals, vec3f[] colours, vec2f[] uvs, int[] elements) {
+        return new VAO() {{
+            setVertexCount(elements.length);
+            genVertexBuffer(vec3fToFloatArray(vertices));
+            genNormalBuffer(vec3fToFloatArray(normals));
+            genColourBuffer(vec3fToFloatArray(colours));
+            if (uvs != null) genUVBuffer(vec2fToFloatArray(uvs));
+            genElementBuffer(elements);
+        }};
+    }
+
     public void setVertexCount(int vertexCount) {
         this.vertexCount = vertexCount;
     }
