@@ -28,7 +28,7 @@ public abstract class ModelRenderer extends Renderer.CameraRenderer3D {
     }
 
     @Override
-    protected void draw(FBO framebuffer) {
+    public void draw() {
         var shader = getShader();
 
         for (Model model : models) {

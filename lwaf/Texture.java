@@ -15,21 +15,39 @@ public class Texture {
     private final int textureID;
     private final int width, height;
 
-    private Texture(int width, int height) {
+    private Texture(int textureID, int width, int height) {
+        this.textureID = textureID;
         this.width = width;
         this.height = height;
+    }
 
-        textureID = glGenTextures();
+    public void bind() {
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+    }
+
+    public void unbind() {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    private Texture(String filePath) {
+    public int getTextureID() {
+        return textureID;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void destroy() {
+        glDeleteTextures(textureID);
+    }
+
+    public static Texture load(String filePath) {
+        int textureID, width, height;
+
         ByteBuffer data;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -56,10 +74,8 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         STBImage.stbi_image_free(data);
-    }
 
-    public static Texture load(String filePath) {
-        return new Texture(filePath);
+        return new Texture(textureID, width, height);
     }
 
     public static Texture safeLoad(String filePath) {
@@ -67,31 +83,17 @@ public class Texture {
     }
 
     public static Texture create(int width, int height) {
-        return new Texture(width, height);
-    }
+        int textureID = glGenTextures();
 
-    public void bind() {
         glBindTexture(GL_TEXTURE_2D, textureID);
-    }
-
-    public void unbind() {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
         glBindTexture(GL_TEXTURE_2D, 0);
-    }
 
-    public int getTextureID() {
-        return textureID;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void destroy() {
-        glDeleteTextures(textureID);
+        return new Texture(textureID, width, height);
     }
 
 }

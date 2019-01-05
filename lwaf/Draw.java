@@ -1,6 +1,6 @@
 package lwaf;
 
-import lwaf_3D.View;
+import lwaf_3D.GBuffer;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"WeakerAccess"})
 public class Draw {
 
     private static VAO rectangleVAO;
@@ -82,29 +82,19 @@ public class Draw {
         image(texture, new vec2f(0, 0), new vec2f(1, 1));
     }
 
-    public static void view(View view, vec2f position, vec2f scale) {
-        view.render();
-
+    public static void buffer(GBuffer buffer, vec2f position, vec2f scale) {
         var displaySize = getViewportSize();
         var transform   = mat4f.identity()
                 .scaleBy(1, -1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .translate(position.x, position.y, 0)
-                .scaleBy(view.getTexture().getWidth(), view.getTexture().getHeight(), 1)
+                .scaleBy(buffer.getColourTexture().getWidth(), buffer.getColourTexture().getHeight(), 1)
                 .scaleBy(new vec3f(scale, 1))
                 .translate(0, 1, 0)
                 .scaleBy(1, -1, 0);
 
-        draw2D(view.getTexture(), rectangleVAO, transform);
-    }
-
-    public static void view(View view, vec2f position) {
-        view(view, position, new vec2f(1, 1));
-    }
-
-    public static void view(View view) {
-        view(view, new vec2f(0, 0), new vec2f(1, 1));
+        draw2D(buffer.getColourTexture(), rectangleVAO, transform);
     }
 
     public static void text(Text text, vec2f position) {

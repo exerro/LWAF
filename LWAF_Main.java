@@ -1,8 +1,6 @@
 
 import lwaf.*;
-import lwaf_3D.Camera;
-import lwaf_3D.Lighting;
-import lwaf_3D.View;
+import lwaf_3D.*;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.ModelLoader;
@@ -152,12 +150,12 @@ class CustomRenderer extends ModelRenderer {
     }
 
     @Override
-    protected void draw(FBO framebuffer) {
+    public void draw() {
         var t = Application.getActive().getTime();
 
         setAmbientLighting(0.1f);
 
-        super.draw(framebuffer);
+        super.draw();
 
         var sea = new Graph3D(v -> {
             return (float) (
@@ -191,30 +189,42 @@ public class LWAF_Main extends Application {
         Application.run(app);
     }
 
-    private View view;
+    private Scene scene;
+    private GBuffer gBuffer;
+    private Text text;
+    private Font font;
+    private CustomRenderer renderer;
 
     private LWAF_Main(Display display) {
         super(display);
     }
 
-    private Text text;
-    private Font font;
-    private CustomRenderer renderer;
-
     @Override
     protected boolean load() {
         font = Font.safeLoad("lwaf/font/open-sans/OpenSans-Regular.fnt");
         text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font);
-        view = new View(1200, 680);
-        view.attachRenderer(renderer = new CustomRenderer());
+        renderer = new CustomRenderer();
+        scene = new Scene() {
+            @Override
+            protected void drawObjects(mat4f viewMatrix, mat4f projectionMatrix) {
+                renderer.preDraw();
+                renderer.draw();
+                renderer.postDraw();
+            }
+        };
+        gBuffer = new GBuffer(1200, 680);
 
         return true;
     }
 
     @Override
     protected void draw() {
+        scene.setCamera(renderer.getCamera());
+        scene.draw(gBuffer);
+
         Draw.setColour(1, 1, 1);
-        Draw.view(view, new vec2f(40, 20));
+        // Draw.view(view, new vec2f(40, 20));
+        Draw.buffer(gBuffer, new vec2f(40, 20), vec2f.one);
 
         Draw.setColour(0.5f, 0.5f, 0.5f);
         Draw.rectangle(0, 0, font.getWidth(text.getText()), font.getHeight());
@@ -295,7 +305,7 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void unload() {
-        view.destroy();
+        gBuffer.destroy();
     }
 
     @Override

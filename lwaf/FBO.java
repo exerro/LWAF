@@ -13,14 +13,12 @@ public class FBO {
     private final int frameBufferID;
     private final int depthTextureID;
     private final int depthBufferID;
-    private final Texture texture;
 
     public FBO(int width, int height) {
         this.width = width;
         this.height = height;
 
         frameBufferID = glGenFramebuffers();
-        texture = Texture.create(width, height);
         depthTextureID = glGenTextures();
         depthBufferID = glGenRenderbuffers();
 
@@ -28,9 +26,6 @@ public class FBO {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-        // bind texture
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.getTextureID(), 0);
-//
 //        // generate and bind depth texture
 //        glBindTexture(GL_TEXTURE_2D, depthTextureID);
 //        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
@@ -48,9 +43,17 @@ public class FBO {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    public Texture attachColorAttachment(int attachment) {
+        var texture = Texture.create(width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.getTextureID(), 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return texture;
+    }
+
     public void bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-        Draw.setViewport(new vec2f(texture.getWidth(), texture.getHeight()));
+        Draw.setViewport(new vec2f(width, height));
     }
 
     public void unbind() {
@@ -66,15 +69,10 @@ public class FBO {
         return height;
     }
 
-    public Texture getTexture() {
-        return texture;
-    }
-
     public void destroy() {
         glDeleteFramebuffers(frameBufferID);
         glDeleteTextures(depthTextureID);
         glDeleteRenderbuffers(depthBufferID);
-        texture.destroy();
     }
 
 }

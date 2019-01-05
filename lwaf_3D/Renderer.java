@@ -10,23 +10,15 @@ import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class Renderer {
 
-    protected void load() {
+    public void preDraw() {
 
     }
 
-    protected void unload() {
+    public void postDraw() {
 
     }
 
-    protected void preDraw(FBO framebuffer) {
-
-    }
-
-    protected void postDraw(FBO framebuffer) {
-
-    }
-
-    protected abstract void draw(FBO framebuffer);
+    public abstract void draw();
 
 
     public static abstract class Renderer3D extends Renderer {
@@ -43,18 +35,18 @@ public abstract class Renderer {
         protected abstract void setUniforms();
 
         @Override
-        protected void preDraw(FBO framebuffer) {
-            glEnable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
+        public void preDraw() {
+            glEnable(GL_CULL_FACE); //
+            glEnable(GL_DEPTH_TEST); //
             setUniforms();
             if (getShader() != null) getShader().start();
         }
 
         @Override
-        protected void postDraw(FBO framebuffer) {
+        public void postDraw() {
             if (getShader() != null) getShader().stop();
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE); //
+            glDisable(GL_DEPTH_TEST); //
         }
 
         public void setLightingPosition(vec3f position) {
