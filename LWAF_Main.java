@@ -1,6 +1,7 @@
 
 import lwaf.*;
 import lwaf_graph.Graph3D;
+import lwaf_math.SimplexNoise;
 import lwaf_primitive.CubeVAO;
 import lwaf_primitive.IcoSphereVAO;
 import lwaf_primitive.UVSphereVAO;
@@ -72,12 +73,6 @@ class CustomRenderer extends ModelRenderer {
                 .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
         ;
 
-        var sea = new Graph3D(v -> (float) (
-                Math.sin(v.x * 20) * Math.cos(v.y * 20)
-        ))
-                .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)));
-        ;
-
         var scale = new vec3f(20, 1f, 20);
         var res = 10;
 
@@ -99,11 +94,6 @@ class CustomRenderer extends ModelRenderer {
         add(new Model<>(graph.getSmoothVAO(new Graph3D.GradientPullStrategy(res))))
                 .setTranslation(-scale.x - 1, -10, -scale.x / 2 - 1)
                 .setScale(scale)
-        ;
-
-        add(new Model<>(sea.getTriangulatedVAO(new Graph3D.UniformGridStrategy(50))))
-                .setTranslation(50, 0, 0)
-                .setScale(40, 1, 40)
         ;
 
         lightModel = new Model<>(new IcoSphereVAO(5));
@@ -144,6 +134,8 @@ class CustomRenderer extends ModelRenderer {
 
     @Override
     protected void draw(FBO framebuffer) {
+        var t = Application.getActive().getTime();
+
         for (var model : getModels()) {
             // model.setRotation(0, Application.getActive().getTime(), 0);
         }
@@ -151,6 +143,22 @@ class CustomRenderer extends ModelRenderer {
         getShader().setUniform("lightMinimum", 0.3f);
 
         super.draw(framebuffer);
+
+        var sea = new Graph3D(v -> {
+            return (float) (
+                      2.00 * SimplexNoise.noise(v.x * 0.5 + t * 0.05, v.y * 0.5, t * 0.05)
+                    + 0.50 * SimplexNoise.noise(v.x + t * 0.1, v.y, t * 0.1)
+                    + 0.50 * SimplexNoise.noise(v.x * 3 + t * 0.3, v.y * 3, t * 0.3)
+            );
+        })
+                .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)))
+        ;
+
+        new Model<>(sea.getSmoothVAO(new Graph3D.UniformGridStrategy(50)))
+                .setTranslation(50, -10, 0)
+                .setScale(40, 1, 40)
+                .draw(getShader())
+        ;
 
         lightModel.setTranslation(lightPosition);
         getShader().setUniform("lightMinimum", 1f);
