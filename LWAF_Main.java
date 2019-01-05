@@ -2,6 +2,7 @@
 import lwaf.*;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
+import lwaf_model.ModelLoader;
 import lwaf_primitive.CubeVAO;
 import lwaf_primitive.IcoSphereVAO;
 import lwaf_primitive.UVSphereVAO;
@@ -27,7 +28,7 @@ class CustomRenderer extends ModelRenderer {
                 false
         ));
 
-        lighting = new Lighting(0.9f, 0.5f, 10);
+        lighting = new Lighting(0.9f, 0.4f, 10);
 
         camera = new Camera(new vec3f(0, 1, 5));
         camera.rotateBy(new vec3f((float) Math.PI * -0.1f, 0, 0));
@@ -49,7 +50,9 @@ class CustomRenderer extends ModelRenderer {
             for (int j = 0; j < 10; ++j) {
                 add(new Model<>(new UVSphereVAO(j + 1, i + 3)))
                         .setTranslation(i * 2, 3 + j * 2, -2)
-                        .setTexture(dark_texture);
+                        .setTexture(dark_texture)
+                        .setSpecularLighting(0)
+                ;
             }
         }
 
@@ -68,6 +71,12 @@ class CustomRenderer extends ModelRenderer {
         add(new Model<>(new IcoSphereVAO(7)))
                 .setColour(1, 1, 0)
                 .setTranslation(6, 0, 0);
+
+        add(ModelLoader.safeLoad("stall.obj"))
+                .setTexture(Texture.load("stall_texture.png"))
+                .setTranslation(0, 0, 10)
+                .setSpecularLighting(0)
+        ;
 
         var graph = new Graph3D(v -> (float) (
                 // (float) 1 / (0.1f + v.length())

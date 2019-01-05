@@ -6,6 +6,7 @@ public class Lighting {
     private int specularLightingPower;
 
     public static final float DIFFUSE_LIGHTING_INTENSITY = 0.7f;
+    public static final float SPECULAR_LIGHTING_INTENSITY = 0.4f;
     public static final int SPECULAR_LIGHTING_POWER = 5;
 
     public Lighting(float diffuseLightingIntensity, float specularLightingIntensity, int specularLightingPower) {
@@ -20,6 +21,10 @@ public class Lighting {
 
     public Lighting(float specularLightingIntensity) {
         this(DIFFUSE_LIGHTING_INTENSITY, specularLightingIntensity, SPECULAR_LIGHTING_POWER);
+    }
+
+    public Lighting() {
+        this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER);
     }
 
     public float getDiffuseLightingIntensity() {
@@ -44,5 +49,11 @@ public class Lighting {
 
     public void setSpecularLightingPower(int specularLightingPower) {
         this.specularLightingPower = specularLightingPower;
+    }
+
+    public void setShaderUniforms(ShaderLoader.Program shader) {
+        shader.setUniform("diffuseLightingIntensity", getDiffuseLightingIntensity());
+        shader.setUniform("specularLightingIntensity", getSpecularLightingIntensity());
+        shader.setUniform("specularLightingPower", getSpecularLightingPower());
     }
 }
