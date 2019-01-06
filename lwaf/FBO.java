@@ -20,30 +20,24 @@ public class FBO {
         this.height = height;
 
         frameBufferID = glGenFramebuffers();
-
-        // bind framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-
         depthTexture = attachTexture(
                 Texture.create(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT),
                 GL_DEPTH_ATTACHMENT
         );
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     public Texture attachTexture(Texture texture, int attachment) {
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+        bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.getTextureID(), 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        unbind();
 
         return texture;
     }
 
     public void setDrawBuffers(int... attachments) {
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+        bind();
         glDrawBuffers(attachments);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        unbind();
     }
 
     public Texture getDepthTexture() {

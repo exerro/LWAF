@@ -1,10 +1,13 @@
 
 import lwaf.*;
 import lwaf_3D.Camera;
-import lwaf_3D.GBuffer;
+import lwaf_3D.Light;
+import lwaf_3D.Renderer;
 import lwaf_3D.Scene;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class LWAF_Main extends Application {
     public static void main(String[] args) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
@@ -16,40 +19,53 @@ public class LWAF_Main extends Application {
         Application.run(app);
     }
 
-    private Scene scene;
-    private GBuffer gBuffer;
-    private Texture texture;
-    private Text text;
-    private Font font;
-    private Renderer renderer;
-    private ShaderLoader.Program shader;
-
     private LWAF_Main(Display display) {
         super(display);
     }
+
+    private Scene scene;
+    private Texture texture;
+    private Text text;
+    private Font font;
+    private Models models;
+    private ShaderLoader.Program shader;
+    private Renderer renderer;
 
     @Override
     protected boolean load() {
         font = Font.safeLoad("lwaf/font/open-sans/OpenSans-Regular.fnt");
         text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font);
         texture = Texture.load("lwaf/img/no-texture-dark.png");
+
         shader = Scene.safeLoadGeometryShader(
                 "lwaf/shader",
                 "vertex-3D.glsl",
                 false
         );
-        renderer = new Renderer();
+
+        models = new Models();
+
         scene = new Scene() {
             @Override
             protected void drawObjects(mat4f viewMatrix, mat4f projectionMatrix) {
                 shader.setUniform("viewTransform", viewMatrix);
                 shader.setUniform("projectionTransform", projectionMatrix);
                 shader.start();
-                renderer.draw(shader);
+                models.draw(shader);
                 shader.stop();
             }
+
+            @Override
+            protected List<Light> getLights() {
+                return Arrays.asList(
+                        new Light.AmbientLight(0.2f),
+                        new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis),
+                        new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis),
+                        new Light.DirectionalLight(0.4f, vec3f.y_axis.unm())
+                );
+            }
         };
-        gBuffer = new GBuffer(1200, 680);
+
         scene.getCamera().setPerspectiveProjection(
                 Application.getActive().getDisplay().getAspectRatio(),
                 Camera.PerspectiveProjection.DEFAULT_FOV,
@@ -57,16 +73,26 @@ public class LWAF_Main extends Application {
                 Camera.PerspectiveProjection.DEFAULT_FAR
         );
 
+        renderer = new Renderer(1200, 680);
+
         return true;
     }
 
     @Override
+    protected void unload() {
+        renderer.destroy();
+        texture.destroy();
+        shader.destroy();
+    }
+
+    @Override
     protected void draw() {
-        scene.draw(gBuffer);
+        renderer.draw(scene);
 
         Draw.setColour(1, 1, 1);
         // Draw.view(view, new vec2f(40, 20));
-        Draw.buffer(gBuffer, new vec2f(40, 20), vec2f.one);
+        Draw.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
+        Draw.texture(renderer.getTexture(), new vec2f(300, 170), vec2f.one.div(2));
     }
 
     @Override
@@ -124,11 +150,6 @@ public class LWAF_Main extends Application {
 
         scene.getCamera().setTranslation(translation);
         scene.getCamera().setRotation(rotation);
-    }
-
-    @Override
-    protected void unload() {
-        gBuffer.destroy();
     }
 
     @Override

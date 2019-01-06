@@ -7,10 +7,10 @@ import lwaf_model.ModelLoader;
 import lwaf_model.ModelRenderer;
 import lwaf_primitive.*;
 
-class Renderer {
+class Models {
     private ModelRenderer models = new ModelRenderer();
 
-    public Renderer() {
+    public Models() {
         var dark_texture = Texture.load("lwaf/img/no-texture-light.png");
 
         for (int i = 0; i < 5; ++i) {
@@ -58,7 +58,7 @@ class Renderer {
                 ;
 
         var scale = new vec3f(20, 1f, 20);
-        var res = 10;
+        var res = 50;
 
         models.add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
                 .setTranslation(0, -10, scale.x / 2 + 1)
@@ -108,7 +108,7 @@ class Renderer {
                 .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)))
                 ;
 
-        new Model<>(sea.getTriangulatedVAO(new Graph3D.UniformGridStrategy(50)))
+        new Model<>(sea.getSmoothVAO(new Graph3D.UniformGridStrategy(50)))
                 .setTranslation(50, -10, 0)
                 .setScale(40, 1, 40)
                 .draw(shader)

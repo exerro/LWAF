@@ -29,6 +29,7 @@ public class VAO {
     public static final int VERTEX_TEXTURE_ATTRIBUTE = 1;
     public static final int VERTEX_NORMAL_ATTRIBUTE = 2;
     public static final int VERTEX_COLOUR_ATTRIBUTE = 3;
+    public static final VAO screen_quad;
 
     public VAO() {
         vaoID = GL30.glGenVertexArrays();
@@ -260,6 +261,31 @@ public class VAO {
         setBufferData(VBOID, data, usage);
 
         return VBOID;
+    }
+
+    static {
+        screen_quad = new VAO() {{
+            setVertexCount(6);
+
+            genVertexBuffer(new float[] {
+                    -1,  1, 0,
+                    -1, -1, 0,
+                     1, -1, 0,
+                     1,  1, 0
+            });
+
+            genUVBuffer(new float[] {
+                    0, 1,
+                    0, 0,
+                    1, 0,
+                    1, 1
+            });
+
+            genElementBuffer(new int[] {
+                    2, 1, 0,
+                    3, 2, 0
+            });
+        }};
     }
 
 }

@@ -13,9 +13,9 @@ public class GBuffer {
         fbo = new FBO(width, height);
 
         colourTexture = fbo.attachTexture(Texture.create(width, height), GL_COLOR_ATTACHMENT0);
-        positionTexture = fbo.attachTexture(Texture.create(width, height), GL_COLOR_ATTACHMENT1);
-        normalTexture = fbo.attachTexture(Texture.create(width, height), GL_COLOR_ATTACHMENT2);
-        lightingTexture = fbo.attachTexture(Texture.create(width, height), GL_COLOR_ATTACHMENT3);
+        positionTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT1);
+        normalTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT2);
+        lightingTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT3);
 
         fbo.setDrawBuffers(GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3);
     }
@@ -26,6 +26,19 @@ public class GBuffer {
 
     public void unbind() {
         fbo.unbind();
+    }
+
+    public void bindReading() {
+        for (int i = 0 ; i < 4; i++) {
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, colourTexture.getTextureID());
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, positionTexture.getTextureID());
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, normalTexture.getTextureID());
+            glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, lightingTexture.getTextureID());
+        }
+    }
+
+    public void unbindReading() {
+
     }
 
     public Texture getColourTexture() {

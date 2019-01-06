@@ -1,7 +1,7 @@
 package lwaf_model;
 
 import lwaf.*;
-import lwaf_3D.Lighting;
+import lwaf_3D.ObjectLighting;
 
 public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Model<T>> {
     private vec3f position = vec3f.zero,
@@ -9,7 +9,7 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
                   scale = vec3f.one;
     private vec3f colour = vec3f.one;
     private Texture texture = null;
-    private Lighting lighting = new Lighting();
+    private ObjectLighting lighting = new ObjectLighting();
     private final T vao;
 
     public Model(T vao) {
@@ -55,11 +55,11 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
         return this;
     }
 
-    public Lighting getLighting() {
+    public ObjectLighting getLighting() {
         return lighting;
     }
 
-    public Model<T> setLighting(Lighting lighting) {
+    public Model<T> setLighting(ObjectLighting lighting) {
         this.lighting = lighting;
         return this;
     }
