@@ -30,6 +30,7 @@ public class LWAF_Main extends Application {
     private Models models;
     private ShaderLoader.Program shader;
     private Renderer renderer;
+    private int textureToDraw = 0;
 
     @Override
     protected boolean load() {
@@ -38,7 +39,7 @@ public class LWAF_Main extends Application {
         texture = Texture.load("lwaf/img/no-texture-dark.png");
 
         shader = Scene.safeLoadGeometryShader(
-                "lwaf/shader",
+                "lwaf_3D/shader",
                 "vertex-3D.glsl",
                 false
         );
@@ -91,8 +92,19 @@ public class LWAF_Main extends Application {
 
         Draw.setColour(1, 1, 1);
         // Draw.view(view, new vec2f(40, 20));
-        Draw.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
-        Draw.texture(renderer.getTexture(), new vec2f(300, 170), vec2f.one.div(2));
+        // Draw.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
+
+        Texture texture = null;
+
+        switch (textureToDraw) {
+            case 0: texture = renderer.getTexture(); break;
+            case 1: texture = renderer.getGBuffer().getColourTexture(); break;
+            case 2: texture = renderer.getGBuffer().getNormalTexture(); break;
+            case 3: texture = renderer.getGBuffer().getPositionTexture(); break;
+            case 4: texture = renderer.getGBuffer().getLightingTexture(); break;
+        }
+
+        Draw.texture(texture);
     }
 
     @Override
@@ -155,8 +167,11 @@ public class LWAF_Main extends Application {
     @Override
     protected void onKeyDown(String key, int modifier) {
         switch (MOD(key, modifier)) {
-
+            case "tab": textureToDraw = (textureToDraw + 1) % 5; break;
+            case "ctrl-tab": textureToDraw = (textureToDraw - 1) % 5; break;
         }
+
+        if (textureToDraw < 0) textureToDraw += 5;
     }
 
     @Override

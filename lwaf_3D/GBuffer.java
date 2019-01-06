@@ -38,7 +38,12 @@ public class GBuffer {
     }
 
     public void unbindReading() {
-
+        for (int i = 0 ; i < 4; i++) {
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, 0);
+        }
     }
 
     public Texture getColourTexture() {

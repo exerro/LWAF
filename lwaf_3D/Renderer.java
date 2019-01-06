@@ -3,6 +3,9 @@ package lwaf_3D;
 import lwaf.FBO;
 import lwaf.Texture;
 
+import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
+import static org.lwjgl.opengl.GL11.glGetIntegerv;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 
 public class Renderer {
@@ -32,7 +35,11 @@ public class Renderer {
     }
 
     public void draw(Scene scene) {
+        int[] currentViewport = new int[4];
+        glViewport(0, 0, texture.getWidth(), texture.getHeight());
         scene.draw(framebuffer, buffer);
+        glGetIntegerv(GL_VIEWPORT, currentViewport);
+        glViewport(currentViewport[0], currentViewport[1], currentViewport[2], currentViewport[3]);
     }
 
     public void destroy() {

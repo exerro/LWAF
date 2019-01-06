@@ -59,10 +59,13 @@ public class Draw {
     public static void texture(Texture texture, vec2f position, vec2f scale) {
         var displaySize = getViewportSize();
         var transform   = mat4f.identity()
+                .scaleBy(1, -1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .translate(position.x, position.y, 0)
                 .scaleBy(texture.getWidth(), texture.getHeight(), 1)
+                .translate(0, 1, 0)
+                .scaleBy(1, -1, 1)
                 .scaleBy(new vec3f(scale, 1));
 
         draw2D(texture, rectangleVAO, transform);
@@ -103,42 +106,6 @@ public class Draw {
 
     public static void image(Texture texture) {
         image(texture, new vec2f(0, 0), new vec2f(1, 1));
-    }
-
-    public static void buffer(GBuffer buffer, vec2f position, vec2f scale) {
-        var displaySize = getViewportSize();
-        var transform   = mat4f.identity()
-                .scaleBy(1, 1, 1)
-                .translate(-1, -1, 0)
-                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
-                .translate(position.x, position.y, 0)
-                .scaleBy(buffer.getColourTexture().getWidth(), buffer.getColourTexture().getHeight(), 1)
-                .scaleBy(new vec3f(scale, 1))
-                .scaleBy(1, 1, 0);
-
-        draw2D(buffer.getColourTexture(), rectangleVAO, mat4f.identity()
-                .mul(mat4f.translation(-0.5f, 0.5f, 0))
-                .mul(mat4f.scale(0.5f, 0.5f, 1))
-                .mul(transform)
-        );
-
-        draw2D(buffer.getNormalTexture(), rectangleVAO, mat4f.identity()
-                .mul(mat4f.translation(0.5f, 0.5f, 0))
-                .mul(mat4f.scale(0.5f, 0.5f, 1))
-                .mul(transform)
-        );
-
-        draw2D(buffer.getPositionTexture(), rectangleVAO, mat4f.identity()
-                .mul(mat4f.translation(-0.5f, -0.5f, 0))
-                .mul(mat4f.scale(0.5f, 0.5f, 1))
-                .mul(transform)
-        );
-
-        draw2D(buffer.getLightingTexture(), rectangleVAO, mat4f.identity()
-                .mul(mat4f.translation(0.5f, -0.5f, 0))
-                .mul(mat4f.scale(0.5f, 0.5f, 1))
-                .mul(transform)
-        );
     }
 
     public static void text(Text text, vec2f position) {

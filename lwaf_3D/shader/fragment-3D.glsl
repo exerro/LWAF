@@ -17,16 +17,13 @@ uniform float specularLightingPower = 5;
 uniform sampler2D textureSampler;
 uniform bool useTexture = false;
 
-// colour of the object - for recolouring
-uniform vec3 colour = vec3(1, 1, 1);
-
 layout (location = 0) out vec4 OutColour;
 layout (location = 1) out vec4 OutPosition;
 layout (location = 2) out vec4 OutNormal;
 layout (location = 3) out vec4 OutLighting;
 
 void main(void) {
-    OutColour = vec4(colour * fragment_colour, 1.0);
+    OutColour = vec4(fragment_colour, 1.0);
     OutPosition = vec4(fragment_position, 1.0);
     OutNormal = vec4(fragment_normal, 1.0);
     OutLighting = vec4(diffuseLightingIntensity, specularLightingIntensity, specularLightingPower, 1);
