@@ -44,9 +44,12 @@ public class LWAF_Main extends Application {
         scene = new Scene() {
             {
                 addLight(new Light.AmbientLight(0.2f));
-                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
-                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
-                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
+                addLight(new Light.PointLight(1, new vec3f(0, 6, 10), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+                addLight(new Light.PointLight(1, new vec3f(10, 13, 0), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+                addLight(new Light.PointLight(1, new vec3f(4, 0, 1), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
             }
 
             @Override
