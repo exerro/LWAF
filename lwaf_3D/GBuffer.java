@@ -1,7 +1,11 @@
 package lwaf_3D;
 
 import lwaf.FBO;
+import lwaf.ShaderLoader;
 import lwaf.Texture;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL30.*;
 
@@ -72,6 +76,46 @@ public class GBuffer {
         positionTexture.destroy();
         normalTexture.destroy();
         lightingTexture.destroy();
+    }
+
+    public static String FRAGMENT_SHADER_PATH = "lwaf_3D/shader/gbuffer-render.fragment-3D.glsl";
+
+    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
+        return ShaderLoader.load(
+                "",
+                Paths.get(basePath, vertexShader).toString(),
+                Paths.get(basePath, geometryShader).toString(),
+                FRAGMENT_SHADER_PATH,
+                instanced
+        );
+    }
+
+    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
+        return ShaderLoader.load(
+                "",
+                Paths.get(basePath, vertexShader).toString(),
+                FRAGMENT_SHADER_PATH,
+                instanced
+        );
+    }
+
+    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) {
+        return ShaderLoader.safeLoad(
+                "",
+                Paths.get(basePath, vertexShader).toString(),
+                Paths.get(basePath, geometryShader).toString(),
+                FRAGMENT_SHADER_PATH,
+                instanced
+        );
+    }
+
+    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, boolean instanced) {
+        return ShaderLoader.safeLoad(
+                "",
+                Paths.get(basePath, vertexShader).toString(),
+                FRAGMENT_SHADER_PATH,
+                instanced
+        );
     }
 
 }

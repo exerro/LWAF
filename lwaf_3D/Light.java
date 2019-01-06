@@ -8,10 +8,14 @@ import java.util.function.Supplier;
 
 public abstract class Light {
 
-    public static final Map<Class<? extends Light>, ShaderLoader.Program> shaders = new HashMap<>();
+    private static final Map<Class<? extends Light>, ShaderLoader.Program> shaders = new HashMap<>();
 
-    public static ShaderLoader.Program loadShader(Class<? extends Light> name, Supplier<ShaderLoader.Program> generator) {
-        shaders.computeIfAbsent(name, ignored -> {
+    public static ShaderLoader.Program getShader(Class<? extends Light> lightType) {
+        return shaders.get(lightType);
+    }
+
+    protected ShaderLoader.Program registerShader(Supplier<ShaderLoader.Program> generator) {
+        shaders.computeIfAbsent(this.getClass(), ignored -> {
             var shader = generator.get();
 
             shader.setUniform("colourMap", 0);
@@ -22,10 +26,13 @@ public abstract class Light {
             return shader;
         });
 
-        return shaders.get(name);
+        return shaders.get(this.getClass());
     }
 
-    public abstract ShaderLoader.Program getShader();
+    protected ShaderLoader.Program getShader() {
+        return getShader(this.getClass());
+    }
+
     public abstract mat4f getTransformMatrix();
 
     public void render(GBuffer buffer, mat4f viewMatrix, mat4f projectionMatrix) {
@@ -37,12 +44,12 @@ public abstract class Light {
     public static class AmbientLight extends Light {
         private final float intensity;
         private final vec3f colour;
-        private final ShaderLoader.Program shader;
 
         public AmbientLight(float intensity, vec3f colour) {
             this.intensity = intensity;
             this.colour = colour;
-            this.shader = Light.loadShader(AmbientLight.class, () -> ShaderLoader.safeLoad(
+
+            registerShader(() -> ShaderLoader.safeLoad(
                     "lwaf_3D/shader",
                     "pass-through.vertex-3D.glsl",
                     "ambient.fragment-3D.glsl",
@@ -52,11 +59,6 @@ public abstract class Light {
 
         public AmbientLight(float intensity) {
             this(intensity, vec3f.one);
-        }
-
-        @Override
-        public ShaderLoader.Program getShader() {
-            return shader;
         }
 
         @Override
@@ -70,11 +72,9 @@ public abstract class Light {
 
             getShader().setUniform("lightIntensity", intensity);
             getShader().setUniform("lightColour", colour);
-            getShader().start();
+            getShader().setUniform("transform", getTransformMatrix());
 
             Draw.drawIndexedVAO(VAO.screen_quad);
-
-            getShader().stop();
         }
     }
 
@@ -82,13 +82,13 @@ public abstract class Light {
         private final float intensity;
         private final vec3f direction;
         private final vec3f colour;
-        private final ShaderLoader.Program shader;
 
         public DirectionalLight(float intensity, vec3f direction, vec3f colour) {
             this.intensity = intensity;
             this.direction = direction.normalise();
             this.colour = colour;
-            this.shader = Light.loadShader(DirectionalLight.class, () -> ShaderLoader.safeLoad(
+
+            registerShader(() -> ShaderLoader.safeLoad(
                     "lwaf_3D/shader",
                     "pass-through.vertex-3D.glsl",
                     "directional.fragment-3D.glsl",
@@ -98,11 +98,6 @@ public abstract class Light {
 
         public DirectionalLight(float intensity, vec3f direction) {
             this(intensity, direction, vec3f.one);
-        }
-
-        @Override
-        public ShaderLoader.Program getShader() {
-            return shader;
         }
 
         @Override
@@ -117,11 +112,9 @@ public abstract class Light {
             getShader().setUniform("lightIntensity", intensity);
             getShader().setUniform("lightDirection", direction);
             getShader().setUniform("lightColour", colour);
-            getShader().start();
+            getShader().setUniform("transform", getTransformMatrix());
 
             Draw.drawIndexedVAO(VAO.screen_quad);
-
-            getShader().stop();
         }
     }
 

@@ -1,17 +1,13 @@
 package lwaf_3D;
 
-import lwaf.*;
+import lwaf.mat4f;
+import lwaf.vec3f;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.List;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
-import static org.lwjgl.opengl.GL14.glBlendEquation;
+import java.util.*;
 
 public abstract class Scene {
     private final Camera camera;
+    private final Map<Class<? extends Light>, List<Light>> lights = new HashMap<>();
 
     public Scene(Camera camera) {
         this.camera = camera;
@@ -22,90 +18,32 @@ public abstract class Scene {
     }
 
     protected abstract void drawObjects(mat4f viewMatrix, mat4f projectionMatrix);
-    protected abstract List<Light> getLights();
 
     public Camera getCamera() {
         return camera;
     }
 
-    public void draw(FBO framebuffer, GBuffer buffer) {
-        var viewMatrix = camera.getViewMatrix();
-        var projectionMatrix = camera.getProjectionMatrix();
+    public Scene addLight(Light light) {
+        lights.computeIfAbsent(light.getClass(), ignored -> new ArrayList<>());
+        lights.get(light.getClass()).add(light);
 
-        buffer.bind();
+        return this;
+    }
 
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        glDepthMask(true);
-        glClearColor(0, 0, 0, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        drawObjects(viewMatrix, projectionMatrix);
-
-        glDepthMask(false);
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-
-        buffer.unbind();
-        framebuffer.bind();
-
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-        buffer.bindReading();
-
-        for (var light : getLights()) {
-            light.render(buffer, viewMatrix, projectionMatrix);
+    public Scene removeLight(Light light) {
+        if (lights.containsKey(light.getClass())) {
+            lights.get(light.getClass()).remove(light);
         }
 
-        framebuffer.unbind();
-        buffer.unbindReading();
-
-        glDisable(GL_BLEND);
+        return this;
     }
 
-    public static String FRAGMENT_SHADER_PATH = "lwaf_3D/shader/fragment-3D.glsl";
-
-    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        return ShaderLoader.load(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                Paths.get(basePath, geometryShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
+    public Set<Class<? extends Light>> getLightTypes() {
+        return lights.keySet();
     }
 
-    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        return ShaderLoader.load(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
-    }
-
-    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) {
-        return ShaderLoader.safeLoad(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                Paths.get(basePath, geometryShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
-    }
-
-    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, boolean instanced) {
-        return ShaderLoader.safeLoad(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
+    public List<Light> getLightsOfType(Class<? extends Light> type) {
+        return lights.getOrDefault(type, new ArrayList<>());
     }
 
 }

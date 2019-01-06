@@ -1,13 +1,8 @@
 
 import lwaf.*;
-import lwaf_3D.Camera;
-import lwaf_3D.Light;
-import lwaf_3D.Renderer;
-import lwaf_3D.Scene;
+import lwaf_3D.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public class LWAF_Main extends Application {
     public static void main(String[] args) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
@@ -38,7 +33,7 @@ public class LWAF_Main extends Application {
         text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font);
         texture = Texture.load("lwaf/img/no-texture-dark.png");
 
-        shader = Scene.safeLoadGeometryShader(
+        shader = GBuffer.safeLoadGeometryShader(
                 "lwaf_3D/shader",
                 "vertex-3D.glsl",
                 false
@@ -47,6 +42,13 @@ public class LWAF_Main extends Application {
         models = new Models();
 
         scene = new Scene() {
+            {
+                addLight(new Light.AmbientLight(0.2f));
+                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
+                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
+                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
+            }
+
             @Override
             protected void drawObjects(mat4f viewMatrix, mat4f projectionMatrix) {
                 shader.setUniform("viewTransform", viewMatrix);
@@ -54,16 +56,6 @@ public class LWAF_Main extends Application {
                 shader.start();
                 models.draw(shader);
                 shader.stop();
-            }
-
-            @Override
-            protected List<Light> getLights() {
-                return Arrays.asList(
-                        new Light.AmbientLight(0.2f),
-                        new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis),
-                        new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis),
-                        new Light.DirectionalLight(0.4f, vec3f.y_axis.unm())
-                );
             }
         };
 
@@ -90,9 +82,11 @@ public class LWAF_Main extends Application {
     protected void draw() {
         renderer.draw(scene);
 
-        Draw.setColour(1, 1, 1);
         // Draw.view(view, new vec2f(40, 20));
         // Draw.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
+
+        Draw.setColour(0, 0, 0);
+        Draw.text(text, vec2f.zero);
 
         Texture texture = null;
 
@@ -104,6 +98,7 @@ public class LWAF_Main extends Application {
             case 4: texture = renderer.getGBuffer().getLightingTexture(); break;
         }
 
+        Draw.setColour(1, 1, 1);
         Draw.texture(texture);
     }
 
