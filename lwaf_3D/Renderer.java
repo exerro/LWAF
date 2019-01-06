@@ -22,6 +22,18 @@ public class Renderer {
         framebuffer.setDrawBuffers(GL_COLOR_ATTACHMENT0);
     }
 
+    public int getWidth() {
+        return texture.getWidth();
+    }
+
+    public int getHeight() {
+        return texture.getHeight();
+    }
+
+    public float getAspectRatio() {
+        return (float) getWidth() / getHeight();
+    }
+
     public GBuffer getGBuffer() {
         return buffer;
     }
@@ -35,12 +47,14 @@ public class Renderer {
     }
 
     public void draw(Scene scene) {
-        int[] currentViewport = new int[4];
-        glViewport(0, 0, texture.getWidth(), texture.getHeight());
+        var currentViewport = new int[4];
         var viewMatrix = scene.getCamera().getViewMatrix();
         var projectionMatrix = scene.getCamera().getProjectionMatrix();
 
         buffer.bind();
+
+        glGetIntegerv(GL_VIEWPORT, currentViewport);
+        glViewport(0, 0, getWidth(), getHeight());
 
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
@@ -81,8 +95,7 @@ public class Renderer {
         framebuffer.unbind();
         buffer.unbindReading();
 
-        glDisable(GL_BLEND);
-        glGetIntegerv(GL_VIEWPORT, currentViewport);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glViewport(currentViewport[0], currentViewport[1], currentViewport[2], currentViewport[3]);
     }
 

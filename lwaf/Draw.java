@@ -1,7 +1,5 @@
 package lwaf;
 
-import lwaf_3D.GBuffer;
-
 import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -64,9 +62,10 @@ public class Draw {
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .translate(position.x, position.y, 0)
                 .scaleBy(texture.getWidth(), texture.getHeight(), 1)
+                .scaleBy(new vec3f(scale, 1))
                 .translate(0, 1, 0)
                 .scaleBy(1, -1, 1)
-                .scaleBy(new vec3f(scale, 1));
+                ;
 
         draw2D(texture, rectangleVAO, transform);
     }
@@ -91,7 +90,8 @@ public class Draw {
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .translate(position.x, position.y, 0)
                 .scaleBy(texture.getWidth(), texture.getHeight(), 1)
-                .scaleBy(new vec3f(scale, 1));
+                .scaleBy(new vec3f(scale, 1))
+                ;
 
         draw2D(texture, rectangleVAO, transform);
     }
@@ -120,11 +120,8 @@ public class Draw {
     }
 
     private static void draw2D(Texture texture, VAO vao, mat4f transform) {
-        var displaySize = getViewportSize();
-
         if (texture != null) {
             texture.bind();
-            glActiveTexture(GL_TEXTURE0);
         }
 
         shaderProgram2D.setUniform("transform", transform);

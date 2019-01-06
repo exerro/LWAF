@@ -59,14 +59,14 @@ public class LWAF_Main extends Application {
             }
         };
 
+        renderer = new Renderer(1200, 680);
+
         scene.getCamera().setPerspectiveProjection(
-                Application.getActive().getDisplay().getAspectRatio(),
+                renderer.getAspectRatio(),
                 Camera.PerspectiveProjection.DEFAULT_FOV,
                 Camera.PerspectiveProjection.DEFAULT_NEAR,
                 Camera.PerspectiveProjection.DEFAULT_FAR
         );
-
-        renderer = new Renderer(1200, 680);
 
         return true;
     }
