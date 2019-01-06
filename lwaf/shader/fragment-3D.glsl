@@ -1,8 +1,5 @@
 #version 400 core
 
-const float SPECULAR_POWER = 5;
-const float SPECULAR_LIGHT = 0.5;
-
 in vec3 fragment_position;
 in vec3 fragment_normal;
 in vec3 fragment_colour;

@@ -32,7 +32,7 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
             shader.setUniform("useTexture", false);
         }
 
-        Draw.drawElements(getVAO());
+        Draw.drawIndexedVAO(getVAO());
 
         if (texture != null) {
             texture.unbind();

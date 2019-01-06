@@ -13,7 +13,6 @@ import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 public class Draw {
 
     private static VAO rectangleVAO;
-    private static int rectangleVAOuvVBOID;
     private static ShaderLoader.Program shaderProgram2D;
     private static vec3f colour = new vec3f(1, 1, 1);
     private static vec2f viewportSize;
@@ -57,6 +56,30 @@ public class Draw {
         rectangle(new vec2f(x, y), new vec2f(width, height));
     }
 
+    public static void texture(Texture texture, vec2f position, vec2f scale) {
+        var displaySize = getViewportSize();
+        var transform   = mat4f.identity()
+                .translate(-1, -1, 0)
+                .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
+                .translate(position.x, position.y, 0)
+                .scaleBy(texture.getWidth(), texture.getHeight(), 1)
+                .scaleBy(new vec3f(scale, 1));
+
+        draw2D(texture, rectangleVAO, transform);
+    }
+
+    public static void texture(Texture texture, vec2f position) {
+        texture(texture, position, new vec2f(1, 1));
+    }
+
+    public static void texture(Texture texture, float x, float y) {
+        texture(texture, new vec2f(x, y), new vec2f(1, 1));
+    }
+
+    public static void texture(Texture texture) {
+        texture(texture, new vec2f(0, 0), new vec2f(1, 1));
+    }
+
     public static void image(Texture texture, vec2f position, vec2f scale) {
         var displaySize = getViewportSize();
         var transform   = mat4f.identity()
@@ -85,16 +108,37 @@ public class Draw {
     public static void buffer(GBuffer buffer, vec2f position, vec2f scale) {
         var displaySize = getViewportSize();
         var transform   = mat4f.identity()
-                .scaleBy(1, -1, 1)
+                .scaleBy(1, 1, 1)
                 .translate(-1, -1, 0)
                 .scaleBy(2 / displaySize.x, 2 / displaySize.y, 1)
                 .translate(position.x, position.y, 0)
                 .scaleBy(buffer.getColourTexture().getWidth(), buffer.getColourTexture().getHeight(), 1)
                 .scaleBy(new vec3f(scale, 1))
-                .translate(0, 1, 0)
-                .scaleBy(1, -1, 0);
+                .scaleBy(1, 1, 0);
 
-        draw2D(buffer.getColourTexture(), rectangleVAO, transform);
+        draw2D(buffer.getColourTexture(), rectangleVAO, mat4f.identity()
+                .mul(mat4f.translation(-0.5f, 0.5f, 0))
+                .mul(mat4f.scale(0.5f, 0.5f, 1))
+                .mul(transform)
+        );
+
+        draw2D(buffer.getNormalTexture(), rectangleVAO, mat4f.identity()
+                .mul(mat4f.translation(0.5f, 0.5f, 0))
+                .mul(mat4f.scale(0.5f, 0.5f, 1))
+                .mul(transform)
+        );
+
+        draw2D(buffer.getPositionTexture(), rectangleVAO, mat4f.identity()
+                .mul(mat4f.translation(-0.5f, -0.5f, 0))
+                .mul(mat4f.scale(0.5f, 0.5f, 1))
+                .mul(transform)
+        );
+
+        draw2D(buffer.getLightingTexture(), rectangleVAO, mat4f.identity()
+                .mul(mat4f.translation(0.5f, -0.5f, 0))
+                .mul(mat4f.scale(0.5f, 0.5f, 1))
+                .mul(transform)
+        );
     }
 
     public static void text(Text text, vec2f position) {
@@ -120,7 +164,7 @@ public class Draw {
         shaderProgram2D.setUniform("colour", colour);
         shaderProgram2D.setUniform("useTexture", texture != null);
         shaderProgram2D.start();
-        drawElements(vao);
+        drawIndexedVAO(vao);
         shaderProgram2D.stop();
 
         if (texture != null) {
@@ -128,13 +172,13 @@ public class Draw {
         }
     }
 
-    public static void drawElements(VAO vao) {
+    public static void drawIndexedVAO(VAO vao) {
         vao.load();
         glDrawElements(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0);
         vao.unload();
     }
 
-    public static void drawElementsInstanced(VAO vao) {
+    public static void drawIndexedInstancedVAO(VAO vao) {
         vao.load();
         glDrawElementsInstanced(GL_TRIANGLES, vao.getVertexCount(), GL_UNSIGNED_INT, 0, vao.getInstanceCount());
         vao.unload();
@@ -168,7 +212,7 @@ public class Draw {
                         3, 2, 0
                 });
 
-                rectangleVAOuvVBOID = genUVBuffer(new float[] {
+                genUVBuffer(new float[] {
                         0, 1,
                         0, 0,
                         1, 0,

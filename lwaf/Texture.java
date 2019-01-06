@@ -82,7 +82,7 @@ public class Texture {
         return load(filePath);
     }
 
-    public static Texture create(int width, int height) {
+    public static Texture create(int width, int height, int internalFormat, int format, int type) {
         int textureID = glGenTextures();
 
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -90,10 +90,14 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, (ByteBuffer) null);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return new Texture(textureID, width, height);
+    }
+
+    public static Texture create(int width, int height) {
+        return create(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
     }
 
 }

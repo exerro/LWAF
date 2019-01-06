@@ -1,17 +1,14 @@
 package lwaf_model;
 
 import lwaf.*;
-import lwaf_3D.Renderer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ModelRenderer extends Renderer.CameraRenderer3D {
+public class ModelRenderer {
     private final List<Model> models = new ArrayList<>();
 
-    public ModelRenderer() {
-
-    }
+    public ModelRenderer() {}
 
     public <T extends VAO> Model<T> add(Model<T> model) {
         models.add(model);
@@ -27,10 +24,7 @@ public abstract class ModelRenderer extends Renderer.CameraRenderer3D {
         return new ArrayList<>(models);
     }
 
-    @Override
-    public void draw() {
-        var shader = getShader();
-
+    public void draw(ShaderLoader.Program shader) {
         for (Model model : models) {
             model.draw(shader);
         }
