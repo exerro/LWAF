@@ -184,6 +184,12 @@ public abstract class ShaderLoader {
             if (!active) GL20.glUseProgram(0);
         }
 
+        public void setUniform(String uniform, int value) {
+            if (!active) GL20.glUseProgram(programID);
+            GL20.glUniform1i(GL20.glGetUniformLocation(programID, uniform), value);
+            if (!active) GL20.glUseProgram(0);
+        }
+
         public void setUniform(String uniform, float[] value) {
             if (!active) GL20.glUseProgram(programID);
             if (value.length == 4) {

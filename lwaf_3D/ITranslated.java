@@ -1,4 +1,6 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.vec3f;
 
 @SuppressWarnings("unused")
 public interface ITranslated<R> {

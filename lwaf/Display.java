@@ -1,11 +1,8 @@
 package lwaf;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-
-import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -32,6 +29,10 @@ public class Display {
     private String title;
     private float cr = 0, cg = 0, cb = 0;
     private boolean isSetup = false;
+
+    public static Display getActive() {
+        return active;
+    }
 
     public Display(int width, int height, String title) {
         this.width = width;
@@ -63,69 +64,6 @@ public class Display {
         isSetup = true;
     }
 
-    // sets up the GLFW window
-    private void setupGLFWWindow() throws WindowCreationError {
-        // causes gl errors to be printed to stderr
-        GLFWErrorCallback.createPrint(java.lang.System.err).set();
-
-        // check that GLFW can be initialised
-        if (!glfwInit()) {
-            throw new WindowCreationError("Unable to initialise GLFW");
-        }
-
-        // set window hints
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-
-        // create window
-        windowID = glfwCreateWindow(width, height, title, NULL, NULL);
-
-        // if a window wasn't created, throw a runtime exception
-        if (windowID == NULL) {
-            throw new WindowCreationError("Failed to create GLFW window");
-        }
-
-        // think this makes the window centered?
-        try (MemoryStack stack = stackPush()) {
-            var pWidth = stack.mallocInt(1);
-            var pHeight = stack.mallocInt(1);
-
-            glfwGetWindowSize(windowID, pWidth, pHeight);
-
-            var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-            if (videoMode != null) {
-                glfwSetWindowPos(windowID,
-                        (videoMode.width() - pWidth.get(0)) / 2,
-                        (videoMode.height() - pHeight.get(0)) / 2
-                );
-            }
-            // otherwise, do nothing, centering isn't that important...
-        }
-
-        // don't really know what these are for but I found them online so fuck it
-        glfwMakeContextCurrent(windowID);
-        glfwSwapInterval(1);
-        // think this has something to do with the centering
-        glfwShowWindow(windowID);
-    }
-
-    private void setupOpenGL() {
-        GL.createCapabilities();
-
-        glClearColor(cr, cg, cb, 1.0f);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glEnable(GL_MULTISAMPLE);
-    }
-
     // returns true if the window should close (e.g. close button pressed)
     public boolean windowShouldClose() {
         if (!isSetup) {
@@ -143,7 +81,8 @@ public class Display {
 
         glClearColor(cr, cg, cb, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Draw.viewport(new vec2f(width, height));
+
+        Draw.setViewport(new vec2f(width, height));
 
         active = this;
     }
@@ -235,14 +174,74 @@ public class Display {
         var x=glfwSetErrorCallback(null);if(x!=null)x.free();
     }
 
-    public static Display getActive() {
-        return active;
-    }
-
     // thrown in setup() when window creation fails
     public static class WindowCreationError extends Exception {
         private WindowCreationError(String error) {
             super(error);
         }
     }
+
+    // sets up the GLFW window
+    private void setupGLFWWindow() throws WindowCreationError {
+        // causes gl errors to be printed to stderr
+        GLFWErrorCallback.createPrint(java.lang.System.err).set();
+
+        // check that GLFW can be initialised
+        if (!glfwInit()) {
+            throw new WindowCreationError("Unable to initialise GLFW");
+        }
+
+        // set window hints
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
+        // create window
+        windowID = glfwCreateWindow(width, height, title, NULL, NULL);
+
+        // if a window wasn't created, throw a runtime exception
+        if (windowID == NULL) {
+            throw new WindowCreationError("Failed to create GLFW window");
+        }
+
+        // think this makes the window centered?
+        try (MemoryStack stack = stackPush()) {
+            var pWidth = stack.mallocInt(1);
+            var pHeight = stack.mallocInt(1);
+
+            glfwGetWindowSize(windowID, pWidth, pHeight);
+
+            var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            if (videoMode != null) {
+                glfwSetWindowPos(windowID,
+                        (videoMode.width() - pWidth.get(0)) / 2,
+                        (videoMode.height() - pHeight.get(0)) / 2
+                );
+            }
+            // otherwise, do nothing, centering isn't that important...
+        }
+
+        // don't really know what these are for but I found them online so fuck it
+        glfwMakeContextCurrent(windowID);
+        glfwSwapInterval(1);
+        // think this has something to do with the centering
+        glfwShowWindow(windowID);
+    }
+
+    private void setupOpenGL() {
+        GL.createCapabilities();
+
+        glClearColor(cr, cg, cb, 1.0f);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glEnable(GL_MULTISAMPLE);
+    }
+
 }

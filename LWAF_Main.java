@@ -1,229 +1,189 @@
 
 import lwaf.*;
-import lwaf_graph.Graph3D;
-import lwaf_math.SimplexNoise;
-import lwaf_model.ModelLoader;
-import lwaf_primitive.CubeVAO;
-import lwaf_primitive.IcoSphereVAO;
-import lwaf_primitive.UVSphereVAO;
+import lwaf_3D.*;
 import lwaf_model.Model;
-import lwaf_model.ModelRenderer;
 import lwaf_primitive.ConeVAO;
-import lwaf_primitive.CylinderVAO;
-import lwaf_primitive.PyramidVAO;
 
 import java.io.IOException;
-
-class CustomRenderer extends ModelRenderer {
-    private Camera camera;
-    private vec3f lightPosition = new vec3f(0, -1, 3);
-    private Model<IcoSphereVAO> lightModel;
-    private Lighting lighting;
-
-    CustomRenderer() {
-        setShader(ShaderLoader.safeLoad(
-                "lwaf/shader",
-                "vertex-3D.glsl",
-                "fragment-3D.glsl",
-                false
-        ));
-
-        lighting = new Lighting(0.9f, 0.4f, 10);
-
-        camera = new Camera(new vec3f(0, 1, 5));
-        camera.rotateBy(new vec3f((float) Math.PI * -0.1f, 0, 0));
-        camera.setPerspectiveProjection(
-                Application.getActive().getDisplay().getAspectRatio(),
-                Camera.PerspectiveProjection.DEFAULT_FOV,
-                Camera.PerspectiveProjection.DEFAULT_NEAR,
-                Camera.PerspectiveProjection.DEFAULT_FAR
-        );
-
-        var dark_texture = Texture.load("lwaf/img/no-texture-light.png");
-
-        for (int i = 0; i < 5; ++i) {
-            add(new Model<>(new IcoSphereVAO(i + 1)))
-                    .setTranslation(i * 2, -3, -2);
-        }
-
-        for (int i = 0; i < 10; ++i) {
-            for (int j = 0; j < 10; ++j) {
-                add(new Model<>(new UVSphereVAO(j + 1, i + 3)))
-                        .setTranslation(i * 2, 3 + j * 2, -2)
-                        .setTexture(dark_texture)
-                        .setSpecularLighting(0)
-                ;
-            }
-        }
-
-        add(new Model<>(new IcoSphereVAO(1)))
-                .setColour(0, 1, 1)
-                .setTranslation(0, 0, 0);
-
-        add(new Model<>(new CubeVAO()))
-                .setTexture(Texture.load("lwaf/img/no-texture-light.png"))
-                .setTranslation(2, 0, 0);
-
-        add(new Model<>(new UVSphereVAO(40, 80)))
-                .setTexture(Texture.load("lwaf/img/no-texture-dark.png"))
-                .setTranslation(4, 0, 0);
-
-        add(new Model<>(new IcoSphereVAO(7)))
-                .setColour(1, 1, 0)
-                .setTranslation(6, 0, 0);
-
-        add(ModelLoader.safeLoad("stall.obj"))
-                .setTexture(Texture.load("stall_texture.png"))
-                .setTranslation(0, 0, 10)
-                .setSpecularLighting(0)
-        ;
-
-        var graph = new Graph3D(v -> (float) (
-                // (float) 1 / (0.1f + v.length())
-                Math.sin(1 / (1 + v.length2()) * 25 + 10 * v.y)
-        ))
-                .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
-        ;
-
-        var scale = new vec3f(20, 1f, 20);
-        var res = 10;
-
-        add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
-                .setTranslation(0, -10, scale.x / 2 + 1)
-                .setScale(scale)
-        ;
-
-        add(new Model<>(new CubeVAO())).setTranslation(0, -10, scale.x / 2 + 1);
-        add(new Model<>(new CubeVAO())).setTranslation(scale.x * 0.5f, -10, scale.x / 2 + 1);
-
-        add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
-                .setTranslation(0, -10, -scale.x / 2 - 1)
-                .setScale(scale)
-        ;
-
-        add(new Model<>(graph.getSmoothVAO(new Graph3D.UniformGridStrategy(res))))
-                .setTranslation(-scale.x - 1, -10, scale.x / 2 + 1)
-                .setScale(scale)
-        ;
-
-        add(new Model<>(graph.getSmoothVAO(new Graph3D.GradientPullStrategy(res))))
-                .setTranslation(-scale.x - 1, -10, -scale.x / 2 - 1)
-                .setScale(scale)
-        ;
-
-        lightModel = new Model<>(new IcoSphereVAO(5));
-
-        add(new Model<>(new ConeVAO(360)))
-                .setTranslation(-2, 0, 0);
-
-        add(new Model<>(new CylinderVAO(100)))
-                .setTranslation(-2, 2, 0);
-
-        add(new Model<>(new PyramidVAO(4)))
-                .setTranslation(-2, 4, 0);
-
-        lightModel = new Model<>(new IcoSphereVAO(5))
-                .setColour(0.9f, 0.9f, 0.3f)
-                .setScale(0.1f);
-    }
-
-    public void setLightPosition(vec3f position) {
-        lightPosition = position;
-    }
-
-    @Override
-    public void setUniforms() {
-        super.setUniforms();
-
-        setLighting(lighting);
-        setLightingPosition(lightPosition);
-    }
-
-    public void setCamera(Camera camera) {
-        this.camera = camera;
-    }
-
-    @Override
-    public Camera getCamera() {
-        return camera;
-    }
-
-    @Override
-    protected void draw(FBO framebuffer) {
-        var t = Application.getActive().getTime();
-
-        setAmbientLighting(0.1f);
-
-        super.draw(framebuffer);
-
-        var sea = new Graph3D(v -> {
-            return (float) (
-                      2.00 * SimplexNoise.noise(v.x * 0.5 + t * 0.05, v.y * 0.5, t * 0.05)
-                    + 0.50 * SimplexNoise.noise(v.x + t * 0.1, v.y, t * 0.1)
-                    + 0.50 * SimplexNoise.noise(v.x * 3 + t * 0.3, v.y * 3, t * 0.3)
-            );
-        })
-                .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)))
-        ;
-
-        new Model<>(sea.getTriangulatedVAO(new Graph3D.UniformGridStrategy(50)))
-                .setTranslation(50, -10, 0)
-                .setScale(40, 1, 40)
-                .draw(getShader())
-        ;
-
-        lightModel.setTranslation(lightPosition);
-        setAmbientLighting(1f);
-        lightModel.draw(getShader());
-    }
-}
 
 public class LWAF_Main extends Application {
     public static void main(String[] args) throws Display.WindowCreationError, ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
         Display display = new Display("LWAF Demo");
 
         var app = new LWAF_Main(display);
-        app.getDisplay().setBackgroundColour(0.5f, 0.5f, 0.5f);
+        app.getDisplay().setBackgroundColour(1, 1, 1);
 
         Application.run(app);
     }
-
-    private View view;
 
     private LWAF_Main(Display display) {
         super(display);
     }
 
+    private Scene scene;
+    private Texture texture;
     private Text text;
     private Font font;
-    private CustomRenderer renderer;
+    private Models models;
+    private ShaderLoader.Program shader;
+    private Renderer renderer;
+    private int textureToDraw = 0;
 
     @Override
     protected boolean load() {
         font = Font.safeLoad("lwaf/font/open-sans/OpenSans-Regular.fnt");
         text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font);
-        view = new View(1200, 680);
-        view.attachRenderer(renderer = new CustomRenderer());
+        texture = Texture.load("lwaf/img/no-texture-dark.png");
+
+        shader = GBuffer.safeLoadGeometryShader(
+                "lwaf_3D/shader",
+                "vertex-3D.glsl",
+                false
+        );
+
+        models = new Models();
+
+        scene = new Scene() {
+            {
+                addLight(new Light.AmbientLight(0.2f));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
+//                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
+                addLight(new Light.PointLight(10, new vec3f(0, 4f, 10), Light.PointLight.attenuation(25), new vec3f(1, 1, 0)));
+
+                addLight(new Light.SpotLight(
+                        1,
+                        new vec3f(0, -10 + 5, 11),
+                        new vec3f(0, -1, 0),
+                        new vec3f(1, 0.09f, 0.032f),
+                        Light.SpotLight.lightSpread(0.6f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(20, -4, 0),
+                        new vec3f(5, -1, 0),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.12f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(40, 10, 40),
+                        new vec3f(2, -2, -5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.1f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(50, 20, -30),
+                        new vec3f(-2, -6, 5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.1f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(10, -6, 0),
+                        new vec3f(-8, -5, -5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(0, -4, -20),
+                        new vec3f(-5, -5, 8),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(-30, -4, -15),
+                        new vec3f(8, -5, 5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(-30, -4, 30),
+                        new vec3f(5, -5, -8),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(0, 0, 10),
+                        new vec3f(1, 1, -1),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+            }
+
+            @Override
+            protected void drawObjects(mat4f viewMatrix, mat4f projectionMatrix) {
+                shader.setUniform("viewTransform", viewMatrix);
+                shader.setUniform("projectionTransform", projectionMatrix);
+                shader.start();
+                models.draw(shader);
+                shader.stop();
+            }
+        };
+
+        renderer = new Renderer(1200, 680);
+
+        scene.getCamera().setPerspectiveProjection(
+                renderer.getAspectRatio(),
+                Camera.PerspectiveProjection.DEFAULT_FOV,
+                Camera.PerspectiveProjection.DEFAULT_NEAR,
+                Camera.PerspectiveProjection.DEFAULT_FAR
+        );
 
         return true;
     }
 
     @Override
+    protected void unload() {
+        renderer.destroy();
+        texture.destroy();
+        shader.destroy();
+    }
+
+    @Override
     protected void draw() {
-        Draw.setColour(1, 1, 1);
-        Draw.view(view, new vec2f(40, 20));
+        renderer.draw(scene);
 
-        Draw.setColour(0.5f, 0.5f, 0.5f);
-        Draw.rectangle(0, 0, font.getWidth(text.getText()), font.getHeight());
+        // Draw.view(view, new vec2f(40, 20));
+        // Draw.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
+
+        Draw.setColour(0, 0, 0);
+        Draw.text(text, vec2f.zero);
+
+        Texture texture = null;
+
+        switch (textureToDraw) {
+            case 0: texture = renderer.getTexture(); break;
+            case 1: texture = renderer.getGBuffer().getColourTexture(); break;
+            case 2: texture = renderer.getGBuffer().getNormalTexture(); break;
+            case 3: texture = renderer.getGBuffer().getPositionTexture(); break;
+            case 4: texture = renderer.getGBuffer().getLightingTexture(); break;
+        }
 
         Draw.setColour(1, 1, 1);
-        Draw.text(text, new vec2f(0, 0));
-
-        Draw.setColour(1, 1, 1);
-        Draw.text(new Text(
-                String.valueOf(font.getWidth(text.getText())) + " |",
-                font.resizeTo(32)
-        ), new vec2f(0, font.getHeight() + 5));
+        Draw.texture(texture);
     }
 
     @Override
@@ -235,10 +195,10 @@ public class LWAF_Main extends Application {
 
     @Override
     protected void update(float dt) {
-        var translation = renderer.getCamera().getTranslation();
-        var rotation = renderer.getCamera().getRotation();
-        var forward = renderer.getCamera().getFlatForward();
-        var right = renderer.getCamera().getFlatRight();
+        var translation = scene.getCamera().getTranslation();
+        var rotation = scene.getCamera().getRotation();
+        var forward = scene.getCamera().getFlatForward();
+        var right = scene.getCamera().getFlatRight();
         var speed = dt * 5;
         var rspeed = dt * (float) Math.PI / 2;
 
@@ -279,27 +239,18 @@ public class LWAF_Main extends Application {
             rotation = rotation.sub(vec3f.x_axis.mul(rspeed));
         }
 
-        renderer.setLightPosition(
-                vec3f.y_axis.mul((float) Math.sin(Application.getActive().getTime()))
-           .add(vec3f.x_axis.mul((float) Math.cos(1.5 * Application.getActive().getTime())))
-           .add(vec3f.z_axis.mul(1 + (float) Math.sin(0.3 * Application.getActive().getTime())))
-           .add(vec3f.x_axis.mul(6))
-        );
-
-        renderer.getCamera().setTranslation(translation);
-        renderer.getCamera().setRotation(rotation);
-    }
-
-    @Override
-    protected void unload() {
-        view.destroy();
+        scene.getCamera().setTranslation(translation);
+        scene.getCamera().setRotation(rotation);
     }
 
     @Override
     protected void onKeyDown(String key, int modifier) {
         switch (MOD(key, modifier)) {
-
+            case "tab": textureToDraw = (textureToDraw + 1) % 5; break;
+            case "ctrl-tab": textureToDraw = (textureToDraw - 1) % 5; break;
         }
+
+        if (textureToDraw < 0) textureToDraw += 5;
     }
 
     @Override

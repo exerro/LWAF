@@ -1,7 +1,9 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.ShaderLoader;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class Lighting {
+public class ObjectLighting {
     private float diffuseLightingIntensity, specularLightingIntensity;
     private int specularLightingPower;
 
@@ -9,21 +11,21 @@ public class Lighting {
     public static final float SPECULAR_LIGHTING_INTENSITY = 0.4f;
     public static final int SPECULAR_LIGHTING_POWER = 5;
 
-    public Lighting(float diffuseLightingIntensity, float specularLightingIntensity, int specularLightingPower) {
+    public ObjectLighting(float diffuseLightingIntensity, float specularLightingIntensity, int specularLightingPower) {
         this.diffuseLightingIntensity = diffuseLightingIntensity;
         this.specularLightingIntensity = specularLightingIntensity;
         this.specularLightingPower = specularLightingPower;
     }
 
-    public Lighting(float diffuseLightingIntensity, float specularLightingIntensity) {
+    public ObjectLighting(float diffuseLightingIntensity, float specularLightingIntensity) {
         this(diffuseLightingIntensity, specularLightingIntensity, SPECULAR_LIGHTING_POWER);
     }
 
-    public Lighting(float specularLightingIntensity) {
+    public ObjectLighting(float specularLightingIntensity) {
         this(DIFFUSE_LIGHTING_INTENSITY, specularLightingIntensity, SPECULAR_LIGHTING_POWER);
     }
 
-    public Lighting() {
+    public ObjectLighting() {
         this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER);
     }
 
