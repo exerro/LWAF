@@ -47,9 +47,27 @@ public class LWAF_Main extends Application {
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
-                addLight(new Light.PointLight(1, new vec3f(0, 6, 10), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
-                addLight(new Light.PointLight(1, new vec3f(10, 13, 0), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
-                addLight(new Light.PointLight(1, new vec3f(4, 0, 1), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+//                addLight(new Light.PointLight(1, new vec3f(0, 6, 10), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+//                addLight(new Light.PointLight(1, new vec3f(10, 13, 0), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+//                addLight(new Light.PointLight(1, new vec3f(4, 0, 1), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+
+                addLight(new Light.SpotLight(
+                        1,
+                        new vec3f(0, -10 + 3, 11),
+                        new vec3f(0, -1, 0),
+                        new vec3f(1, 0.09f, 0.032f),
+                        (float) Math.PI * 0.3f,
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(20, -4, 0),
+                        new vec3f(5, -1, 0),
+                        new vec3f(1000, 0.09f, 1f),
+                        (float) Math.PI * 0.06f,
+                        vec3f.one
+                ));
             }
 
             @Override

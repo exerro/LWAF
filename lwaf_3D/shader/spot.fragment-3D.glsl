@@ -9,8 +9,10 @@ uniform sampler2D lightingMap;
 
 uniform float lightIntensity;
 uniform vec3 lightPosition;
-uniform vec3 lightColour;
+uniform vec3 lightDirection;
 uniform vec3 lightAttenuation;
+uniform vec2 lightCutoff;
+uniform vec3 lightColour;
 
 uniform mat4 viewTransform;
 
@@ -38,9 +40,14 @@ void main(void) {
 
     float distance = length(position.xyz - lightPosition);
     float attenuationFactor = 1 / (lightAttenuation.x + distance * (lightAttenuation.y + distance * lightAttenuation.z));
+    float theta = acos(dot(lightDirectionToFragment, normalize(lightDirection)));
+    float spotFactor = clamp(1 -
+        (theta - lightCutoff.y)
+      / (lightCutoff.x - lightCutoff.y)
+      , 0, 1);
 
-    vec4 diffuseColour  = attenuationFactor * lightIntensity * diffuseLightingIntensity  * vec4(lightColour, 1.0) * colour * diffuseFactor;
-    vec4 specularColour = attenuationFactor * lightIntensity * specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
+    vec4 diffuseColour  = spotFactor * attenuationFactor * lightIntensity * diffuseLightingIntensity  * vec4(lightColour, 1.0) * colour * diffuseFactor;
+    vec4 specularColour = spotFactor * attenuationFactor * lightIntensity * specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
 
     gl_FragColor = diffuseColour + specularColour;
 }

@@ -7,49 +7,41 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class Light {
+    private final float intensity;
+    private final vec3f colour;
 
-    private static final Map<Class<? extends Light>, ShaderLoader.Program> shaders = new HashMap<>();
-
-    public static ShaderLoader.Program getShader(Class<? extends Light> lightType) {
-        return shaders.get(lightType);
+    protected Light(float intensity, vec3f colour) {
+        this.intensity = intensity;
+        this.colour = colour;
     }
 
-    protected ShaderLoader.Program registerShader(Supplier<ShaderLoader.Program> generator) {
-        shaders.computeIfAbsent(this.getClass(), ignored -> {
-            var shader = generator.get();
-
-            shader.setUniform("colourMap", 0);
-            shader.setUniform("positionMap", 1);
-            shader.setUniform("normalMap", 2);
-            shader.setUniform("lightingMap", 3);
-
-            return shader;
-        });
-
-        return shaders.get(this.getClass());
-    }
+    public abstract mat4f getTransformationMatrix();
+    public abstract void render(GBuffer buffer);
 
     protected ShaderLoader.Program getShader() {
         return getShader(this.getClass());
     }
 
-    public abstract mat4f getTransformationMatrix();
+    public float getIntensity() {
+        return intensity;
+    }
 
-    public void render(GBuffer buffer, mat4f viewMatrix, mat4f projectionMatrix) {
+    public vec3f getColour() {
+        return colour;
+    }
+
+    public void setUniforms(mat4f viewMatrix, mat4f projectionMatrix) {
         getShader().setUniform("transform", getTransformationMatrix());
         getShader().setUniform("viewTransform", viewMatrix);
         getShader().setUniform("projectionTransform", projectionMatrix);
     }
 
     public static class AmbientLight extends Light {
-        private final float intensity;
-        private final vec3f colour;
 
         public AmbientLight(float intensity, vec3f colour) {
-            this.intensity = intensity;
-            this.colour = colour;
+            super(intensity, colour);
 
-            registerShader(() -> ShaderLoader.safeLoad(
+            registerShader(AmbientLight.class, () -> ShaderLoader.safeLoad(
                     "lwaf_3D/shader",
                     "pass-through.vertex-3D.glsl",
                     "ambient.fragment-3D.glsl",
@@ -67,28 +59,28 @@ public abstract class Light {
         }
 
         @Override
-        public void render(GBuffer buffer, mat4f viewMatrix, mat4f projectionMatrix) {
-            super.render(buffer, viewMatrix, projectionMatrix);
+        public void setUniforms(mat4f viewMatrix, mat4f projectionMatrix) {
+            super.setUniforms(viewMatrix, projectionMatrix);
 
-            getShader().setUniform("lightIntensity", intensity);
-            getShader().setUniform("lightColour", colour);
-            getShader().setUniform("transform", getTransformationMatrix());
+            getShader().setUniform("lightIntensity", getIntensity());
+            getShader().setUniform("lightColour", getColour());
+        }
 
+        @Override
+        public void render(GBuffer buffer) {
             Draw.drawIndexedVAO(VAO.screen_quad);
         }
     }
 
     public static class DirectionalLight extends Light {
-        private final float intensity;
         private final vec3f direction;
-        private final vec3f colour;
 
         public DirectionalLight(float intensity, vec3f direction, vec3f colour) {
-            this.intensity = intensity;
-            this.direction = direction.normalise();
-            this.colour = colour;
+            super(intensity, colour);
 
-            registerShader(() -> ShaderLoader.safeLoad(
+            this.direction = direction.normalise();
+
+            registerShader(DirectionalLight.class, () -> ShaderLoader.safeLoad(
                     "lwaf_3D/shader",
                     "pass-through.vertex-3D.glsl",
                     "directional.fragment-3D.glsl",
@@ -100,39 +92,43 @@ public abstract class Light {
             this(intensity, direction, vec3f.one);
         }
 
+        public vec3f getDirection() {
+            return direction;
+        }
+
         @Override
         public mat4f getTransformationMatrix() {
             return mat4f.identity();
         }
 
         @Override
-        public void render(GBuffer buffer, mat4f viewMatrix, mat4f projectionMatrix) {
-            super.render(buffer, viewMatrix, projectionMatrix);
+        public void setUniforms(mat4f viewMatrix, mat4f projectionMatrix) {
+            super.setUniforms(viewMatrix, projectionMatrix);
 
-            getShader().setUniform("lightIntensity", intensity);
-            getShader().setUniform("lightDirection", direction);
-            getShader().setUniform("lightColour", colour);
-            getShader().setUniform("transform", getTransformationMatrix());
+            getShader().setUniform("lightIntensity", getIntensity());
+            getShader().setUniform("lightDirection", getDirection());
+            getShader().setUniform("lightColour", getColour());
+        }
 
+        @Override
+        public void render(GBuffer buffer) {
             Draw.drawIndexedVAO(VAO.screen_quad);
         }
     }
 
     public static class PointLight extends Light {
-        private final float intensity;
         private final vec3f position;
         private final vec3f attenuation;
-        private final vec3f colour;
 
         public static final vec3f ATTENUATION = new vec3f(1, 0.09f, 0.032f);
 
         public PointLight(float intensity, vec3f position, vec3f attenuation, vec3f colour) {
-            this.intensity = intensity;
+            super(intensity, colour);
+
             this.position = position;
             this.attenuation = attenuation;
-            this.colour = colour;
 
-            registerShader(() -> ShaderLoader.safeLoad(
+            registerShader(PointLight.class, () -> ShaderLoader.safeLoad(
                     "lwaf_3D/shader",
                     "pass-through.vertex-3D.glsl",
                     "point.fragment-3D.glsl",
@@ -148,6 +144,34 @@ public abstract class Light {
             this(intensity, position, ATTENUATION, vec3f.one);
         }
 
+        public vec3f getPosition() {
+            return position;
+        }
+
+        public vec3f getAttenuation() {
+            return attenuation;
+        }
+
+        @Override
+        public mat4f getTransformationMatrix() {
+            return mat4f.identity();
+        }
+
+        @Override
+        public void setUniforms(mat4f viewMatrix, mat4f projectionMatrix) {
+            super.setUniforms(viewMatrix, projectionMatrix);
+
+            getShader().setUniform("lightIntensity", getIntensity());
+            getShader().setUniform("lightPosition", getPosition());
+            getShader().setUniform("lightAttenuation", getAttenuation());
+            getShader().setUniform("lightColour", getColour());
+        }
+
+        @Override
+        public void render(GBuffer buffer) {
+            Draw.drawIndexedVAO(VAO.screen_quad);
+        }
+
         public static vec3f attenuation(float distance, float halfBrightnessDistance) {
             // brightness factor = 1 / (Lx + d * (Ly + d * Lz))
 
@@ -161,14 +185,55 @@ public abstract class Light {
 
             var Lz = ( 254/(distance-halfBrightnessDistance) - 1/(halfBrightnessDistance-1) ) / (distance+1);
             var Ly = 1/(halfBrightnessDistance-1)
-                   - (
-                           (halfBrightnessDistance+1)
-                         / ((distance-halfBrightnessDistance) * (distance+1))
-                     )
-                   * (254 - (distance-halfBrightnessDistance) / (halfBrightnessDistance - 1));
+                    - (
+                    (halfBrightnessDistance+1)
+                            / ((distance-halfBrightnessDistance) * (distance+1))
+            )
+                    * (254 - (distance-halfBrightnessDistance) / (halfBrightnessDistance - 1));
             var Lx = 1 - Ly - Lz;
 
             return new vec3f(Lx, Ly, Lz);
+        }
+    }
+
+    public static class SpotLight extends PointLight {
+        private final vec3f direction;
+        private final vec2f cutoff;
+
+        public static final vec2f CUTOFF = new vec2f();
+
+        public SpotLight(float intensity, vec3f position, vec3f direction, vec3f attenuation, vec2f cutoff, vec3f colour) {
+            super(intensity, position, attenuation, colour);
+
+            this.direction = direction;
+            this.cutoff = cutoff;
+
+            registerShader(SpotLight.class, () -> ShaderLoader.safeLoad(
+                    "lwaf_3D/shader",
+                    "pass-through.vertex-3D.glsl",
+                    "spot.fragment-3D.glsl",
+                    false
+            ));
+        }
+
+        public SpotLight(float intensity, vec3f position, vec3f direction, vec3f attenuation, float cutoff, vec3f colour) {
+            this(intensity, position, direction, attenuation, new vec2f(cutoff, cutoff * 0.8f), colour);
+        }
+
+        public SpotLight(float intensity, vec3f position, vec3f direction, vec3f attenuation) {
+            this(intensity, position, direction, attenuation, CUTOFF, vec3f.one);
+        }
+
+        public SpotLight(float intensity, vec3f position, vec3f direction) {
+            this(intensity, position, direction, ATTENUATION, CUTOFF, vec3f.one);
+        }
+
+        public vec3f getDirection() {
+            return direction;
+        }
+
+        public vec2f getCutoff() {
+            return cutoff;
         }
 
         @Override
@@ -177,17 +242,40 @@ public abstract class Light {
         }
 
         @Override
-        public void render(GBuffer buffer, mat4f viewMatrix, mat4f projectionMatrix) {
-            super.render(buffer, viewMatrix, projectionMatrix);
+        public void setUniforms(mat4f viewMatrix, mat4f projectionMatrix) {
+            super.setUniforms(viewMatrix, projectionMatrix);
 
-            getShader().setUniform("lightIntensity", intensity);
-            getShader().setUniform("lightPosition", position);
-            getShader().setUniform("lightAttenuation", attenuation);
-            getShader().setUniform("lightColour", colour);
-            getShader().setUniform("transform", getTransformationMatrix());
+            getShader().setUniform("lightDirection", getDirection());
+            getShader().setUniform("lightCutoff", getCutoff());
+        }
 
+        @Override
+        public void render(GBuffer buffer) {
             Draw.drawIndexedVAO(VAO.screen_quad);
         }
+
+        public static float lightSpread(float range) {
+            return (float) Math.PI * range / 2;
+        }
+    }
+
+    private static final Map<Class<? extends Light>, ShaderLoader.Program> shaders = new HashMap<>();
+
+    public static void registerShader(Class<? extends Light> type, Supplier<ShaderLoader.Program> generator) {
+        shaders.computeIfAbsent(type, ignored -> {
+            var shader = generator.get();
+
+            shader.setUniform("colourMap", 0);
+            shader.setUniform("positionMap", 1);
+            shader.setUniform("normalMap", 2);
+            shader.setUniform("lightingMap", 3);
+
+            return shader;
+        });
+    }
+
+    public static ShaderLoader.Program getShader(Class<? extends Light> lightType) {
+        return shaders.get(lightType);
     }
 
 }

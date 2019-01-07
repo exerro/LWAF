@@ -88,7 +88,8 @@ public class Renderer {
             shader.setUniform("projectionTransform", projectionMatrix);
 
             for (var light : scene.getLightsOfType(lightType)) {
-                light.render(buffer, viewMatrix, projectionMatrix);
+                light.setUniforms(viewMatrix, projectionMatrix);
+                light.render(buffer);
             }
         }
 

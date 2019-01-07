@@ -34,8 +34,8 @@ void main(void) {
         normalize(lightDirection)
     ));
 
-    vec4 diffuseColour  = diffuseLightingIntensity * vec4(lightColour, 1.0) * colour * diffuseFactor;
-    vec4 specularColour = specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
+    vec4 diffuseColour  = lightIntensity * diffuseLightingIntensity * vec4(lightColour, 1.0) * colour * diffuseFactor;
+    vec4 specularColour = lightIntensity * specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
 
     gl_FragColor = diffuseColour + specularColour;
 }
