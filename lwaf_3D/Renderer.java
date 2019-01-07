@@ -2,6 +2,7 @@ package lwaf_3D;
 
 import lwaf.FBO;
 import lwaf.Texture;
+import lwaf.vec2f;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
@@ -84,6 +85,7 @@ public class Renderer {
             var shader = Light.getShader(lightType);
 
             shader.start();
+            shader.setUniform("screenSize", new vec2f(getWidth(), getHeight()));
             shader.setUniform("viewTransform", viewMatrix);
             shader.setUniform("projectionTransform", projectionMatrix);
 

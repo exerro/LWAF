@@ -122,6 +122,19 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
         return setScale(scale, scale, scale);
     }
 
+    public Model<T> scaleBy(vec3f scale) {
+        this.scale = this.scale.mul(scale);
+        return this;
+    }
+
+    public Model<T> scaleBy(float x, float y, float z) {
+        return scaleBy(new vec3f(x, y, z));
+    }
+
+    public Model<T> scaleBy(float scale) {
+        return scaleBy(scale, scale, scale);
+    }
+
     public mat4f getTransformationMatrix() {
         return mat4f.identity()
                 .mul(mat4f.translation(position))

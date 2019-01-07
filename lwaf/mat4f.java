@@ -52,6 +52,11 @@ public class mat4f {
     }
 
     // creates a scale matrix
+    public static mat4f scale(float s) {
+        return scale(s, s, s);
+    }
+
+    // creates a scale matrix
     public static mat4f scale(vec3f scale) {
         return scale(scale.x, scale.y, scale.z);
     }
@@ -106,13 +111,13 @@ public class mat4f {
     }
 
     // returns the matrix scaled
-    public mat4f scaleBy(float s) {
-        return mul(scale(s, s, s));
+    public mat4f scaleBy(float x, float y, float z) {
+        return mul(scale(x, y, z));
     }
 
     // returns the matrix scaled
-    public mat4f scaleBy(float x, float y, float z) {
-        return mul(scale(x, y, z));
+    public mat4f scaleBy(float s) {
+        return mul(scale(s));
     }
 
     // returns the matrix scaled

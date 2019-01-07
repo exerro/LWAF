@@ -1,5 +1,4 @@
 import lwaf.*;
-import lwaf_3D.Camera;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.Model;
@@ -8,7 +7,7 @@ import lwaf_model.ModelRenderer;
 import lwaf_primitive.*;
 
 class Models {
-    private ModelRenderer models = new ModelRenderer();
+    public final ModelRenderer models = new ModelRenderer();
 
     public Models() {
         var dark_texture = Texture.load("lwaf/img/no-texture-light.png");

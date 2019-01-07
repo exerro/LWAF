@@ -1,7 +1,5 @@
 #version 400 core
 
-in vec2 uv;
-
 uniform sampler2D colourMap;
 uniform sampler2D positionMap;
 uniform sampler2D normalMap;
@@ -12,8 +10,10 @@ uniform vec3 lightDirection;
 uniform vec3 lightColour;
 
 uniform mat4 viewTransform;
+uniform vec2 screenSize;
 
 void main(void) {
+    vec2 uv = gl_FragCoord.xy / screenSize;
    	vec3 cameraPosition = (inverse(viewTransform)[3]).xyz;
    	vec4 colour = texture(colourMap, uv);
    	vec4 normal = texture(normalMap, uv);

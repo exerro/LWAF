@@ -1,6 +1,8 @@
 
 import lwaf.*;
 import lwaf_3D.*;
+import lwaf_model.Model;
+import lwaf_primitive.ConeVAO;
 
 import java.io.IOException;
 
@@ -47,16 +49,14 @@ public class LWAF_Main extends Application {
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.one.unm(), vec3f.y_axis));
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis, vec3f.x_axis));
 //                addLight(new Light.DirectionalLight(0.4f, vec3f.y_axis.unm()));
-//                addLight(new Light.PointLight(1, new vec3f(0, 6, 10), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
-//                addLight(new Light.PointLight(1, new vec3f(10, 13, 0), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
-//                addLight(new Light.PointLight(1, new vec3f(4, 0, 1), Light.PointLight.attenuation(256, 2), new vec3f(1, 0.00f, 0.016f)));
+                addLight(new Light.PointLight(10, new vec3f(0, 4f, 10), Light.PointLight.attenuation(25), new vec3f(1, 1, 0)));
 
                 addLight(new Light.SpotLight(
                         1,
-                        new vec3f(0, -10 + 3, 11),
+                        new vec3f(0, -10 + 5, 11),
                         new vec3f(0, -1, 0),
                         new vec3f(1, 0.09f, 0.032f),
-                        (float) Math.PI * 0.3f,
+                        Light.SpotLight.lightSpread(0.6f),
                         vec3f.one
                 ));
 
@@ -65,7 +65,61 @@ public class LWAF_Main extends Application {
                         new vec3f(20, -4, 0),
                         new vec3f(5, -1, 0),
                         new vec3f(1000, 0.09f, 1f),
-                        (float) Math.PI * 0.06f,
+                        Light.SpotLight.lightSpread(0.12f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(40, 10, 40),
+                        new vec3f(2, -2, -5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.1f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(50, 20, -30),
+                        new vec3f(-2, -6, 5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.1f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(10, -6, 0),
+                        new vec3f(-8, -5, -5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.3f),
+                        vec3f.x_axis
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(0, -4, -20),
+                        new vec3f(-5, -5, 8),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.3f),
+                        vec3f.y_axis
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(-30, -4, -15),
+                        new vec3f(8, -5, 5),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.3f),
+                        vec3f.z_axis
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(0, 0, 10),
+                        new vec3f(1, 1, -1),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
                         vec3f.one
                 ));
             }

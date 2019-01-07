@@ -1,7 +1,5 @@
 #version 400 core
 
-in vec2 uv;
-
 uniform sampler2D colourMap;
 uniform sampler2D positionMap;
 uniform sampler2D normalMap;
@@ -15,8 +13,10 @@ uniform vec2 lightCutoff;
 uniform vec3 lightColour;
 
 uniform mat4 viewTransform;
+uniform vec2 screenSize;
 
 void main(void) {
+    vec2 uv = gl_FragCoord.xy / screenSize;
    	vec3 cameraPosition = (inverse(viewTransform)[3]).xyz;
    	vec4 colour = texture(colourMap, uv);
    	vec4 normal = texture(normalMap, uv);
@@ -39,12 +39,12 @@ void main(void) {
     ));
 
     float distance = length(position.xyz - lightPosition);
-    float attenuationFactor = 1 / (lightAttenuation.x + distance * (lightAttenuation.y + distance * lightAttenuation.z));
-    float theta = acos(dot(lightDirectionToFragment, normalize(lightDirection)));
+    float attenuationFactor = clamp(1 / (lightAttenuation.x + distance * (lightAttenuation.y + distance * lightAttenuation.z)), 0, 1);
+    float cosMin = cos(lightCutoff.x);
+    float cosMax = cos(lightCutoff.y);
     float spotFactor = clamp(1 -
-        (theta - lightCutoff.y)
-      / (lightCutoff.x - lightCutoff.y)
-      , 0, 1);
+        (dot(lightDirectionToFragment, normalize(lightDirection)) - cosMin) / (cosMax - cosMin)
+    , 0, 1);
 
     vec4 diffuseColour  = spotFactor * attenuationFactor * lightIntensity * diffuseLightingIntensity  * vec4(lightColour, 1.0) * colour * diffuseFactor;
     vec4 specularColour = spotFactor * attenuationFactor * lightIntensity * specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
