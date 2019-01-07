@@ -51,7 +51,7 @@ class Models {
 
         var graph = new Graph3D(v -> (float) (
                 // (float) 1 / (0.1f + v.length())
-                Math.sin(1 / (1 + v.length2()) * 25 + 10 * v.y)
+                Math.sin(1 / (1 + v.length2() / 2) * 25 + 10 * v.y / 2)
         ))
                 .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
                 ;

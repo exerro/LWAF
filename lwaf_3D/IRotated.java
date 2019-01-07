@@ -1,4 +1,6 @@
-package lwaf;
+package lwaf_3D;
+
+import lwaf.vec3f;
 
 @SuppressWarnings("UnusedReturnValue")
 public interface IRotated<R> {

@@ -92,8 +92,8 @@ public class LWAF_Main extends Application {
                         new vec3f(10, -6, 0),
                         new vec3f(-8, -5, -5),
                         new vec3f(1000, 0.09f, 1f),
-                        Light.SpotLight.lightSpread(0.3f),
-                        vec3f.x_axis
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
                 ));
 
                 addLight(new Light.SpotLight(
@@ -101,8 +101,8 @@ public class LWAF_Main extends Application {
                         new vec3f(0, -4, -20),
                         new vec3f(-5, -5, 8),
                         new vec3f(1000, 0.09f, 1f),
-                        Light.SpotLight.lightSpread(0.3f),
-                        vec3f.y_axis
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
                 ));
 
                 addLight(new Light.SpotLight(
@@ -110,8 +110,17 @@ public class LWAF_Main extends Application {
                         new vec3f(-30, -4, -15),
                         new vec3f(8, -5, 5),
                         new vec3f(1000, 0.09f, 1f),
-                        Light.SpotLight.lightSpread(0.3f),
-                        vec3f.z_axis
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
+                ));
+
+                addLight(new Light.SpotLight(
+                        1000,
+                        new vec3f(-30, -4, 30),
+                        new vec3f(5, -5, -8),
+                        new vec3f(1000, 0.09f, 1f),
+                        Light.SpotLight.lightSpread(0.2f),
+                        vec3f.one
                 ));
 
                 addLight(new Light.SpotLight(

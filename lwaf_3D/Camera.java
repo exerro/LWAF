@@ -1,12 +1,10 @@
 package lwaf_3D;
 
-import lwaf.IRotated;
-import lwaf.ITranslated;
 import lwaf.mat4f;
 import lwaf.vec3f;
 
 @SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
-public class Camera implements ITranslated<Camera>, IRotated<Camera> {
+public class Camera implements IPositioned<Camera>, IRotated<Camera> {
     private vec3f position;
     private vec3f rotation;
     private Projection projection;

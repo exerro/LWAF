@@ -1,9 +1,9 @@
 package lwaf_model;
 
 import lwaf.*;
-import lwaf_3D.ObjectLighting;
+import lwaf_3D.*;
 
-public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Model<T>> {
+public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Model<T>> {
     private vec3f position = vec3f.zero,
                   rotation = vec3f.zero,
                   scale = vec3f.one;
@@ -112,27 +112,6 @@ public class Model<T extends VAO> implements ITranslated<Model<T>>, IRotated<Mod
     public Model<T> setScale(vec3f scale) {
         this.scale = scale;
         return this;
-    }
-
-    public Model<T> setScale(float x, float y, float z) {
-        return setScale(new vec3f(x, y, z));
-    }
-
-    public Model<T> setScale(float scale) {
-        return setScale(scale, scale, scale);
-    }
-
-    public Model<T> scaleBy(vec3f scale) {
-        this.scale = this.scale.mul(scale);
-        return this;
-    }
-
-    public Model<T> scaleBy(float x, float y, float z) {
-        return scaleBy(new vec3f(x, y, z));
-    }
-
-    public Model<T> scaleBy(float scale) {
-        return scaleBy(scale, scale, scale);
     }
 
     public mat4f getTransformationMatrix() {
