@@ -3,84 +3,100 @@ package lwaf_model;
 import lwaf.*;
 import lwaf_3D.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Model<T>> {
     private vec3f position = vec3f.zero,
                   rotation = vec3f.zero,
                   scale = vec3f.one;
-    private vec3f colour = vec3f.one;
-    private Texture texture = null;
-    private ObjectLighting lighting = new ObjectLighting();
-    private final T vao;
+    private final Map<String, T> vaos = new HashMap<>();
+    private final Map<String, Material> materials = new HashMap<>();
+
+    public static final String DEFAULT_OBJECT_NAME = "default";
+
+    public Model() {
+
+    }
 
     public Model(T vao) {
-        this.vao = vao;
+        addObject(DEFAULT_OBJECT_NAME, vao, new Material());
+    }
+
+    public Model<T> addObject(String objectName, T vao, Material material) {
+        vaos.put(objectName, vao);
+        materials.put(objectName, material);
+        return this;
+    }
+
+    public Model<T> removeObject(String objectName) {
+        vaos.remove(objectName);
+        materials.remove(objectName);
+        return this;
+    }
+
+    public Set<String> getObjectNames() {
+        return vaos.keySet();
+    }
+
+    public VAO getVAO(String objectName) {
+        return vaos.get(objectName);
+    }
+
+    public VAO getVAO() {
+        return getVAO(DEFAULT_OBJECT_NAME);
+    }
+
+    public Model<T> setVAO(String objectName, T vao) {
+        if (!vaos.containsKey(objectName)) throw new IllegalStateException("No object '" + objectName + "' attached");
+        vaos.put(objectName, vao);
+        return this;
+    }
+
+    public Material getMaterial(String objectName) {
+        return materials.get(objectName);
+    }
+
+    public Material getMaterial() {
+        return getMaterial(DEFAULT_OBJECT_NAME);
+    }
+
+    public Model<T> setMaterial(String objectName, Material material) {
+        if (!materials.containsKey(objectName)) throw new IllegalStateException("No object '" + objectName + "' attached");
+        materials.put(objectName, material);
+        return this;
+    }
+
+    public Model<T> setMaterial(Material material) {
+        for (var objectName : vaos.keySet()) {
+            materials.put(objectName, material);
+        }
+        return this;
     }
 
     public void draw(ShaderLoader.Program shader) {
-        Texture texture = getTexture();
-
         shader.setUniform("transform", getTransformationMatrix());
-        shader.setUniform("colour", getColour());
 
-        lighting.setShaderUniforms(shader);
+        for (String objectName : getObjectNames()) {
+            var material = materials.get(objectName);
+            var texture = material.getTexture();
 
-        if (texture != null) {
-            shader.setUniform("useTexture", true);
-            texture.bind();
+            material.setShaderUniforms(shader);
+
+            if (material.hasTexture()) {
+                shader.setUniform("useTexture", true);
+                texture.bind();
+            } else {
+                shader.setUniform("useTexture", false);
+            }
+
+            Draw.drawIndexedVAO(vaos.get(objectName));
+
+            if (material.hasTexture()) {
+                texture.unbind();
+            }
         }
-        else {
-            shader.setUniform("useTexture", false);
-        }
-
-        Draw.drawIndexedVAO(getVAO());
-
-        if (texture != null) {
-            texture.unbind();
-        }
-    }
-
-    public T getVAO() {
-        return vao;
-    }
-
-    public Texture getTexture() {
-        return texture;
-    }
-
-    public Model<T> setTexture(Texture texture) {
-        if (!vao.areTexturesSupported())
-            throw new IllegalStateException("Model VAO does not support textures (" + vao.getClass().getName() + ")");
-
-        this.texture = texture;
-        return this;
-    }
-
-    public ObjectLighting getLighting() {
-        return lighting;
-    }
-
-    public Model<T> setLighting(ObjectLighting lighting) {
-        this.lighting = lighting;
-        return this;
-    }
-
-    public Model<T> setSpecularLighting(float specularLightingIntensity) {
-        lighting.setSpecularLightingIntensity(specularLightingIntensity);
-        return this;
-    }
-
-    public vec3f getColour() {
-        return colour;
-    }
-
-    public Model<T> setColour(float r, float g, float b) {
-        this.colour = new vec3f(r, g, b);
-        return this;
-    }
-
-    public Model<T> setColour(vec3f colour) {
-        this.colour = colour;
-        return this;
     }
 
     @Override

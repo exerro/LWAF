@@ -1,8 +1,9 @@
 import lwaf.*;
+import lwaf_3D.Material;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.Model;
-import lwaf_model.ModelLoader;
+import lwaf_model.OBJModelLoader;
 import lwaf_model.ModelRenderer;
 import lwaf_primitive.*;
 
@@ -21,32 +22,73 @@ class Models {
             for (int j = 0; j < 10; ++j) {
                 models.add(new Model<>(new UVSphereVAO(j + 1, i + 3)))
                         .setTranslation(i * 2, 3 + j * 2, -2)
-                        .setTexture(dark_texture)
-                        .setSpecularLighting(0)
+                        .setMaterial(new Material()
+                                .setTexture(dark_texture)
+                                .setSpecularLightingIntensity(0)
+                        )
                 ;
             }
         }
 
         models.add(new Model<>(new IcoSphereVAO(1)))
-                .setColour(0, 1, 1)
+                .setMaterial(new Material()
+                        .setColour(0, 1, 1))
                 .setTranslation(0, 0, 0);
 
         models.add(new Model<>(new CubeVAO()))
-                .setTexture(Texture.load("lwaf/img/no-texture-light.png"))
+                .setMaterial(new Material()
+                        .setTexture(Texture.load("lwaf/img/no-texture-light.png")))
                 .setTranslation(2, 0, 0);
 
         models.add(new Model<>(new UVSphereVAO(40, 80)))
-                .setTexture(Texture.load("lwaf/img/no-texture-dark.png"))
+                .setMaterial(new Material()
+                        .setTexture(Texture.load("lwaf/img/no-texture-dark.png")))
                 .setTranslation(4, 0, 0);
 
         models.add(new Model<>(new IcoSphereVAO(7)))
-                .setColour(1, 1, 0)
+                .setMaterial(new Material()
+                        .setColour(1, 1, 0))
                 .setTranslation(6, 0, 0);
 
-        models.add(ModelLoader.safeLoad("stall.obj"))
-                .setTexture(Texture.load("stall_texture.png"))
+        models.add(OBJModelLoader.safeLoadModel("models/stall/stall.obj"))
+                .setMaterial(new Material()
+                        .setTexture(Texture.load("models/stall/stall_texture.png"))
+                        .setSpecularLightingIntensity(0))
                 .setTranslation(0, 0, 10)
-                .setSpecularLighting(0)
+        ;
+
+        models.add(OBJModelLoader.safeLoadModel("models/deer/deer.obj"))
+                .setTranslation(10, 0, 10)
+                .setMaterial(new Material()
+                        .setSpecularLightingIntensity(0.1f))
+                .scaleBy(0.002f)
+        ;
+
+//        models.add(OBJModelLoader.safeLoadModel("models/bugatti/bugatti.obj"))
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f))
+//                .setTranslation(20, 0, 10)
+//        ;
+
+//        models.add(OBJModelLoader.safeLoadModel("models/cottage/cottage_obj.obj"))
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f)
+//                        .setTexture(Texture.load("models/cottage/cottage_diffuse.png")))
+//                .setTranslation(30, 0, 10)
+//        ;
+
+        models.add(OBJModelLoader.safeLoadModel("models/buildings/low poly buildings.obj"))
+                .setMaterial(new Material()
+                        .setSpecularLightingIntensity(0.1f))
+                .setTranslation(40, 0, 10)
+                .setScale(0.005f)
+        ;
+
+        models.add(OBJModelLoader.safeLoadModel("models/trees/Tree1.obj"))
+                .removeObject("Plane")
+                .setMaterial(new Material()
+                        .setSpecularLightingIntensity(0.1f))
+                .setTranslation(50, -1, 10)
         ;
 
         var graph = new Graph3D(v -> (float) (

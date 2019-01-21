@@ -131,6 +131,11 @@ public class LWAF_Main extends Application {
                         Light.SpotLight.lightSpread(0.2f),
                         vec3f.one
                 ));
+
+                addLight(new Light.PointLight(
+                        3,
+                        new vec3f(40, 5, 5)
+                ));
             }
 
             @Override
