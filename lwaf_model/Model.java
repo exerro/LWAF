@@ -21,12 +21,18 @@ public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Mod
     }
 
     public Model(T vao) {
-        attach(DEFAULT_OBJECT_NAME, vao, new Material());
+        addObject(DEFAULT_OBJECT_NAME, vao, new Material());
     }
 
-    public Model<T> attach(String objectName, T vao, Material material) {
+    public Model<T> addObject(String objectName, T vao, Material material) {
         vaos.put(objectName, vao);
         materials.put(objectName, material);
+        return this;
+    }
+
+    public Model<T> removeObject(String objectName) {
+        vaos.remove(objectName);
+        materials.remove(objectName);
         return this;
     }
 

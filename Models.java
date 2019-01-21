@@ -3,7 +3,7 @@ import lwaf_3D.Material;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.Model;
-import lwaf_model.ModelLoader;
+import lwaf_model.OBJModelLoader;
 import lwaf_model.ModelRenderer;
 import lwaf_primitive.*;
 
@@ -50,30 +50,45 @@ class Models {
                         .setColour(1, 1, 0))
                 .setTranslation(6, 0, 0);
 
-        models.add(ModelLoader.safeLoad("stall.obj"))
+        models.add(OBJModelLoader.safeLoadModel("models/stall/stall.obj"))
                 .setMaterial(new Material()
-                        .setTexture(Texture.load("stall_texture.png"))
+                        .setTexture(Texture.load("models/stall/stall_texture.png"))
                         .setSpecularLightingIntensity(0))
                 .setTranslation(0, 0, 10)
         ;
 
-        models.add(ModelLoader.safeLoad("deer.obj"))
+        models.add(OBJModelLoader.safeLoadModel("models/deer/deer.obj"))
                 .setTranslation(10, 0, 10)
                 .setMaterial(new Material()
                         .setSpecularLightingIntensity(0.1f))
                 .scaleBy(0.002f)
         ;
 
-        models.add(ModelLoader.safeLoad("bugatti.obj"))
+//        models.add(OBJModelLoader.safeLoadModel("models/bugatti/bugatti.obj"))
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f))
+//                .setTranslation(20, 0, 10)
+//        ;
+
+//        models.add(OBJModelLoader.safeLoadModel("models/cottage/cottage_obj.obj"))
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f)
+//                        .setTexture(Texture.load("models/cottage/cottage_diffuse.png")))
+//                .setTranslation(30, 0, 10)
+//        ;
+
+        models.add(OBJModelLoader.safeLoadModel("models/buildings/low poly buildings.obj"))
                 .setMaterial(new Material()
                         .setSpecularLightingIntensity(0.1f))
-                .setTranslation(20, 0, 10)
+                .setTranslation(40, 0, 10)
+                .setScale(0.005f)
         ;
 
-        models.add(ModelLoader.safeLoad("cottage_obj.obj"))
+        models.add(OBJModelLoader.safeLoadModel("models/trees/Tree1.obj"))
+                .removeObject("Plane")
                 .setMaterial(new Material()
                         .setSpecularLightingIntensity(0.1f))
-                .setTranslation(20, 0, 10)
+                .setTranslation(50, -1, 10)
         ;
 
         var graph = new Graph3D(v -> (float) (
