@@ -1,5 +1,6 @@
 import lwaf.*;
 import lwaf_3D.Material;
+import lwaf_core.*;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.Model;
@@ -11,7 +12,7 @@ class Models {
     public final ModelRenderer models = new ModelRenderer();
 
     public Models() {
-        var dark_texture = Texture.load("lwaf/img/no-texture-light.png");
+        var dark_texture = GLTextureKt.loadTexture("lwaf/img/no-texture-light.png");
 
         for (int i = 0; i < 5; ++i) {
             models.add(new Model<>(new IcoSphereVAO(i + 1)))
@@ -37,12 +38,12 @@ class Models {
 
         models.add(new Model<>(new CubeVAO()))
                 .setMaterial(new Material()
-                        .setTexture(Texture.load("lwaf/img/no-texture-light.png")))
+                        .setTexture(GLTextureKt.loadTexture("lwaf/img/no-texture-light.png")))
                 .setTranslation(2, 0, 0);
 
         models.add(new Model<>(new UVSphereVAO(40, 80)))
                 .setMaterial(new Material()
-                        .setTexture(Texture.load("lwaf/img/no-texture-dark.png")))
+                        .setTexture(GLTextureKt.loadTexture("lwaf/img/no-texture-dark.png")))
                 .setTranslation(4, 0, 0);
 
         models.add(new Model<>(new IcoSphereVAO(7)))
@@ -52,7 +53,7 @@ class Models {
 
         models.add(OBJModelLoader.safeLoadModel("models/stall/stall.obj"))
                 .setMaterial(new Material()
-                        .setTexture(Texture.load("models/stall/stall_texture.png"))
+                        .setTexture(GLTextureKt.loadTexture("models/stall/stall_texture.png"))
                         .setSpecularLightingIntensity(0))
                 .setTranslation(0, 0, 10)
         ;
@@ -69,58 +70,58 @@ class Models {
 //                        .setSpecularLightingIntensity(0.1f))
 //                .setTranslation(20, 0, 10)
 //        ;
-
+//
 //        models.add(OBJModelLoader.safeLoadModel("models/cottage/cottage_obj.obj"))
 //                .setMaterial(new Material()
 //                        .setSpecularLightingIntensity(0.1f)
 //                        .setTexture(Texture.load("models/cottage/cottage_diffuse.png")))
 //                .setTranslation(30, 0, 10)
 //        ;
-
-        models.add(OBJModelLoader.safeLoadModel("models/buildings/low poly buildings.obj"))
-                .setMaterial(new Material()
-                        .setSpecularLightingIntensity(0.1f))
-                .setTranslation(40, 0, 10)
-                .setScale(0.005f)
-        ;
-
-        models.add(OBJModelLoader.safeLoadModel("models/trees/Tree1.obj"))
-                .removeObject("Plane")
-                .setMaterial(new Material()
-                        .setSpecularLightingIntensity(0.1f))
-                .setTranslation(50, -1, 10)
-        ;
+//
+//        models.add(OBJModelLoader.safeLoadModel("models/buildings/low poly buildings.obj"))
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f))
+//                .setTranslation(40, 0, 10)
+//                .setScale(0.005f)
+//        ;
+//
+//        models.add(OBJModelLoader.safeLoadModel("models/trees/Tree1.obj"))
+//                .removeObject("Plane")
+//                .setMaterial(new Material()
+//                        .setSpecularLightingIntensity(0.1f))
+//                .setTranslation(50, -1, 10)
+//        ;
 
         var graph = new Graph3D(v -> (float) (
                 // (float) 1 / (0.1f + v.length())
-                Math.sin(1 / (1 + v.length2() / 2) * 25 + 10 * v.y / 2)
+                Math.sin(1 / (1 + v.length2() / 2) * 25 + 10 * v.getY() / 2)
         ))
-                .setColouring(v -> new vec3f(0.5f + v.y * 0.5f, new vec2f(v.x, v.z).length(), 1f - v.y * 0.5f))
+                .setColouring(v -> new vec3(0.5f + v.getY() * 0.5f, new vec2(v.getX(), v.getZ()).length(), 1f - v.getY() * 0.5f))
                 ;
 
-        var scale = new vec3f(20, 1f, 20);
+        var scale = new vec3(20, 1f, 20);
         var res = 50;
 
         models.add(new Model<>(graph.getTriangulatedVAO(new Graph3D.UniformGridStrategy(res))))
-                .setTranslation(0, -10, scale.x / 2 + 1)
+                .setTranslation(0, -10, scale.getX() / 2 + 1)
                 .setScale(scale)
         ;
 
-        models.add(new Model<>(new CubeVAO())).setTranslation(0, -10, scale.x / 2 + 1);
-        models.add(new Model<>(new CubeVAO())).setTranslation(scale.x * 0.5f, -10, scale.x / 2 + 1);
+        models.add(new Model<>(new CubeVAO())).setTranslation(0, -10, scale.getX() / 2 + 1);
+        models.add(new Model<>(new CubeVAO())).setTranslation(scale.getX() * 0.5f, -10, scale.getX() / 2 + 1);
 
         models.add(new Model<>(graph.getTriangulatedVAO(new Graph3D.GradientPullStrategy(res))))
-                .setTranslation(0, -10, -scale.x / 2 - 1)
+                .setTranslation(0, -10, -scale.getX() / 2 - 1)
                 .setScale(scale)
         ;
 
         models.add(new Model<>(graph.getSmoothVAO(new Graph3D.UniformGridStrategy(res))))
-                .setTranslation(-scale.x - 1, -10, scale.x / 2 + 1)
+                .setTranslation(-scale.getX() - 1, -10, scale.getX() / 2 + 1)
                 .setScale(scale)
         ;
 
         models.add(new Model<>(graph.getSmoothVAO(new Graph3D.GradientPullStrategy(res))))
-                .setTranslation(-scale.x - 1, -10, -scale.x / 2 - 1)
+                .setTranslation(-scale.getX() - 1, -10, -scale.getX() / 2 - 1)
                 .setScale(scale)
         ;
 
@@ -134,19 +135,17 @@ class Models {
                 .setTranslation(-2, 4, 0);
     }
 
-    public void draw(ShaderLoader.Program shader) {
-        var t = Application.getActive().getTime();
+    public void draw(GLShaderProgram shader) {
+        var t = System.currentTimeMillis();
 
         models.draw(shader);
 
-        var sea = new Graph3D(v -> {
-            return (float) (
-                    2.00 * SimplexNoise.noise(v.x * 0.5 + t * 0.05, v.y * 0.5, t * 0.05)
-                            + 0.50 * SimplexNoise.noise(v.x + t * 0.1, v.y, t * 0.1)
-                            + 0.50 * SimplexNoise.noise(v.x * 3 + t * 0.3, v.y * 3, t * 0.3)
-            );
-        })
-                .setColouring(v -> new vec3f(0.3f, 0.6f, 0.9f).add(vec3f.one.mul(v.y * 0.1f)))
+        var sea = new Graph3D(v -> (float) (
+                2.00 * SimplexNoise.noise(v.getX() * 0.5 + t * 0.05, v.getY() * 0.5, t * 0.05)
+                        + 0.50 * SimplexNoise.noise(v.getX() + t * 0.1, v.getY(), t * 0.1)
+                        + 0.50 * SimplexNoise.noise(v.getX() * 3 + t * 0.3, v.getY() * 3, t * 0.3)
+        ))
+                .setColouring(v -> new vec3(0.3f, 0.6f, 0.9f).add(new vec3(1f, 1f, 1f).mul(v.getY() * 0.1f)))
                 ;
 
         new Model<>(sea.getSmoothVAO(new Graph3D.UniformGridStrategy(50)))
