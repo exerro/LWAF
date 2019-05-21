@@ -21,7 +21,11 @@ class DrawContext2D(private val view: GLView) {
         drawTexturedVAO(null, rectangleVAO, transform)
     }
 
-    fun write(text: Text, position: vec2 = vec2(0f, 0f)) {
+    fun write(text: String, font: Font, position: vec2 = vec2(0f, 0f)) {
+        write(font.getTextObject(text), position)
+    }
+
+    fun write(text: FontText, position: vec2 = vec2(0f, 0f)) {
         val displaySize = view.size
         val transform   = mat4_identity
                 .translateBy(vec3(-1f, 1f, 0f))

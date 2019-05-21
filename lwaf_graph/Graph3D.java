@@ -208,7 +208,7 @@ public class Graph3D {
         }
     }
 
-    private static abstract class EvaluationStrategy {
+    public static abstract class EvaluationStrategy {
         protected abstract List<Tri> generateTriangles(Graph3D graph);
     }
 

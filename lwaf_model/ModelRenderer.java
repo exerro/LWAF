@@ -1,6 +1,6 @@
 package lwaf_model;
 
-import lwaf_core.DrawContext3D;
+import lwaf_3D.DrawContext3D;
 import lwaf_core.GLShaderProgram;
 import lwaf_core.GLVAO;
 

@@ -46,6 +46,8 @@ data class vec2(val x: Float, val y: Float) {
 
     fun mul(other: vec2): vec2 = vec2(x * other.x, y * other.y)
     fun mul(s: Float): vec2 = mul(vec2(s, s))
+    fun div(other: vec2): vec2 = vec2(x / other.x, y / other.y)
+    fun div(s: Float): vec2 = div(vec2(s, s))
 
     fun length2(): Float = x*x + y*y
     fun length(): Float = Math.sqrt(length2().toDouble()).toFloat()

@@ -26,18 +26,114 @@ class Display(
     private var window: Long = 0
     private var internalFPS = 0
 
-    var onResizedCallback: ((Int, Int) -> Unit)? = null
-    var onMouseDownCallback: ((vec2, Int) -> Unit)? = null
-    var onMouseUpCallback: ((vec2, Int) -> Unit)? = null
-    var onMouseMoveCallback: ((vec2, vec2) -> Unit)? = null
-    var onMouseDragCallback: ((vec2, vec2, vec2, Set<Int>) -> Unit)? = null
-    var onKeyPressedCallback: ((Int, Int) -> Unit)? = null
-    var onKeyReleasedCallback: ((Int, Int) -> Unit)? = null
-    var onTextInputCallback: ((String) -> Unit)? = null
-    var onUpdateCallback: ((Float) -> Unit)? = null
-    var onDrawCallback: (() -> Unit)? = null
-    var onLoadCallback: (() -> Unit)? = null
-    var onUnloadCallback: (() -> Unit)? = null
+    private val onResizedCallbacks: MutableList<((Int, Int) -> Unit)> = ArrayList()
+    private val onMouseDownCallbacks: MutableList<((vec2, Int) -> Unit)> = ArrayList()
+    private val onMouseUpCallbacks: MutableList<((vec2, Int) -> Unit)> = ArrayList()
+    private val onMouseMoveCallbacks: MutableList<((vec2, vec2) -> Unit)> = ArrayList()
+    private val onMouseDragCallbacks: MutableList<((vec2, vec2, vec2, Set<Int>) -> Unit)> = ArrayList()
+    private val onKeyPressedCallbacks: MutableList<((Int, Int) -> Unit)> = ArrayList()
+    private val onKeyReleasedCallbacks: MutableList<((Int, Int) -> Unit)> = ArrayList()
+    private val onTextInputCallbacks: MutableList<((String) -> Unit)> = ArrayList()
+    private val onUpdateCallbacks: MutableList<((Float) -> Unit)> = ArrayList()
+    private val onDrawCallbacks: MutableList<(() -> Unit)> = ArrayList()
+    private val onLoadCallbacks: MutableList<(() -> Unit)> = ArrayList()
+    private val onUnloadCallbacks: MutableList<(() -> Unit)> = ArrayList()
+
+    fun attachResizedCallback(callback: (Int, Int) -> Unit) {
+        onResizedCallbacks.add(callback)
+    }
+
+    fun attachMouseDownCallback(callback: (vec2, Int) -> Unit) {
+        onMouseDownCallbacks.add(callback)
+    }
+
+    fun attachMouseUpCallback(callback: (vec2, Int) -> Unit) {
+        onMouseUpCallbacks.add(callback)
+    }
+
+    fun attachMouseMoveCallback(callback: (vec2, vec2) -> Unit) {
+        onMouseMoveCallbacks.add(callback)
+    }
+
+    fun attachMouseDragCallback(callback: (vec2, vec2, vec2, Set<Int>) -> Unit) {
+        onMouseDragCallbacks.add(callback)
+    }
+
+    fun attachKeyPressedCallback(callback: (Int, Int) -> Unit) {
+        onKeyPressedCallbacks.add(callback)
+    }
+
+    fun attachKeyReleasedCallback(callback: (Int, Int) -> Unit) {
+        onKeyReleasedCallbacks.add(callback)
+    }
+
+    fun attachTextInputCallback(callback: (String) -> Unit) {
+        onTextInputCallbacks.add(callback)
+    }
+
+    fun attachUpdateCallback(callback: (Float) -> Unit) {
+        onUpdateCallbacks.add(callback)
+    }
+
+    fun attachDrawCallback(callback: () -> Unit) {
+        onDrawCallbacks.add(callback)
+    }
+
+    fun attachLoadCallback(callback: () -> Unit) {
+        onLoadCallbacks.add(callback)
+    }
+
+    fun attachUnloadCallback(callback: () -> Unit) {
+        onUnloadCallbacks.add(callback)
+    }
+
+    fun detachResizedCallback(callback: (Int, Int) -> Unit) {
+        onResizedCallbacks.remove(callback)
+    }
+
+    fun detachMouseDownCallback(callback: (vec2, Int) -> Unit) {
+        onMouseDownCallbacks.remove(callback)
+    }
+
+    fun detachMouseUpCallback(callback: (vec2, Int) -> Unit) {
+        onMouseUpCallbacks.remove(callback)
+    }
+
+    fun detachMouseMoveCallback(callback: (vec2, vec2) -> Unit) {
+        onMouseMoveCallbacks.remove(callback)
+    }
+
+    fun detachMouseDragCallback(callback: (vec2, vec2, vec2, Set<Int>) -> Unit) {
+        onMouseDragCallbacks.remove(callback)
+    }
+
+    fun detachKeyPressedCallback(callback: (Int, Int) -> Unit) {
+        onKeyPressedCallbacks.remove(callback)
+    }
+
+    fun detachKeyReleasedCallback(callback: (Int, Int) -> Unit) {
+        onKeyReleasedCallbacks.remove(callback)
+    }
+
+    fun detachTextInputCallback(callback: (String) -> Unit) {
+        onTextInputCallbacks.remove(callback)
+    }
+
+    fun detachUpdateCallback(callback: (Float) -> Unit) {
+        onUpdateCallbacks.remove(callback)
+    }
+
+    fun detachDrawCallback(callback: () -> Unit) {
+        onDrawCallbacks.remove(callback)
+    }
+
+    fun detachLoadCallback(callback: () -> Unit) {
+        onLoadCallbacks.remove(callback)
+    }
+
+    fun detachUnloadCallback(callback: () -> Unit) {
+        onUnloadCallbacks.remove(callback)
+    }
 
     val FPS get() = internalFPS
 
@@ -112,8 +208,8 @@ class Display(
             internalFPS = (fpsReadings.fold(dt) { acc, it -> acc + it } / (fpsReadings.size + 1)).toInt()
 
             // call the update render callbacks
-            onUpdateCallback?.invoke(dt / 1000f)
-            onDrawCallback?.invoke()
+            onUpdateCallbacks.map { it(dt / 1000f) }
+            onDrawCallbacks.map { it() }
 
             // swap the color buffers to present the content to the screen
             glfwSwapBuffers(window)
@@ -124,7 +220,7 @@ class Display(
             glfwPollEvents()
         }
 
-        onUnloadCallback?.invoke()
+        onUnloadCallbacks.map { it() }
 
         destroy()
         glfwTerminate()
@@ -172,7 +268,7 @@ class Display(
         setCallbacks() // sets the GLFW callbacks to use the custom callbacks above
         updateGLViewport() // update the GL viewport to set it up initially
 
-        onLoadCallback?.invoke() // call the loaded callback, if set
+        onLoadCallbacks.map { it() } // call the loaded callbacks
         onSetup.map { it() }
         setup = true
     }
@@ -181,22 +277,22 @@ class Display(
         // on window resize, update the GL viewport and call a resized callback, if set
         glfwSetWindowSizeCallback(window) { _, _, _ ->
             updateGLViewport()
-            onResizedCallback?.invoke(width, height)
+            onResizedCallbacks.map { it(width, height) }
         }
 
         glfwSetKeyCallback(window) { _, key, _, action, mods ->
-            if (action == GLFW_PRESS) onKeyPressedCallback?.invoke(key, mods)
-            if (action == GLFW_RELEASE) onKeyReleasedCallback?.invoke(key, mods)
+            if (action == GLFW_PRESS) onKeyPressedCallbacks.map { it(key, mods) }
+            if (action == GLFW_RELEASE) onKeyReleasedCallbacks.map { it(key, mods) }
         }
 
         glfwSetCharCallback(window) { _, codepoint ->
-            onTextInputCallback?.invoke(Character.toChars(codepoint).toString())
+            onTextInputCallbacks.map { it(Character.toChars(codepoint).toString()) }
         }
 
         glfwSetCursorPosCallback(window) { _, _, _ ->
             val pos = getMousePosition()
-            if (heldMouseButtons.isEmpty()) onMouseMoveCallback?.invoke(pos, lastMousePosition)
-            else onMouseDragCallback?.invoke(pos, lastMousePosition, firstMousePosition, heldMouseButtons)
+            if (heldMouseButtons.isEmpty()) onMouseMoveCallbacks.map { it(pos, lastMousePosition) }
+            else onMouseDragCallbacks.map { it(pos, lastMousePosition, firstMousePosition, heldMouseButtons) }
             lastMousePosition = pos
         }
 
@@ -206,11 +302,11 @@ class Display(
             if (action == GLFW_PRESS) {
                 if (heldMouseButtons.isEmpty()) firstMousePosition = pos
                 heldMouseButtons.add(button)
-                onMouseDownCallback?.invoke(pos, mods)
+                onMouseDownCallbacks.map { it(pos, mods) }
             }
             else if (action == GLFW_RELEASE) {
                 heldMouseButtons.remove(button)
-                onMouseUpCallback?.invoke(pos, mods)
+                onMouseUpCallbacks.map { it(pos, mods) }
             }
         }
     }

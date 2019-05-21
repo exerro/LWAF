@@ -7,12 +7,12 @@ import java.nio.file.Paths;
 import static org.lwjgl.opengl.GL30.*;
 
 public class GBuffer {
-    private final GLFBO fbo;
+    private final GLFramebuffer fbo;
     private final GLTexture colourTexture, positionTexture, normalTexture, lightingTexture;
     public final DrawContext3D context;
 
     public GBuffer(int width, int height) {
-        fbo = new GLFBO(width, height);
+        fbo = new GLFramebuffer(width, height);
         context = new DrawContext3D(new GLView(new vec2(0, 0), new vec2(width, height)));
 
         colourTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height), GL_COLOR_ATTACHMENT0);

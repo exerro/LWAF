@@ -1,8 +1,7 @@
 package lwaf_3D;
 
-import lwaf_core.GLFBO;
+import lwaf_core.GLFramebuffer;
 import lwaf_core.GLTexture;
-import lwaf_core.mat4;
 import lwaf_core.vec2;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -12,12 +11,12 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 
 public class Renderer {
     private final GBuffer buffer;
-    private final GLFBO framebuffer;
+    private final GLFramebuffer framebuffer;
     private final GLTexture texture;
 
     public Renderer(int width, int height) {
         buffer = new GBuffer(width, height);
-        framebuffer = new GLFBO(width, height);
+        framebuffer = new GLFramebuffer(width, height);
         texture = lwaf_core.GLTextureKt.createEmptyTexture(width, height);
 
         framebuffer.attachTexture(texture, GL_COLOR_ATTACHMENT0);
@@ -40,7 +39,7 @@ public class Renderer {
         return buffer;
     }
 
-    public GLFBO getFramebuffer() {
+    public GLFramebuffer getFramebuffer() {
         return framebuffer;
     }
 
