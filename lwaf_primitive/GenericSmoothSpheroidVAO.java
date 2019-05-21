@@ -1,19 +1,19 @@
 package lwaf_primitive;
 
-import lwaf.VAO;
-import lwaf.vec3f;
+import lwaf_core.GLVAO;
+import lwaf_core.vec3;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-abstract class GenericSmoothSpheroidVAO extends VAO {
+abstract class GenericSmoothSpheroidVAO extends GLVAO {
     // assumes vertices are already normalised
-    protected void genSpheroidBuffers(vec3f[] vertices) {
+    protected void genSpheroidBuffers(vec3[] vertices) {
         float[] vertex_floats, normal_floats;
-        var normals = new vec3f[vertices.length];
+        var normals = new vec3[vertices.length];
 
         System.arraycopy(vertices, 0, normals, 0, vertices.length);
 
-        normal_floats = vec3fToFloatArray(normals);
-        vertex_floats = vec3fToFloatArray(vertices);
+        normal_floats = Util.vec3fToFloatArray(normals);
+        vertex_floats = Util.vec3fToFloatArray(vertices);
 
         for (int i = 0; i < vertex_floats.length; ++i) {
             vertex_floats[i] = vertex_floats[i] / 2;

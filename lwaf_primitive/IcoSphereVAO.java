@@ -1,6 +1,6 @@
 package lwaf_primitive;
 
-import lwaf.vec3f;
+import lwaf_core.vec3;
 
 // FIXME: non-optimal number of vertices are created by the upscaling method, this should be fixed
 // TODO: add texturing support with calculated UV coords
@@ -16,7 +16,7 @@ public class IcoSphereVAO extends GenericSmoothSpheroidVAO {
         var vertices  = icosahedron_vertices;
 
         for (int res = 1; res < resolution; ++res) {
-            var vertices_out = new vec3f[vertices.length + 3 * faces.length];
+            var vertices_out = new vec3[vertices.length + 3 * faces.length];
             var faces_out    = new int[faces.length * 4][];
 
             upscaleVertices(vertices, vertices_out, faces, faces_out);
@@ -40,7 +40,7 @@ public class IcoSphereVAO extends GenericSmoothSpheroidVAO {
         genElementBuffer(elements);
     }
 
-    private static void upscaleVertices(vec3f[] vertices_in, vec3f[] vertices_out, int[][] faces_in, int[][] faces_out) {
+    private static void upscaleVertices(vec3[] vertices_in, vec3[] vertices_out, int[][] faces_in, int[][] faces_out) {
         var f = 0;
         var v = vertices_in.length;
 
@@ -69,19 +69,19 @@ public class IcoSphereVAO extends GenericSmoothSpheroidVAO {
 
     private static final float t = (float) Math.sqrt(5) / 2 + 1;
 
-    private static vec3f[] icosahedron_vertices = new vec3f[] {
-            new vec3f(-1f,  t ,  0f).normalise(),
-            new vec3f( 1f,  t ,  0f).normalise(),
-            new vec3f(-1f, -t ,  0f).normalise(),
-            new vec3f( 1f, -t ,  0f).normalise(),
-            new vec3f( 0f, -1f,  t ).normalise(),
-            new vec3f( 0f,  1f,  t ).normalise(),
-            new vec3f( 0f, -1f, -t ).normalise(),
-            new vec3f( 0f,  1f, -t ).normalise(),
-            new vec3f( t,   0f, -1f).normalise(),
-            new vec3f( t,   0f,  1f).normalise(),
-            new vec3f(-t,   0f, -1f).normalise(),
-            new vec3f(-t,   0f,  1f).normalise(),
+    private static vec3[] icosahedron_vertices = new vec3[] {
+            new vec3(-1f,  t ,  0f).normalise(),
+            new vec3( 1f,  t ,  0f).normalise(),
+            new vec3(-1f, -t ,  0f).normalise(),
+            new vec3( 1f, -t ,  0f).normalise(),
+            new vec3( 0f, -1f,  t ).normalise(),
+            new vec3( 0f,  1f,  t ).normalise(),
+            new vec3( 0f, -1f, -t ).normalise(),
+            new vec3( 0f,  1f, -t ).normalise(),
+            new vec3( t,   0f, -1f).normalise(),
+            new vec3( t,   0f,  1f).normalise(),
+            new vec3(-t,   0f, -1f).normalise(),
+            new vec3(-t,   0f,  1f).normalise(),
     };
 
     private static int[][] icosahedron_faces = new int[][] {

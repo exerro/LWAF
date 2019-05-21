@@ -1,6 +1,6 @@
 package lwaf_primitive;
 
-import lwaf.vec3f;
+import lwaf_core.vec3;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class UVSphereVAO extends GenericSmoothSpheroidVAO {
@@ -20,8 +20,8 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
         genElementBuffer(elements);
     }
 
-    private static vec3f[] genVertices(int w, int h) {
-        var vs = new vec3f[(w + 1) * h + 2 * w];
+    private static vec3[] genVertices(int w, int h) {
+        var vs = new vec3[(w + 1) * h + 2 * w];
         var v = 0;
 
         for (int yt = 0; yt < h; ++yt) {
@@ -33,13 +33,13 @@ public class UVSphereVAO extends GenericSmoothSpheroidVAO {
                 double x = rl * Math.sin(xTheta);
                 double z = rl * Math.cos(xTheta);
 
-                vs[v++] = new vec3f((float) x, (float) y, (float) z).normalise();
+                vs[v++] = new vec3((float) x, (float) y, (float) z).normalise();
             }
         }
 
         for (int i = 0; i < w; ++i) {
-            vs[v++] = vec3f.y_axis;
-            vs[v++] = vec3f.y_axis.unm();
+            vs[v++] = new vec3(0, 1, 0);
+            vs[v++] = new vec3(0, -1, 0);
         }
 
         return vs;

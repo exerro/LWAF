@@ -1,13 +1,13 @@
 package lwaf_3D;
 
-import lwaf.vec3f;
+import lwaf_core.vec3;
 
 public interface IPositioned<R> extends ITranslated<R> {
-    default R setPosition(vec3f position) {
+    default R setPosition(vec3 position) {
         return setTranslation(position);
     }
 
-    default R moveBy(vec3f movement) {
+    default R moveBy(vec3 movement) {
         return translateBy(movement);
     }
 

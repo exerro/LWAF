@@ -1,15 +1,15 @@
 package lwaf_primitive;
 
-import lwaf.VAO;
-import lwaf.vec3f;
+import lwaf_core.GLVAO;
+import lwaf_core.vec3;
 
-public class PyramidVAO extends VAO {
+public class PyramidVAO extends GLVAO {
     public PyramidVAO(int sides) {
         if (sides < 3)
             throw new IllegalArgumentException("Too few sides for pyramid construction (" + sides + ")");
 
         float[] vertices = new float[(sides * 4 + 1) * 3];
-        vec3f[] normals  = new vec3f[sides * 4 + 1];
+        vec3[] normals  = new vec3[sides * 4 + 1];
         int[] elements = new int[sides * 6];
 
         for (int i = 0; i < sides; ++i) {
@@ -43,17 +43,17 @@ public class PyramidVAO extends VAO {
             vertices[sides * 9 + i * 3 + 1] = -0.5f;
             vertices[sides * 9 + i * 3 + 2] = cos / 2;
 
-            normals[i            ] = new vec3f(sin2, 0.5f, cos2).normalise();
-            normals[sides     + i] = new vec3f(sin3, 0.5f, cos3).normalise();
-            normals[sides * 2 + i] = new vec3f(sin2, 0.5f, cos2).normalise();
-            normals[sides * 3 + i] = new vec3f(0, -1, 0);
+            normals[i            ] = new vec3(sin2, 0.5f, cos2).normalise();
+            normals[sides     + i] = new vec3(sin3, 0.5f, cos3).normalise();
+            normals[sides * 2 + i] = new vec3(sin2, 0.5f, cos2).normalise();
+            normals[sides * 3 + i] = new vec3(0, -1, 0);
         }
 
         vertices[sides * 12    ] = 0;
         vertices[sides * 12 + 1] = -0.5f;
         vertices[sides * 12 + 2] = 0;
 
-        normals[sides * 4] = new vec3f(0, -1, 0);
+        normals[sides * 4] = new vec3(0, -1, 0);
 
         for (int i = 0; i < sides; ++i) {
             elements[i * 3    ] = i + sides * 2;
@@ -67,7 +67,7 @@ public class PyramidVAO extends VAO {
 
         setVertexCount(elements.length);
         genVertexBuffer(vertices);
-        genNormalBuffer(vec3fToFloatArray(normals));
+        genNormalBuffer(Util.vec3fToFloatArray(normals));
         genColourBuffer(vertices.length / 3);
         genElementBuffer(elements);
     }

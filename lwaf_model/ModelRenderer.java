@@ -1,6 +1,8 @@
 package lwaf_model;
 
 import lwaf.*;
+import lwaf_core.GLShaderProgram;
+import lwaf_core.GLVAO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +12,13 @@ public class ModelRenderer {
 
     public ModelRenderer() {}
 
-    public <T extends VAO> Model<T> add(Model<T> model) {
+    public <T extends GLVAO> Model<T> add(Model<T> model) {
         models.add(model);
         return model;
     }
 
-    public <T extends VAO> Model<T> remove(Model<T> model) {
+    public <T extends GLVAO
+            > Model<T> remove(Model<T> model) {
         models.remove(model);
         return model;
     }
@@ -24,7 +27,7 @@ public class ModelRenderer {
         return new ArrayList<>(models);
     }
 
-    public void draw(ShaderLoader.Program shader) {
+    public void draw(GLShaderProgram shader) {
         for (Model model : models) {
             model.draw(shader);
         }

@@ -1,9 +1,9 @@
 package lwaf_primitive;
 
-import lwaf.VAO;
+import lwaf_core.GLVAO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class CubeVAO extends VAO {
+public class CubeVAO extends GLVAO {
     public CubeVAO() {
         setVertexCount(elements.length);
         genVertexBuffer(vertices);

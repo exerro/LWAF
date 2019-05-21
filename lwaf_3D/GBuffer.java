@@ -1,8 +1,10 @@
 package lwaf_3D;
 
-import lwaf.FBO;
 import lwaf.ShaderLoader;
-import lwaf.Texture;
+import lwaf_core.GLFBO;
+import lwaf_core.GLShaderProgram;
+import lwaf_core.GLTexture;
+import lwaf_core.GLTextureKt;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -10,16 +12,16 @@ import java.nio.file.Paths;
 import static org.lwjgl.opengl.GL30.*;
 
 public class GBuffer {
-    private final FBO fbo;
-    private final Texture colourTexture, positionTexture, normalTexture, lightingTexture;
+    private final GLFBO fbo;
+    private final GLTexture colourTexture, positionTexture, normalTexture, lightingTexture;
 
     public GBuffer(int width, int height) {
-        fbo = new FBO(width, height);
+        fbo = new GLFBO(width, height);
 
-        colourTexture = fbo.attachTexture(Texture.create(width, height), GL_COLOR_ATTACHMENT0);
-        positionTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT1);
-        normalTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT2);
-        lightingTexture = fbo.attachTexture(Texture.create(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT3);
+        colourTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height), GL_COLOR_ATTACHMENT0);
+        positionTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT1);
+        normalTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT2);
+        lightingTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT3);
 
         fbo.setDrawBuffers(GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3);
     }
@@ -50,23 +52,23 @@ public class GBuffer {
         }
     }
 
-    public Texture getColourTexture() {
+    public GLTexture getColourTexture() {
         return colourTexture;
     }
 
-    public Texture getPositionTexture() {
+    public GLTexture getPositionTexture() {
         return positionTexture;
     }
 
-    public Texture getNormalTexture() {
+    public GLTexture getNormalTexture() {
         return normalTexture;
     }
 
-    public Texture getLightingTexture() {
+    public GLTexture getLightingTexture() {
         return lightingTexture;
     }
 
-    public Texture getDepthTexture() {
+    public GLTexture getDepthTexture() {
         return fbo.getDepthTexture();
     }
 
@@ -80,36 +82,7 @@ public class GBuffer {
 
     public static String FRAGMENT_SHADER_PATH = "lwaf_3D/shader/gbuffer-render.fragment-3D.glsl";
 
-    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        return ShaderLoader.load(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                Paths.get(basePath, geometryShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
-    }
-
-    public static ShaderLoader.Program loadGeometryShader(String basePath, String vertexShader, boolean instanced) throws ShaderLoader.ProgramLoadException, IOException, ShaderLoader.ShaderLoadException {
-        return ShaderLoader.load(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
-    }
-
-    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, String geometryShader, boolean instanced) {
-        return ShaderLoader.safeLoad(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
-                Paths.get(basePath, geometryShader).toString(),
-                FRAGMENT_SHADER_PATH,
-                instanced
-        );
-    }
-
-    public static ShaderLoader.Program safeLoadGeometryShader(String basePath, String vertexShader, boolean instanced) {
+    public static GLShaderProgram safeLoadGeometryShader(String basePath, String vertexShader, boolean instanced) {
         return ShaderLoader.safeLoad(
                 "",
                 Paths.get(basePath, vertexShader).toString(),

@@ -1,8 +1,8 @@
 package lwaf_primitive;
 
-import lwaf.VAO;
+import lwaf_core.GLVAO;
 
-public class CylinderVAO extends VAO {
+public class CylinderVAO extends GLVAO {
     public CylinderVAO(int detail) {
         if (detail < 3)
             throw new IllegalArgumentException("Detail is too low for cylinder construction (" + detail + ")");

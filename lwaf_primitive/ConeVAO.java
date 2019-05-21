@@ -1,18 +1,18 @@
 package lwaf_primitive;
 
-import lwaf.VAO;
-import lwaf.vec3f;
+import lwaf_core.GLVAO;
+import lwaf_core.vec3;
 
 // TODO: improve this
 //  due to the single normal at the top of the cone
 //  there are very obvious vertical lines from lighting when rendering
-public class ConeVAO extends VAO {
+public class ConeVAO extends GLVAO {
     public ConeVAO(int detail) {
         if (detail < 3)
             throw new IllegalArgumentException("Detail is too low for cone construction (" + detail + ")");
 
         var vertices = new float[detail * 12];
-        var normals  = new vec3f[detail * 4];
+        var normals  = new vec3[detail * 4];
         var elements = new int[detail * 6];
 
         for (int i = 0; i < detail; ++i) {
@@ -35,10 +35,10 @@ public class ConeVAO extends VAO {
             vertices[i * 3 + detail * 9 + 1] = -0.5f;
             vertices[i * 3 + detail * 9 + 2] = 0;
 
-            normals[i             ] = new vec3f(sin, 0.5f, cos).normalise();
-            normals[i + detail    ] = new vec3f(0, -1, 0);
-            normals[i + detail * 2] = new vec3f(sin2, 0.5f, cos2).normalise();
-            normals[i + detail * 3] = new vec3f(0, -1, 0);
+            normals[i             ] = new vec3(sin, 0.5f, cos).normalise();
+            normals[i + detail    ] = new vec3(0, -1, 0);
+            normals[i + detail * 2] = new vec3(sin2, 0.5f, cos2).normalise();
+            normals[i + detail * 3] = new vec3(0, -1, 0);
         }
 
         for (int i = 0; i < detail; ++i) {
@@ -52,7 +52,7 @@ public class ConeVAO extends VAO {
 
         setVertexCount(elements.length);
         genVertexBuffer(vertices);
-        genNormalBuffer(vec3fToFloatArray(normals));
+        genNormalBuffer(Util.vec3fToFloatArray(normals));
         genColourBuffer(vertices.length / 3);
         genElementBuffer(elements);
     }

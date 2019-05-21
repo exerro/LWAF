@@ -1,7 +1,7 @@
 package lwaf_3D;
 
-import lwaf.mat4f;
-import lwaf.vec3f;
+import lwaf_core.mat4;
+import lwaf_core.vec3;
 
 import java.util.*;
 
@@ -14,10 +14,10 @@ public abstract class Scene {
     }
 
     public Scene() {
-        this(new Camera(vec3f.zero));
+        this(new Camera(new vec3(0, 0, 0)));
     }
 
-    protected abstract void drawObjects(mat4f viewMatrix, mat4f projectionMatrix);
+    protected abstract void drawObjects(mat4 viewMatrix, mat4 projectionMatrix);
 
     public Camera getCamera() {
         return camera;

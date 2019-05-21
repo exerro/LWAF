@@ -1,6 +1,7 @@
 package lwaf_3D;
 
 import lwaf.ShaderLoader;
+import lwaf_core.GLShaderProgram;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ObjectLighting {
@@ -53,7 +54,7 @@ public class ObjectLighting {
         this.specularLightingPower = specularLightingPower;
     }
 
-    public void setShaderUniforms(ShaderLoader.Program shader) {
+    public void setShaderUniforms(GLShaderProgram shader) {
         shader.setUniform("diffuseLightingIntensity", getDiffuseLightingIntensity());
         shader.setUniform("specularLightingIntensity", getSpecularLightingIntensity());
         shader.setUniform("specularLightingPower", getSpecularLightingPower());

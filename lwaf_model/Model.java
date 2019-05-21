@@ -2,15 +2,16 @@ package lwaf_model;
 
 import lwaf.*;
 import lwaf_3D.*;
+import lwaf_core.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Model<T>> {
-    private vec3f position = vec3f.zero,
-                  rotation = vec3f.zero,
-                  scale = vec3f.one;
+public class Model<T extends GLVAO> implements IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Model<T>> {
+    private vec3 position = new vec3(0, 0, 0),
+                  rotation = new vec3(0, 0, 0),
+                  scale = new vec3(1, 1, 1);
     private final Map<String, T> vaos = new HashMap<>();
     private final Map<String, Material> materials = new HashMap<>();
 
@@ -40,11 +41,11 @@ public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Mod
         return vaos.keySet();
     }
 
-    public VAO getVAO(String objectName) {
+    public GLVAO getVAO(String objectName) {
         return vaos.get(objectName);
     }
 
-    public VAO getVAO() {
+    public GLVAO getVAO() {
         return getVAO(DEFAULT_OBJECT_NAME);
     }
 
@@ -75,7 +76,7 @@ public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Mod
         return this;
     }
 
-    public void draw(ShaderLoader.Program shader) {
+    public void draw(GLShaderProgram shader) {
         shader.setUniform("transform", getTransformationMatrix());
 
         for (String objectName : getObjectNames()) {
@@ -91,7 +92,7 @@ public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Mod
                 shader.setUniform("useTexture", false);
             }
 
-            Draw.drawIndexedVAO(vaos.get(objectName));
+            Draw2D.INSTANCE.drawIndexedVAO(vaos.get(objectName));
 
             if (material.hasTexture()) {
                 texture.unbind();
@@ -100,42 +101,42 @@ public class Model<T extends VAO> implements IPositioned<Model<T>>, IRotated<Mod
     }
 
     @Override
-    public vec3f getRotation() {
+    public vec3 getRotation() {
         return rotation;
     }
 
     @Override
-    public Model<T> setRotation(vec3f rotation) {
+    public Model<T> setRotation(vec3 rotation) {
         this.rotation = rotation;
         return this;
     }
 
     @Override
-    public vec3f getTranslation() {
+    public vec3 getTranslation() {
         return position;
     }
 
     @Override
-    public Model<T> setTranslation(vec3f translation) {
+    public Model<T> setTranslation(vec3 translation) {
         this.position = translation;
         return this;
     }
 
-    public vec3f getScale() {
+    public vec3 getScale() {
         return scale;
     }
 
-    public Model<T> setScale(vec3f scale) {
+    public Model<T> setScale(vec3 scale) {
         this.scale = scale;
         return this;
     }
 
-    public mat4f getTransformationMatrix() {
-        return mat4f.identity()
-                .mul(mat4f.translation(position))
-                .mul(mat4f.rotation(vec3f.x_axis, rotation.x))
-                .mul(mat4f.rotation(vec3f.y_axis, rotation.y))
-                .mul(mat4f.rotation(vec3f.z_axis, rotation.z))
-                .mul(mat4f.scale(scale));
+    public mat4 getTransformationMatrix() {
+        return MatrixKt.getMat4_identity()
+                .mul(MatrixKt.mat4_translate(position))
+                .mul(MatrixKt.mat4_rotation(rotation.getX(), new vec3(1, 0, 0)))
+                .mul(MatrixKt.mat4_rotation(rotation.getY(), new vec3(0, 1, 0)))
+                .mul(MatrixKt.mat4_rotation(rotation.getZ(), new vec3(0, 0, 1)))
+                .mul(MatrixKt.mat4_scale(scale));
     }
 }

@@ -1,9 +1,10 @@
 package lwaf_model;
 
-import lwaf.VAO;
-import lwaf.vec2f;
-import lwaf.vec3f;
 import lwaf_3D.Material;
+import lwaf_core.GLVAO;
+import lwaf_core.GLVAOKt;
+import lwaf_core.vec2;
+import lwaf_core.vec3;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
 
 public class OBJModelLoader {
 
-    public static Model<VAO> loadModel(String file, String basePath) throws FileNotFoundException {
+    public static Model<GLVAO> loadModel(String file, String basePath) throws FileNotFoundException {
         System.out.println("Loading " + file);
 
         var parsed = readObjectLines(file);
@@ -39,7 +40,7 @@ public class OBJModelLoader {
                 .getOrDefault("vt", Collections.emptyList())
                 .stream()
                 .map(OBJModelLoader.parseVecNf(2))
-                .map(v -> new vec2f(v.x, 1 - v.y)) // why does 1-v.y work???
+                .map(v -> new vec2(v.getX(), 1 - v.getY())) // why does 1-v.y work???
                 .collect(Collectors.toList())
                 ;
 
@@ -59,12 +60,12 @@ public class OBJModelLoader {
         return model;
     }
 
-    public static Model<VAO> loadModel(String file) throws FileNotFoundException {
+    public static Model<GLVAO> loadModel(String file) throws FileNotFoundException {
         var basePath = Paths.get(file).getParent();
         return loadModel(file, basePath == null ? "" : basePath.toString());
     }
 
-    public static Model<VAO> safeLoadModel(String file, String basePath) {
+    public static Model<GLVAO> safeLoadModel(String file, String basePath) {
         try {
             return loadModel(file, basePath);
         }
@@ -75,7 +76,7 @@ public class OBJModelLoader {
         }
     }
 
-    public static Model<VAO> safeLoadModel(String file) {
+    public static Model<GLVAO> safeLoadModel(String file) {
         try {
             return loadModel(file);
         }
@@ -86,7 +87,7 @@ public class OBJModelLoader {
         }
     }
 
-    private static VAO loadObjectVAO(Map<String, List<String>> linesData, List<vec3f> vertices, List<vec3f> normals, List<vec2f> uvs, HashMap<int[], Integer> vertexCache) {
+    private static GLVAO loadObjectVAO(Map<String, List<String>> linesData, List<vec3> vertices, List<vec3> normals, List<vec2> uvs, HashMap<int[], Integer> vertexCache) {
         var faces = linesData
                 .getOrDefault("f", Collections.emptyList())
                 .stream()
@@ -95,16 +96,16 @@ public class OBJModelLoader {
                 .collect(Collectors.toList())
                 ;
 
-        var new_vertices = new ArrayList<vec3f>();
-        var new_normals = new ArrayList<vec3f>();
-        var new_uvs = new ArrayList<vec2f>();
+        var new_vertices = new ArrayList<vec3>();
+        var new_normals = new ArrayList<vec3>();
+        var new_uvs = new ArrayList<vec2>();
         var elements = new int[faces.size() * 3];
         var ei = 0;
 
         for (int[][] face : faces) {
             // note, here, that face[vertex] is { position, uv, normal }
             var hasUndefinedNormal = face[0][2] == -1 || face[1][2] == -1 || face[2][2] == -1;
-            var normal = hasUndefinedNormal ? calculateNormal(face[0][0], face[1][0], face[2][0], vertices) : vec3f.zero;
+            var normal = hasUndefinedNormal ? calculateNormal(face[0][0], face[1][0], face[2][0], vertices) : new vec3(0f, 0f, 0f);
 
             for (int v = 0; v < 3; ++v) {
                 var set = false;
@@ -124,22 +125,22 @@ public class OBJModelLoader {
 
                 if (set) {
                     new_vertices.add(vertices.get(face[v][0] - 1));
-                    new_uvs.add(face[v][1] == -1 ? vec2f.zero : uvs.get(face[v][1] - 1));
+                    new_uvs.add(face[v][1] == -1 ? new vec2(0, 0) : uvs.get(face[v][1] - 1));
                     new_normals.add((face[v][2] == -1 ? normal : normals.get(face[v][2] - 1)).normalise());
                 }
             }
         }
 
-        return new VAO(
-                new_vertices.toArray(new vec3f[0]),
-                new_normals.toArray(new vec3f[0]),
+        return GLVAOKt.generateStandardVAO(
+                new_vertices.toArray(new vec3[0]),
+                new_normals.toArray(new vec3[0]),
                 null,
-                new_uvs.toArray(new vec2f[0]),
+                new_uvs.toArray(new vec2[0]),
                 elements
         );
     }
 
-    private static Function<String, vec3f> parseVecNf(int n) {
+    private static Function<String, vec3> parseVecNf(int n) {
         return s -> {
             var numberMatcher = numberPattern.matcher(s);
             var ns = new float[]{0, 0, 0};
@@ -148,7 +149,7 @@ public class OBJModelLoader {
                 ns[i] = Float.parseFloat(numberMatcher.group(0));
             }
 
-            return new vec3f(ns[0], ns[1], ns[2]);
+            return new vec3(ns[0], ns[1], ns[2]);
         };
     }
 
@@ -229,7 +230,7 @@ public class OBJModelLoader {
         return line.toLowerCase();
     }
 
-    private static vec3f calculateNormal(int v0n, int v1n, int v2n, List<vec3f> vertices) {
+    private static vec3 calculateNormal(int v0n, int v1n, int v2n, List<vec3> vertices) {
         var v0 = vertices.get(v0n - 1);
         var v1 = vertices.get(v1n - 1);
         var v2 = vertices.get(v2n - 1);
