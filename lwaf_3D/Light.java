@@ -1,6 +1,5 @@
 package lwaf_3D;
 
-import lwaf.*;
 import lwaf_core.*;
 import lwaf_primitive.IcoSphereVAO;
 
@@ -45,10 +44,9 @@ public abstract class Light {
         public AmbientLight(float intensity, vec3 colour) {
             super(intensity, colour);
 
-            registerShader(AmbientLight.class, () -> ShaderLoader.safeLoad(
-                    "lwaf_3D/shader",
-                    "pass-through.vertex-3D.glsl",
-                    "ambient.fragment-3D.glsl",
+            registerShader(AmbientLight.class, () -> GLShaderProgramKt.loadShaderProgramFiles(
+                    "lwaf_3D/shader/pass-through.vertex-3D.glsl",
+                    "lwaf_3D/shader/ambient.fragment-3D.glsl",
                     false
             ));
         }
@@ -72,7 +70,7 @@ public abstract class Light {
 
         @Override
         public void render(GBuffer buffer) {
-            Draw2D.INSTANCE.drawIndexedVAO(GLVAOKt.getScreen_quad());
+            buffer.context.drawIndexedVAO(GLVAOKt.getScreen_quad());
         }
     }
 
@@ -84,10 +82,9 @@ public abstract class Light {
 
             this.direction = direction.normalise();
 
-            registerShader(DirectionalLight.class, () -> ShaderLoader.safeLoad(
-                    "lwaf_3D/shader",
-                    "pass-through.vertex-3D.glsl",
-                    "directional.fragment-3D.glsl",
+            registerShader(DirectionalLight.class, () -> GLShaderProgramKt.loadShaderProgramFiles(
+                    "lwaf_3D/shader/pass-through.vertex-3D.glsl",
+                    "lwaf_3D/shader/directional.fragment-3D.glsl",
                     false
             ));
         }
@@ -116,7 +113,7 @@ public abstract class Light {
 
         @Override
         public void render(GBuffer buffer) {
-            Draw2D.INSTANCE.drawIndexedVAO(GLVAOKt.getScreen_quad());
+            buffer.context.drawIndexedVAO(GLVAOKt.getScreen_quad());
         }
     }
 
@@ -133,10 +130,9 @@ public abstract class Light {
             this.position = position;
             this.attenuation = attenuation;
 
-            registerShader(PointLight.class, () -> ShaderLoader.safeLoad(
-                    "lwaf_3D/shader",
-                    "pass-through.vertex-3D.glsl",
-                    "point.fragment-3D.glsl",
+            registerShader(PointLight.class, () -> GLShaderProgramKt.loadShaderProgramFiles(
+                    "lwaf_3D/shader/pass-through.vertex-3D.glsl",
+                    "lwaf_3D/shader/point.fragment-3D.glsl",
                     false
             ));
 
@@ -193,7 +189,7 @@ public abstract class Light {
         public void render(GBuffer buffer) {
             glEnable(GL_CULL_FACE);
             glFrontFace(GL_CW);
-            Draw2D.INSTANCE.drawIndexedVAO(vao);
+            buffer.context.drawIndexedVAO(vao);
             glFrontFace(GL_CCW);
             glDisable(GL_CULL_FACE);
         }
@@ -211,10 +207,9 @@ public abstract class Light {
             this.direction = direction;
             this.cutoff = cutoff;
 
-            registerShader(SpotLight.class, () -> ShaderLoader.safeLoad(
-                    "lwaf_3D/shader",
-                    "pass-through.vertex-3D.glsl",
-                    "spot.fragment-3D.glsl",
+            registerShader(SpotLight.class, () -> GLShaderProgramKt.loadShaderProgramFiles(
+                    "lwaf_3D/shader/pass-through.vertex-3D.glsl",
+                    "lwaf_3D/shader/spot.fragment-3D.glsl",
                     false
             ));
         }
@@ -254,7 +249,7 @@ public abstract class Light {
 
         @Override
         public void render(GBuffer buffer) {
-            Draw2D.INSTANCE.drawIndexedVAO(GLVAOKt.getScreen_quad());
+            buffer.context.drawIndexedVAO(GLVAOKt.getScreen_quad());
         }
 
         public static float lightSpread(float range) {

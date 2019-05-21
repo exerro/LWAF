@@ -3,6 +3,8 @@ package lwaf_core
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL32
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class GLShaderProgram(private val programID: Int, private val fragmentID: Int, private val geometryID: Int?, private val vertexID: Int, private val instanced: Boolean): GLResource {
     private var active: Boolean = false
@@ -83,6 +85,12 @@ class GLShaderProgram(private val programID: Int, private val fragmentID: Int, p
 
 class ShaderLoadException(shaderID: Int, val shaderContent: String) : Exception(GL20.glGetShaderInfoLog(shaderID))
 class ProgramLoadException(programID: Int) : Exception(GL20.glGetProgramInfoLog(programID))
+
+fun loadShaderProgramFiles(vertexShaderPath: String, fragmentShaderPath: String, instanced: Boolean = false): GLShaderProgram {
+    val vertexShader = String(Files.readAllBytes(Paths.get(vertexShaderPath)))
+    val fragmentShader = String(Files.readAllBytes(Paths.get(fragmentShaderPath)))
+    return loadShaderProgram(vertexShader, fragmentShader, instanced)
+}
 
 fun loadShaderProgram(vertexShader: String, fragmentShader: String, instanced: Boolean = false): GLShaderProgram
         = loadShaderProgram(vertexShader, null, fragmentShader, instanced)

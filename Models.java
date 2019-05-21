@@ -1,18 +1,19 @@
-import lwaf.*;
 import lwaf_3D.Material;
 import lwaf_core.*;
 import lwaf_graph.Graph3D;
 import lwaf_math.SimplexNoise;
 import lwaf_model.Model;
-import lwaf_model.OBJModelLoader;
 import lwaf_model.ModelRenderer;
+import lwaf_model.OBJModelLoader;
 import lwaf_primitive.*;
 
 class Models {
     public final ModelRenderer models = new ModelRenderer();
+    private final DrawContext3D context;
 
-    public Models() {
-        var dark_texture = GLTextureKt.loadTexture("lwaf/img/no-texture-light.png");
+    public Models(DrawContext3D context) {
+        this.context = context;
+        var dark_texture = GLTextureKt.loadTexture("lwaf_res/img/no-texture-light.png");
 
         for (int i = 0; i < 5; ++i) {
             models.add(new Model<>(new IcoSphereVAO(i + 1)))
@@ -38,12 +39,12 @@ class Models {
 
         models.add(new Model<>(new CubeVAO()))
                 .setMaterial(new Material()
-                        .setTexture(GLTextureKt.loadTexture("lwaf/img/no-texture-light.png")))
+                        .setTexture(GLTextureKt.loadTexture("lwaf_res/img/no-texture-light.png")))
                 .setTranslation(2, 0, 0);
 
         models.add(new Model<>(new UVSphereVAO(40, 80)))
                 .setMaterial(new Material()
-                        .setTexture(GLTextureKt.loadTexture("lwaf/img/no-texture-dark.png")))
+                        .setTexture(GLTextureKt.loadTexture("lwaf_res/img/no-texture-dark.png")))
                 .setTranslation(4, 0, 0);
 
         models.add(new Model<>(new IcoSphereVAO(7)))
@@ -138,7 +139,7 @@ class Models {
     public void draw(GLShaderProgram shader) {
         var t = System.currentTimeMillis();
 
-        models.draw(shader);
+        models.draw(shader, context);
 
         var sea = new Graph3D(v -> (float) (
                 2.00 * SimplexNoise.noise(v.getX() * 0.5 + t * 0.05, v.getY() * 0.5, t * 0.05)
@@ -151,7 +152,7 @@ class Models {
         new Model<>(sea.getSmoothVAO(new Graph3D.UniformGridStrategy(50)))
                 .setTranslation(50, -10, 0)
                 .setScale(40, 1, 40)
-                .draw(shader)
+                .draw(shader, context)
         ;
     }
 }

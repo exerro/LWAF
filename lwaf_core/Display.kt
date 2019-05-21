@@ -168,7 +168,6 @@ class Display(
         glfwShowWindow(window) // make the window visible
 
         GL.createCapabilities() // makes OpenGL bindings available to use from LWJGL
-        Draw2D.init()
 
         setCallbacks() // sets the GLFW callbacks to use the custom callbacks above
         updateGLViewport() // update the GL viewport to set it up initially
@@ -220,10 +219,8 @@ class Display(
         val width = IntArray(1)
         val height = IntArray(1)
         glfwGetFramebufferSize(window, width, height)
-        glViewport(0, 0, width[0], height[0])
         this.width = width[0]
         this.height = height[0]
-        Draw2D.setViewport(vec2(width[0].toFloat(), height[0].toFloat()))
     }
 
     private fun whenSetup(func: () -> Unit) {

@@ -1,6 +1,6 @@
 package lwaf_model;
 
-import lwaf.*;
+import lwaf_core.DrawContext3D;
 import lwaf_core.GLShaderProgram;
 import lwaf_core.GLVAO;
 
@@ -27,9 +27,9 @@ public class ModelRenderer {
         return new ArrayList<>(models);
     }
 
-    public void draw(GLShaderProgram shader) {
+    public void draw(GLShaderProgram shader, DrawContext3D context) {
         for (Model model : models) {
-            model.draw(shader);
+            model.draw(shader, context);
         }
     }
 }

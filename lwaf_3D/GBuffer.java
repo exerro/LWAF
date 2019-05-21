@@ -1,12 +1,7 @@
 package lwaf_3D;
 
-import lwaf.ShaderLoader;
-import lwaf_core.GLFBO;
-import lwaf_core.GLShaderProgram;
-import lwaf_core.GLTexture;
-import lwaf_core.GLTextureKt;
+import lwaf_core.*;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL30.*;
@@ -14,9 +9,11 @@ import static org.lwjgl.opengl.GL30.*;
 public class GBuffer {
     private final GLFBO fbo;
     private final GLTexture colourTexture, positionTexture, normalTexture, lightingTexture;
+    public final DrawContext3D context;
 
     public GBuffer(int width, int height) {
         fbo = new GLFBO(width, height);
+        context = new DrawContext3D(new GLView(new vec2(0, 0), new vec2(width, height)));
 
         colourTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height), GL_COLOR_ATTACHMENT0);
         positionTexture = fbo.attachTexture(GLTextureKt.createEmptyTexture(width, height, GL_RGB32F, GL_RGB, GL_FLOAT), GL_COLOR_ATTACHMENT1);
@@ -82,10 +79,9 @@ public class GBuffer {
 
     public static String FRAGMENT_SHADER_PATH = "lwaf_3D/shader/gbuffer-render.fragment-3D.glsl";
 
-    public static GLShaderProgram safeLoadGeometryShader(String basePath, String vertexShader, boolean instanced) {
-        return ShaderLoader.safeLoad(
-                "",
-                Paths.get(basePath, vertexShader).toString(),
+    public static GLShaderProgram safeLoadGeometryShader(String vertexShader, boolean instanced) {
+        return GLShaderProgramKt.loadShaderProgramFiles(
+                Paths.get(vertexShader).toString(),
                 FRAGMENT_SHADER_PATH,
                 instanced
         );

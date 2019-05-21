@@ -1,6 +1,5 @@
 package lwaf_3D;
 
-import lwaf.ShaderLoader;
 import lwaf_core.GLShaderProgram;
 
 @SuppressWarnings({"unused", "WeakerAccess"})

@@ -23,6 +23,10 @@ public class LWAF_Main {
         display.setOnDrawCallback(() -> { draw(); return Unit.INSTANCE; });
         display.setOnUpdateCallback((dt) -> { update(dt); return Unit.INSTANCE; });
         display.setOnKeyPressedCallback((a, b) -> { onKeyDown(a, b); return Unit.INSTANCE; });
+        display.setOnResizedCallback((w, h) -> {
+            view.setSize(new vec2(w, h));
+            return Unit.INSTANCE;
+        });
     }
 
     private final Display display;
@@ -34,19 +38,22 @@ public class LWAF_Main {
     private GLShaderProgram shader;
     private Renderer renderer;
     private int textureToDraw = 0;
+    private GLView view;
+    private DrawContext2D context2D;
 
     protected boolean load() {
-        font = Font.Companion.safeLoad("lwaf/font/open-sans/OpenSans-Regular.fnt");
+        font = Font.Companion.safeLoad("lwaf_res/font/open-sans/OpenSans-Regular.fnt");
         text = new Text("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font);
-        texture = GLTextureKt.loadTexture("lwaf/img/no-texture-dark.png");
+        texture = GLTextureKt.loadTexture("lwaf_res/img/no-texture-dark.png");
+        view = new GLView(new vec2(0f, 0f), display.getWindowSize());
+        context2D = new DrawContext2D(view);
 
         shader = GBuffer.safeLoadGeometryShader(
-                "lwaf_3D/shader",
-                "vertex-3D.glsl",
+                "lwaf_3D/shader/vertex-3D.glsl",
                 false
         );
 
-        models = new Models();
+        models = new Models(new DrawContext3D(new GLView(new vec2(0, 0), display.getWindowSize())));
 
         scene = new Scene() {
             {
@@ -190,9 +197,9 @@ public class LWAF_Main {
             case 4: texture = renderer.getGBuffer().getLightingTexture(); break;
         }
 
-        Draw2D.INSTANCE.setColour(1, 1, 1);
-        Draw2D.INSTANCE.texture(texture);
-        Draw2D.INSTANCE.text(text, new vec2(0, 0));
+        context2D.setColour(1f, 1f, 1f);
+        context2D.drawTexture(texture, new vec2(0f, 0f), new vec2(1f, 1f));
+        context2D.write(text, new vec2(0, 0));
     }
 
     protected void update(float dt) {

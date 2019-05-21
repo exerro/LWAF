@@ -1,6 +1,5 @@
 package lwaf_model;
 
-import lwaf.*;
 import lwaf_3D.*;
 import lwaf_core.*;
 
@@ -76,7 +75,7 @@ public class Model<T extends GLVAO> implements IPositioned<Model<T>>, IRotated<M
         return this;
     }
 
-    public void draw(GLShaderProgram shader) {
+    public void draw(GLShaderProgram shader, DrawContext3D context) {
         shader.setUniform("transform", getTransformationMatrix());
 
         for (String objectName : getObjectNames()) {
@@ -92,7 +91,7 @@ public class Model<T extends GLVAO> implements IPositioned<Model<T>>, IRotated<M
                 shader.setUniform("useTexture", false);
             }
 
-            Draw2D.INSTANCE.drawIndexedVAO(vaos.get(objectName));
+            context.drawIndexedVAO(vaos.get(objectName));
 
             if (material.hasTexture()) {
                 texture.unbind();
