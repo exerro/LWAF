@@ -82,7 +82,7 @@ public class Renderer {
         buffer.bindReading();
 
         for (var lightType : scene.getLightTypes()) {
-            var shader = Light.getShader(lightType);
+            var shader = Light.Companion.getShader(lightType);
 
             shader.start();
             shader.setUniform("screenSize", new vec2(getWidth(), getHeight()));

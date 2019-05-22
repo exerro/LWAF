@@ -27,6 +27,8 @@ class GLTexture internal constructor(val textureID: Int, val width: Int, val hei
 fun createEmptyTexture(width: Int, height: Int, internalFormat: Int = GL_RGBA, format: Int = GL_RGBA, type: Int = GL_UNSIGNED_BYTE): GLTexture {
     val textureID = glGenTextures()
 
+    Logging.log("texture.create") { "Creating ($width x $height) empty texture" }
+
     glBindTexture(GL_TEXTURE_2D, textureID)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
@@ -43,6 +45,8 @@ fun loadTexture(filePath: String): GLTexture {
     var width = 0
     var height = 0
     var data: ByteBuffer? = null
+
+    Logging.log("texture.load") { "Loading texture '$filePath'" }
 
     MemoryStack.stackPush().use { stack ->
         val w = stack.mallocInt(1)

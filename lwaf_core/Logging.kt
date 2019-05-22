@@ -1,27 +1,22 @@
 package lwaf_core
 
 object Logging
-private val enabled = HashSet<LogType>()
+private val enabled = HashSet<String>()
 
-fun Logging.enable(logType: LogType) {
+fun Logging.enable(logType: String) {
     enabled.add(logType)
 }
 
-fun Logging.disable(logType: LogType) {
+fun Logging.disable(logType: String) {
     enabled.remove(logType)
+    enabled.removeAll { it.startsWith("$logType.") }
 }
 
-fun Logging.log(logType: LogType = LogType.INFO, log: () -> String) {
-    if (!enabled.contains(logType)) return
+fun Logging.log(logType: String = "info", log: () -> String) {
+    if (!enabled.any { logType.startsWith("$it.") || it == logType || it == "" }) return
     println(log())
 }
 
-enum class LogType {
-    INFO,
-    DEBUG,
-    DEBUG_FPS,
-    SHADER_UNIFORM,
-    SHADER_COMPILE,
-    WARNING,
-    ERROR
+fun Logging.error(log: () -> String) {
+    println("ERROR: ${log()}")
 }

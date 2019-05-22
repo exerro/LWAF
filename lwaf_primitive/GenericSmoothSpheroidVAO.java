@@ -4,7 +4,7 @@ import lwaf_core.GLVAO;
 import lwaf_core.vec3;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-abstract class GenericSmoothSpheroidVAO extends GLVAO {
+public abstract class GenericSmoothSpheroidVAO extends GLVAO {
     // assumes vertices are already normalised
     protected void genSpheroidBuffers(vec3[] vertices) {
         float[] vertex_floats, normal_floats;

@@ -13,6 +13,10 @@ class GLFramebuffer(val width: Int, val height: Int): GLResource {
             GL_DEPTH_ATTACHMENT
     )
 
+    init {
+        Logging.log("framebuffer.create") { "Creating ($width x $height) framebuffer" }
+    }
+
     fun attachTexture(texture: GLTexture, attachment: Int): GLTexture {
         bind()
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.textureID, 0)

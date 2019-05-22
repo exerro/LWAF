@@ -3,6 +3,9 @@ package lwaf_demo
 import lwaf_3D.*
 import lwaf_core.*
 import org.lwjgl.glfw.GLFW.*
+import lwaf_3D.Light
+
+
 
 private lateinit var scene: Scene
 private lateinit var texture: GLTexture
@@ -19,7 +22,13 @@ private lateinit var display: Display
 object Demo3D {
     @JvmStatic
     fun main(args: Array<String>) {
+        Logging.enable("shader.compile.notice")
+        Logging.enable("texture")
+        Logging.enable("framebuffer.create")
+        Logging.enable("font.load")
+
         display = Display()
+
         display.attachLoadCallback {
             font = loadFont("lwaf_res/font/open-sans/OpenSans-Regular.fnt")
             text = FontText("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font)
@@ -40,7 +49,25 @@ object Demo3D {
                     addLight(Light.DirectionalLight(0.4f, vec3(-1f, -1f, -1f), vec3(0f, 1f, 0f)))
                     addLight(Light.DirectionalLight(0.4f, vec3(0f, 1f, 0f), vec3(1f, 0f, 0f)))
                     addLight(Light.DirectionalLight(0.4f, vec3(0f, -1f, 0f)))
-                    addLight(Light.PointLight(10f, vec3(0f, 4f, 10f), Light.PointLight.attenuation(25f), vec3(1f, 1f, 0f)))
+                    addLight(Light.PointLight(10f, vec3(0f, 4f, 10f), Light.attenuation(25f), vec3(1f, 1f, 0f)))
+
+                    addLight(Light.SpotLight(
+                            5f,
+                            vec3(0f, -5f, 11f),
+                            vec3(0f, -1f, 0f),
+                            vec3(1f, 0.09f, 0.032f),
+                            Light.SpotLight.lightSpread(0.6f),
+                            vec3(1f, 1f, 1f)
+                    ))
+
+                    addLight(Light.SpotLight(
+                            10f,
+                            vec3(-6f, -7f, -1f),
+                            vec3(-3f, -1f, 2f).normalise(),
+                            vec3(1f, 0.09f, 0.032f),
+                            Light.SpotLight.lightSpread(0.4f),
+                            vec3(0f, 1f, 1f)
+                    ))
                 }
 
                 override fun drawObjects(viewMatrix: mat4, projectionMatrix: mat4) {
@@ -74,7 +101,7 @@ object Demo3D {
             // Draw2D.view(view, new vec2f(40, 20));
             // Draw2D.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
 
-            val scale = display.getWindowSize().div(vec2(1080f, 720f))
+            val scale = vec2(1f, 1f)
             val texture = when (textureToDraw) {
                 0 -> renderer.texture
                 1 -> renderer.gBuffer.colourTexture
@@ -91,51 +118,34 @@ object Demo3D {
 
         display.attachUpdateCallback { dt ->
             var translation = scene.camera.translation
-            var rotation = scene.camera.rotation
             val forward = scene.camera.flatForward
             val right = scene.camera.flatRight
             val speed = dt * 5
-            val rspeed = dt * Math.PI.toFloat() / 2
 
             text = FontText(display.getMousePosition().toString(), font)
 
             if (display.isKeyDown(GLFW_KEY_A)) {
-                translation = translation.sub(right.mul(speed))
+                translation -= right * speed
             }
             if (display.isKeyDown(GLFW_KEY_D)) {
-                translation = translation.add(right.mul(speed))
+                translation += right * speed
             }
 
             if (display.isKeyDown(GLFW_KEY_W)) {
-                translation = translation.add(forward.mul(speed))
+                translation += forward * speed
             }
             if (display.isKeyDown(GLFW_KEY_S)) {
-                translation = translation.sub(forward.mul(speed))
+                translation -= forward * speed
             }
 
             if (display.isKeyDown(GLFW_KEY_SPACE)) {
-                translation = translation.add(vec3(0f, speed, 0f))
+                translation += vec3(0f, speed, 0f)
             }
             if (display.isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-                translation = translation.sub(vec3(0f, speed, 0f))
+                translation -= vec3(0f, speed, 0f)
             }
 
-            if (display.isKeyDown(GLFW_KEY_LEFT)) {
-                rotation = rotation.add(vec3(0f, rspeed, 0f))
-            }
-            if (display.isKeyDown(GLFW_KEY_RIGHT)) {
-                rotation = rotation.sub(vec3(0f, rspeed, 0f))
-            }
-
-            if (display.isKeyDown(GLFW_KEY_UP)) {
-                rotation = rotation.add(vec3(rspeed, 0f, 0f))
-            }
-            if (display.isKeyDown(GLFW_KEY_DOWN)) {
-                rotation = rotation.sub(vec3(rspeed, 0f, 0f))
-            }
-
-            scene.camera.translation = translation
-            scene.camera.rotation = rotation
+            scene.camera.setPosition(translation)
         }
 
         display.attachMouseDownCallback { _, _ ->
@@ -149,8 +159,8 @@ object Demo3D {
         display.attachMouseDragCallback { pos, last, _, _ ->
             val dx = pos.x - last.x
             val dy = pos.y - last.y
-            scene.camera.rotation = scene.camera.rotation.add(vec3(0f, -dx / display.getWindowSize().x * 0.5f, 0f))
-            scene.camera.rotation = scene.camera.rotation.add(vec3(-dy / display.getWindowSize().y * 0.5f, 0f, 0f))
+            scene.camera.rotateBy(vec3(0f, -dx / display.getWindowSize().x * 0.5f, 0f))
+            scene.camera.rotateBy(vec3(-dy / display.getWindowSize().y * 0.5f, 0f, 0f))
         }
 
         display.attachKeyPressedCallback { key, modifier ->
@@ -167,7 +177,8 @@ object Demo3D {
 
         display.attachResizedCallback { w, h ->
             view.size = vec2(w.toFloat(), h.toFloat())
-            Unit
+            renderer = Renderer(w, h)
+            models = Models(DrawContext3D(GLView(vec2(0f, 0f), display.getWindowSize())))
         }
 
         display.run()

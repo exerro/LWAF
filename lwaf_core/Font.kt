@@ -57,10 +57,10 @@ class Font(
             = char_uvs[c.toInt()]
 
     internal fun getCharSize(c: Char): vec2
-            = char_sizes[c.toInt()].mul(sizeScale)
+            = char_sizes[c.toInt()] * sizeScale
 
     internal fun getCharOffset(c: Char): vec2
-            = char_offsets[c.toInt()].mul(sizeScale)
+            = char_offsets[c.toInt()] * sizeScale
 
     internal fun getCharAdvance(c: Char): Float
             = char_x_advance[c.toInt()] * sizeScale
@@ -76,6 +76,8 @@ class FontText internal constructor(val text: String, val font: Font) {
         val vertices = FloatArray(text.length * 12)
         val uvs = FloatArray(text.length * 8)
         val elements = IntArray(text.length * 6)
+
+        Logging.log("font.text.create") { "Creating text object '$text' for font" }
 
         val base = font.getBase()
         val lineHeight = font.getLineHeight()
@@ -157,6 +159,8 @@ fun loadFont(filePath: String): Font {
     val charSet = BooleanArray(256)
     val scaleW: Int
     val scaleH: Int
+
+    Logging.log("font.load") { "Loading font '$filePath'" }
 
     if (fontFileMatcher.find()) {
         texture = loadTexture(fontFileMatcher.group(1))

@@ -24,9 +24,9 @@ internal class Models(private val context: DrawContext3D) {
         for (i in 0..9) {
             for (j in 0..9) {
                 models.add(Model(UVSphereVAO(j + 1, i + 3)))
-                        .setTranslation((i * 2).toFloat(), (3 + j * 2).toFloat(), -2f).material = Material()
+                        .setTranslation((i * 2).toFloat(), (3 + j * 2).toFloat(), -2f).setMaterial(Material()
                         .setTexture(darkTexture)
-                        .setSpecularLightingIntensity(0f)
+                        .setSpecularLightingIntensity(0f))
             }
         }
 
@@ -38,7 +38,7 @@ internal class Models(private val context: DrawContext3D) {
         models.add(Model(CubeVAO()))
                 .setMaterial(Material()
                         .setTexture(loadTexture("lwaf_res/img/no-texture-light.png")))
-                .setTranslation(2f, 0f, 0f)
+//                .setTranslation(2f, 0f, 0f)
 
         models.add(Model(UVSphereVAO(40, 80)))
                 .setMaterial(Material()
@@ -99,19 +99,19 @@ internal class Models(private val context: DrawContext3D) {
         val res = 50
 
         models.add(Model(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res))))
-                .setTranslation(0f, -10f, scale.x / 2 + 1).scale = scale
+                .setTranslation(0f, -10f, scale.x / 2 + 1).setScale(scale)
 
         models.add(Model(CubeVAO())).setTranslation(0f, -10f, scale.x / 2 + 1)
         models.add(Model(CubeVAO())).setTranslation(scale.x * 0.5f, -10f, scale.x / 2 + 1)
 
         models.add(Model(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res))))
-                .setTranslation(0f, -10f, -scale.x / 2 - 1).scale = scale
+                .setTranslation(0f, -10f, -scale.x / 2 - 1).setScale(scale)
 
         models.add(Model(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res))))
-                .setTranslation(-scale.x - 1, -10f, scale.x / 2 + 1).scale = scale
+                .setTranslation(-scale.x - 1, -10f, scale.x / 2 + 1).setScale(scale)
 
         models.add(Model(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res))))
-                .setTranslation(-scale.x - 1, -10f, -scale.x / 2 - 1).scale = scale
+                .setTranslation(-scale.x - 1, -10f, -scale.x / 2 - 1).setScale(scale)
 
         models.add(Model(ConeVAO(360)))
                 .setTranslation(-2f, 0f, 0f)
@@ -133,7 +133,7 @@ internal class Models(private val context: DrawContext3D) {
                     + 0.50 * SimplexNoise.noise(x + t * 0.1, y.toDouble(), t * 0.1)
                     + 0.50 * SimplexNoise.noise(x * 3 + t * 0.3, (y * 3).toDouble(), t * 0.3)).toFloat()
         }
-                .setColouring { (_, y) -> vec3(0.3f, 0.6f, 0.9f).add(vec3(1f, 1f, 1f).mul(y * 0.1f)) }
+                .setColouring { (_, y) -> (vec3(0.3f, 0.6f, 0.9f) + vec3(1f, 1f, 1f) * y * 0.1f) }
 
         Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
                 .setTranslation(50f, -10f, 0f)

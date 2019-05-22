@@ -120,3 +120,6 @@ class DrawContext2D(private val view: GLView) {
             "    if (useTexture) gl_FragColor *= texture(textureSampler, fragment_uv);\n" +
             "}", false)
 }
+
+fun mat4.translateBy(translation: vec3): mat4 = this * mat4_translate(translation)
+fun mat4.scaleBy(scale: vec3): mat4 = this * mat3_scale(scale).mat4()
