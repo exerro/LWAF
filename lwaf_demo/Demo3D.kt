@@ -1,23 +1,20 @@
 package lwaf_demo
 
 import lwaf_3D.*
+import lwaf_3D.property.moveTo
+import lwaf_3D.property.rotateBy
 import lwaf_core.*
 import org.lwjgl.glfw.GLFW.*
-import lwaf_3D.Light
 
 
-
-private lateinit var scene: Scene
 private lateinit var texture: GLTexture
-private lateinit var text: FontText
 private lateinit var font: Font
 private lateinit var models: Models
 private lateinit var shader: GLShaderProgram
-private lateinit var renderer: Renderer
+private lateinit var context3D: DrawContext3D
 private var textureToDraw = 0
 private lateinit var view: GLView
 private lateinit var context2D: DrawContext2D
-private lateinit var display: Display
 
 object Demo3D {
     @JvmStatic
@@ -27,102 +24,89 @@ object Demo3D {
         Logging.enable("framebuffer.create")
         Logging.enable("font.load")
 
-        display = Display()
+        val display = Display()
+        var text = "Hello world"
 
         display.attachLoadCallback {
             font = loadFont("lwaf_res/font/open-sans/OpenSans-Regular.fnt")
-            text = FontText("!\"£$%^&*()_+-={}[]:@~;'#<>?,./`¬¦\\|", font)
             texture = loadTexture("lwaf_res/img/no-texture-dark.png")
             view = GLView(vec2(0f, 0f), display.getWindowSize())
             context2D = DrawContext2D(view)
+            context3D = DrawContext3D(view)
+            models = Models(context3D)
 
-            shader = GBuffer.safeLoadGeometryShader(
+            shader = GBuffer.loadShader(
                     "lwaf_3D/shader/vertex-3D.glsl",
                     false
             )
 
-            models = Models(DrawContext3D(GLView(vec2(0f, 0f), display.getWindowSize())))
-
-            scene = object : Scene() {
-                init {
-                    addLight(Light.AmbientLight(0.05f))
-                    addLight(Light.DirectionalLight(0.4f, vec3(-1f, -1f, -1f), vec3(0f, 1f, 0f)))
-                    addLight(Light.DirectionalLight(0.4f, vec3(0f, 1f, 0f), vec3(1f, 0f, 0f)))
-                    addLight(Light.DirectionalLight(0.4f, vec3(0f, -1f, 0f)))
-                    addLight(Light.PointLight(10f, vec3(0f, 4f, 10f), Light.attenuation(25f), vec3(1f, 1f, 0f)))
-
-                    addLight(Light.SpotLight(
-                            5f,
-                            vec3(0f, -5f, 11f),
-                            vec3(0f, -1f, 0f),
-                            vec3(1f, 0.09f, 0.032f),
-                            Light.SpotLight.lightSpread(0.6f),
-                            vec3(1f, 1f, 1f)
-                    ))
-
-                    addLight(Light.SpotLight(
-                            10f,
-                            vec3(-6f, -7f, -1f),
-                            vec3(-3f, -1f, 2f).normalise(),
-                            vec3(1f, 0.09f, 0.032f),
-                            Light.SpotLight.lightSpread(0.4f),
-                            vec3(0f, 1f, 1f)
-                    ))
-                }
-
-                override fun drawObjects(viewMatrix: mat4, projectionMatrix: mat4) {
-                    shader.setUniform("viewTransform", viewMatrix)
-                    shader.setUniform("projectionTransform", projectionMatrix)
-                    shader.start()
-                    models.draw(shader)
-                    shader.stop()
-                }
-            }
-
-            renderer = Renderer(1200, 680)
-
-            scene.getCamera().setPerspectiveProjection(
-                    renderer.getAspectRatio(),
-                    Camera.PerspectiveProjection.DEFAULT_FOV,
-                    Camera.PerspectiveProjection.DEFAULT_NEAR,
-                    Camera.PerspectiveProjection.DEFAULT_FAR
-            )
+            context3D.camera.setPerspectiveProjection(context3D.aspectRatio)
         }
 
         display.attachUnloadCallback {
-            renderer.destroy()
+            context3D.destroy()
             texture.destroy()
             shader.destroy()
         }
 
         display.attachDrawCallback {
-            renderer.draw(scene)
+            context3D.begin()
+
+            context3D.drawObjects(shader, object: Object3D() {
+                override val translation: vec3 = vec3(0f)
+                override val rotation: vec3 = vec3(0f)
+                override val scale: vec3 = vec3(0f)
+
+                override fun draw(context: DrawContext3D, shader: GLShaderProgram) {
+                    models.draw(shader)
+                }
+            })
+
+            context3D.ambientLight(0.2f)
+            context3D.directionalLight(vec3(-1f, -1f, -1f), 0.4f, vec3(0f, 1f, 0f))
+            context3D.directionalLight(vec3(0f, 1f, 0f), 0.4f, vec3(1f, 0f, 0f))
+            context3D.directionalLight(vec3(0f, -1f, 0f), 0.4f)
+            context3D.pointLight(vec3(0f, 4f, 10f), 4.8f, getLightingAttenuation(25f), vec3(1f, 1f, 0f))
+            context3D.spotLight(
+                    vec3(-6f, -7f, -1f),
+                    vec3(-3f, -1f, 2f).normalise(),
+                    10f,
+                    vec2(0.4f, 0.5f),
+                    vec3(1f, 0.09f, 0.032f),
+                    vec3(0f, 1f, 1f)
+            )
+            context3D.spotLight(
+                    vec3(0f, -5f, 11f),
+                    vec3(0f, -1f, 0f),
+                    5f,
+                    vec2(0.5f, 0.8f),
+                    vec3(1f, 0.09f, 0.032f)
+            )
 
             // Draw2D.view(view, new vec2f(40, 20));
-            // Draw2D.buffer(renderer.getGBuffer(), new vec2f(40, 20), vec2f.one);
+            // Draw2D.buffer(context3D.getGBuffer(), new vec2f(40, 20), vec2f.one);
 
             val scale = vec2(1f, 1f)
             val texture = when (textureToDraw) {
-                0 -> renderer.texture
-                1 -> renderer.gBuffer.colourTexture
-                2 -> renderer.gBuffer.normalTexture
-                3 -> renderer.gBuffer.positionTexture
-                4 -> renderer.gBuffer.lightingTexture
+                0 -> context3D.texture
+                1 -> context3D.buffer.colourTexture
+                2 -> context3D.buffer.normalTexture
+                3 -> context3D.buffer.positionTexture
+                4 -> context3D.buffer.lightingTexture
                 else -> error("oh")
             }
 
             context2D.setColour(1f, 1f, 1f)
             context2D.drawTexture(texture, vec2(0f, 0f), scale)
-            context2D.write(text.text, font, vec2(0f, 0f))
+            context2D.write(text, font, vec2(0f, 0f))
+            context2D.drawImage(lwaf_demo.texture, vec2(100f), vec2(0.1f))
         }
 
         display.attachUpdateCallback { dt ->
-            var translation = scene.camera.translation
-            val forward = scene.camera.flatForward
-            val right = scene.camera.flatRight
+            var translation = context3D.camera.translation
+            val forward = context3D.camera.flatForward
+            val right = context3D.camera.flatRight
             val speed = dt * 5
-
-            text = FontText(display.getMousePosition().toString(), font)
 
             if (display.isKeyDown(GLFW_KEY_A)) {
                 translation -= right * speed
@@ -145,7 +129,8 @@ object Demo3D {
                 translation -= vec3(0f, speed, 0f)
             }
 
-            scene.camera.setPosition(translation)
+            text = display.fps.toString()
+            context3D.camera.moveTo(translation)
         }
 
         display.attachMouseDownCallback { _, _ ->
@@ -159,16 +144,16 @@ object Demo3D {
         display.attachMouseDragCallback { pos, last, _, _ ->
             val dx = pos.x - last.x
             val dy = pos.y - last.y
-            scene.camera.rotateBy(vec3(0f, -dx / display.getWindowSize().x * 0.5f, 0f))
-            scene.camera.rotateBy(vec3(-dy / display.getWindowSize().y * 0.5f, 0f, 0f))
+            context3D.camera.rotateBy(vec3(0f, -dx / display.getWindowSize().x * 0.5f, 0f))
+            context3D.camera.rotateBy(vec3(-dy / display.getWindowSize().y * 0.5f, 0f, 0f))
         }
 
         display.attachKeyPressedCallback { key, modifier ->
             if (key == GLFW_KEY_TAB) {
                 textureToDraw = if (modifier and GLFW_MOD_CONTROL != 0) {
-                    (textureToDraw + 1) % 5
-                } else {
                     (textureToDraw - 1) % 5
+                } else {
+                    (textureToDraw + 1) % 5
                 }
             }
 
@@ -176,9 +161,11 @@ object Demo3D {
         }
 
         display.attachResizedCallback { w, h ->
-            view.size = vec2(w.toFloat(), h.toFloat())
-            renderer = Renderer(w, h)
-            models = Models(DrawContext3D(GLView(vec2(0f, 0f), display.getWindowSize())))
+            view = GLView(view.offset, vec2(w.toFloat(), h.toFloat()))
+            context2D = DrawContext2D(view)
+            context3D = DrawContext3D(view, context3D.camera)
+            context3D.camera.setPerspectiveProjection(context3D.aspectRatio)
+            models = Models(context3D)
         }
 
         display.run()

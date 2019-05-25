@@ -1,23 +1,17 @@
 package lwaf_model
 
-import lwaf_3D.*
+import lwaf_3D.DrawContext3D
+import lwaf_3D.Material
+import lwaf_3D.property.MutablePositioned
+import lwaf_3D.property.MutableRotated
+import lwaf_3D.property.MutableScaled
 import lwaf_core.*
+import java.util.*
 
-import java.util.HashMap
-
-class Model<T : GLVAO> : IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Model<T>> {
-    private var _translation = vec3(0f)
-    private var _rotation = vec3(0f)
-    private var _scale = vec3(1f)
-    override var translation
-        get() = _translation
-        set(value) { _translation = value }
-    override var rotation
-        get() = _rotation
-        set(value) { _rotation = value }
-    override var scale
-        get() = _scale
-        set(value) { _scale = value }
+class Model<T : GLVAO> : MutablePositioned, MutableRotated, MutableScaled {
+    override var translation = vec3(0f)
+    override var rotation = vec3(0f)
+    override var scale = vec3(1f)
     private val vaos = HashMap<String, T>()
     private val materials = HashMap<String, Material>()
 
@@ -38,9 +32,7 @@ class Model<T : GLVAO> : IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Mode
                 mat3_rotate(rotation.z, vec3(0f, 0f, 1f)).mat4() *
                 mat3_scale(scale).mat4()
 
-    constructor() {
-
-    }
+    constructor()
 
     constructor(vao: T) {
         addObject(DEFAULT_OBJECT_NAME, vao, Material())
@@ -96,7 +88,7 @@ class Model<T : GLVAO> : IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Mode
 
             if (material.hasTexture()) {
                 shader.setUniform("useTexture", true)
-                texture.bind()
+                texture?.bind()
             } else {
                 shader.setUniform("useTexture", false)
             }
@@ -104,27 +96,12 @@ class Model<T : GLVAO> : IPositioned<Model<T>>, IRotated<Model<T>>, IScaled<Mode
             context.drawIndexedVAO(vaos[objectName]!!)
 
             if (material.hasTexture()) {
-                texture.unbind()
+                texture?.unbind()
             }
         }
     }
 
-    override fun setRotation(rotation: vec3): Model<T> {
-        this.rotation = rotation
-        return this
-    }
-
-    override fun setTranslation(translation: vec3): Model<T> {
-        this.translation = translation
-        return this
-    }
-
-    override fun setScale(scale: vec3): Model<T> {
-        this.scale = scale
-        return this
-    }
-
     companion object {
-        val DEFAULT_OBJECT_NAME = "default"
+        const val DEFAULT_OBJECT_NAME = "default"
     }
 }

@@ -2,6 +2,7 @@ package lwaf_core
 
 import org.lwjgl.opengl.GL11
 
+@Suppress("unused")
 class DrawContext2D(private val view: GLView) {
     private var colour = vec3(1f, 1f, 1f)
 

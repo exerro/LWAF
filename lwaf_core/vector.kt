@@ -10,13 +10,6 @@ fun vec3.cross(v: vec3) = vec3(
         x*v.y - y*v.x
 )
 
-fun vec3.toRotationMatrix(): mat3 = mat3_rotate(y, vec3(0f, 1f, 0f)) *
-        mat3_rotate(x, vec3(1f, 0f, 0f)) *
-        mat3_rotate(z, vec3(0f, 0f, 1f))
-
-fun vec3.direction(): vec4 = vec4(x, y, z, 0.0f)
-fun vec3.position(): vec4 = vec4(x, y, z, 1.0f)
-
 fun vec4.vec3() = vec3(x, y, z)
 fun vec3.vec2() = vec2(x, y)
 
@@ -50,3 +43,13 @@ operator fun vec2.times(v: vec2) = vec2(x * v.x, y * v.y)
 operator fun vec2.times(s: Float) = vec2(x * s, y * s)
 operator fun vec2.div(v: vec2) = vec2(x / v.x, y / v.y)
 operator fun vec2.div(s: Float) = this * (1/s)
+
+fun vec3.toRotationMatrix(): mat3
+        = mat3_rotate(y, vec3(0f, 1f, 0f)) *
+          mat3_rotate(x, vec3(1f, 0f, 0f)) *
+          mat3_rotate(z, vec3(0f, 0f, 1f))
+
+fun vec3.toInverseRotationMatrix(): mat3
+        = mat3_rotate(-z, vec3(0f, 0f, 1f)) *
+          mat3_rotate(-x, vec3(1f, 0f, 0f)) *
+          mat3_rotate(-y, vec3(0f, 1f, 0f))

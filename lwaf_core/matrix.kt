@@ -50,16 +50,16 @@ operator fun mat3.times(m: mat3): mat3 {
 }
 
 operator fun mat4.times(v: vec4): vec4 = vec4(
-elements[0] * v.x + elements[1] * v.y + elements[2] * v.z + elements[3] * v.w,
-elements[4] * v.x + elements[5] * v.y + elements[6] * v.z + elements[7] * v.w,
-elements[8] * v.x + elements[9] * v.y + elements[10] * v.z + elements[11] * v.w,
-elements[12] * v.x + elements[13] * v.y + elements[14] * v.z + elements[15] * v.w
+        elements[0] * v.x + elements[1] * v.y + elements[2] * v.z + elements[3] * v.w,
+        elements[4] * v.x + elements[5] * v.y + elements[6] * v.z + elements[7] * v.w,
+        elements[8] * v.x + elements[9] * v.y + elements[10] * v.z + elements[11] * v.w,
+        elements[12] * v.x + elements[13] * v.y + elements[14] * v.z + elements[15] * v.w
 )
 
 operator fun mat3.times(v: vec3): vec3 = vec3(
         elements[0] * v.x + elements[1] * v.y + elements[2] * v.z,
         elements[3] * v.x + elements[4] * v.y + elements[5] * v.z,
-        elements[6] * v.x + elements[7] * v.y + elements[9] * v.z
+        elements[6] * v.x + elements[7] * v.y + elements[8] * v.z
 )
 
 fun mat4_translate(translation: vec3) = mat4(
@@ -68,14 +68,6 @@ fun mat4_translate(translation: vec3) = mat4(
         0.0f, 0.0f, 1.0f, translation.z,
         0.0f, 0.0f, 0.0f, 1.0f
 )
-
-fun mat3_scale(scale: vec3) = mat3(
-        scale.x, 0.0f,    0.0f,
-        0.0f,    scale.y, 0.0f,
-        0.0f,    0.0f,    scale.z
-)
-
-fun mat3_scale(scale: Float) = mat3_scale(vec3(scale, scale, scale))
 
 fun mat3_rotate(theta: Float, axis: vec3 = vec3(0.0f, 1.0f, 0.0f)): mat3 {
     val sin = Math.sin(theta.toDouble()).toFloat()
@@ -93,6 +85,14 @@ fun mat3_rotate(theta: Float, axis: vec3 = vec3(0.0f, 1.0f, 0.0f)): mat3 {
             uz * ux * (1 - cos) - uy * sin, uz * uy * (1 - cos) + ux * sin, cos + uz2 * (1 - cos)
     )
 }
+
+fun mat3_scale(scale: vec3) = mat3(
+        scale.x, 0.0f,    0.0f,
+        0.0f,    scale.y, 0.0f,
+        0.0f,    0.0f,    scale.z
+)
+
+fun mat3_scale(scale: Float) = mat3_scale(vec3(scale, scale, scale))
 
 fun mat3_look(facing: vec3, up: vec3): mat3 {
     val zaxis = vec3(facing.x, facing.y, -facing.z) // no idea why the Z seems to need to be negated

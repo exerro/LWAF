@@ -98,7 +98,7 @@ open class GLVAO : GLResource {
     /**
      * generates a new buffer
      */
-    protected fun genBuffer(): Int {
+    fun genBuffer(): Int {
         val vboID = GL20.glGenBuffers()
         vboIDs.add(vboID)
         return vboID
@@ -239,13 +239,13 @@ open class GLVAO : GLResource {
     }
 
     private fun genAttributeFloatBuffer(data: FloatArray, attribute: Int, dataSize: Int, usage: Int): Int {
-        val VBOID = genBuffer()
+        val vboID = genBuffer()
 
-        bindBufferToAttribute(VBOID, attribute, dataSize, GL_FLOAT)
+        bindBufferToAttribute(vboID, attribute, dataSize, GL_FLOAT)
         enableAttribute(attribute)
-        setBufferData(VBOID, data, usage)
+        setBufferData(vboID, data, usage)
 
-        return VBOID
+        return vboID
     }
 
     companion object {

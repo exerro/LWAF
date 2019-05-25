@@ -2,64 +2,74 @@ package lwaf_demo
 
 import lwaf_3D.DrawContext3D
 import lwaf_3D.Material
+import lwaf_3D.property.rotateBy
+import lwaf_3D.property.scaleBy
+import lwaf_3D.property.scaleTo
+import lwaf_3D.property.translateTo
 import lwaf_core.*
 import lwaf_graph.Graph3D
-import lwaf_math.SimplexNoise
+import lwaf_math.noise
 import lwaf_model.Model
-import lwaf_model.ModelRenderer
 import lwaf_model.OBJModelLoader
 import lwaf_primitive.*
+import java.util.*
 
-internal class Models(private val context: DrawContext3D) {
-    private val models = ModelRenderer()
+class Models(private val context: DrawContext3D) {
+    private val models = ArrayList<Model<*>>()
+
+    private fun <T: GLVAO> add(model: Model<T>): Model<T> {
+        models.add(model)
+        return model
+    }
 
     init {
-        val darkTexture = loadTexture("lwaf_res/img/no-texture-light.png")
+        val tx = loadTexture("lwaf_demo/2k_earth_daymap.png")
 
         for (i in 0..4) {
-            models.add(Model(IcoSphereVAO(i + 1)))
-                    .setTranslation((i * 2).toFloat(), -3f, -2f)
+            add(Model(IcoSphereVAO(i + 1)))
+                    .translateTo((i * 2).toFloat(), -3f, -2f)
         }
 
         for (i in 0..9) {
             for (j in 0..9) {
-                models.add(Model(UVSphereVAO(j + 1, i + 3)))
-                        .setTranslation((i * 2).toFloat(), (3 + j * 2).toFloat(), -2f).setMaterial(Material()
-                        .setTexture(darkTexture)
+                add(Model(UVSphereVAO(j + 1, i + 3)))
+                        .translateTo((18 - i * 2).toFloat(), (21 - 3 - j * 2).toFloat(), -2f).setMaterial(Material()
+                        .setTexture(tx)
                         .setSpecularLightingIntensity(0f))
             }
         }
 
-        models.add(Model(IcoSphereVAO(1)))
+        add(Model(IcoSphereVAO(1)))
                 .setMaterial(Material()
                         .setColour(0f, 1f, 1f))
-                .setTranslation(0f, 0f, 0f)
+                .translateTo(0f, 0f, 0f)
 
-        models.add(Model(CubeVAO()))
+        add(Model(CubeVAO()))
                 .setMaterial(Material()
                         .setTexture(loadTexture("lwaf_res/img/no-texture-light.png")))
 //                .setTranslation(2f, 0f, 0f)
 
-        models.add(Model(UVSphereVAO(40, 80)))
+        add(Model(UVSphereVAO(40, 80)))
                 .setMaterial(Material()
-                        .setTexture(loadTexture("lwaf_res/img/no-texture-dark.png")))
-                .setTranslation(4f, 0f, 0f)
+                        .setTexture(loadTexture("lwaf_demo/2k_earth_daymap.png")))
+                .translateTo(4f, 0f, 0f)
 
-        models.add(Model(IcoSphereVAO(7)))
+        add(Model(IcoSphereVAO(7)))
                 .setMaterial(Material()
                         .setColour(1f, 1f, 0f))
-                .setTranslation(6f, 0f, 0f)
+                .translateTo(6f, 0f, 0f)
 
-        models.add(OBJModelLoader.safeLoadModel("lwaf_demo/models/stall/stall.obj"))
+        add(OBJModelLoader.safeLoadModel("lwaf_demo/models/stall/stall.obj"))
                 .setMaterial(Material()
                         .setTexture(loadTexture("lwaf_demo/models/stall/stall_texture.png"))
                         .setSpecularLightingIntensity(0f))
-                .setTranslation(0f, 0f, 10f)
+                .translateTo(0f, 0f, 10f)
 
-        models.add(OBJModelLoader.safeLoadModel("lwaf_demo/models/deer/deer.obj"))
-                .setTranslation(10f, 0f, 10f)
+        add(OBJModelLoader.safeLoadModel("lwaf_demo/models/deer/deer.obj"))
+                .translateTo(10f, 0f, 10f)
                 .setMaterial(Material()
                         .setSpecularLightingIntensity(0.1f))
+                .rotateBy(0f, 3.14159f, 0f)
                 .scaleBy(0.002f)
 
         //        models.add(OBJModelLoader.safeLoadModel("lwaf_demo/models/bugatti/bugatti.obj"))
@@ -98,46 +108,48 @@ internal class Models(private val context: DrawContext3D) {
         val scale = vec3(20f, 1f, 20f)
         val res = 50
 
-        models.add(Model(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res))))
-                .setTranslation(0f, -10f, scale.x / 2 + 1).setScale(scale)
+        add(Model(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res))))
+                .translateTo(0f, -10f, scale.x / 2 + 1).scaleTo(scale)
 
-        models.add(Model(CubeVAO())).setTranslation(0f, -10f, scale.x / 2 + 1)
-        models.add(Model(CubeVAO())).setTranslation(scale.x * 0.5f, -10f, scale.x / 2 + 1)
+        add(Model(CubeVAO())).translateTo(0f, -10f, scale.x / 2 + 1)
+        add(Model(CubeVAO())).translateTo(scale.x * 0.5f, -10f, scale.x / 2 + 1)
 
-        models.add(Model(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res))))
-                .setTranslation(0f, -10f, -scale.x / 2 - 1).setScale(scale)
+        add(Model(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res))))
+                .translateTo(0f, -10f, -scale.x / 2 - 1).scaleTo(scale)
 
-        models.add(Model(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res))))
-                .setTranslation(-scale.x - 1, -10f, scale.x / 2 + 1).setScale(scale)
+        add(Model(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res))))
+                .translateTo(-scale.x - 1, -10f, scale.x / 2 + 1).scaleTo(scale)
 
-        models.add(Model(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res))))
-                .setTranslation(-scale.x - 1, -10f, -scale.x / 2 - 1).setScale(scale)
+        add(Model(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res))))
+                .translateTo(-scale.x - 1, -10f, -scale.x / 2 - 1).scaleTo(scale)
 
-        models.add(Model(ConeVAO(360)))
-                .setTranslation(-2f, 0f, 0f)
+        add(Model(ConeVAO(360)))
+                .translateTo(-2f, 0f, 0f)
 
-        models.add(Model(CylinderVAO(100)))
-                .setTranslation(-2f, 2f, 0f)
+        add(Model(CylinderVAO(100)))
+                .translateTo(-2f, 2f, 0f)
 
-        models.add(Model(PyramidVAO(4)))
-                .setTranslation(-2f, 4f, 0f)
+        add(Model(PyramidVAO(4)))
+                .translateTo(-2f, 4f, 0f)
     }
 
     fun draw(shader: GLShaderProgram) {
         val t = System.currentTimeMillis()
 
-        models.draw(shader, context)
+        for (model in models) {
+            model.draw(shader, context)
+        }
 
         val sea = Graph3D { (x, y) ->
-            (2.00 * SimplexNoise.noise(x * 0.5 + t * 0.05, y * 0.5, t * 0.05)
-                    + 0.50 * SimplexNoise.noise(x + t * 0.1, y.toDouble(), t * 0.1)
-                    + 0.50 * SimplexNoise.noise(x * 3 + t * 0.3, (y * 3).toDouble(), t * 0.3)).toFloat()
+            (2.00 * noise(x * 0.5 + t * 0.05, y * 0.5, t * 0.05)
+                    + 0.50 * noise(x + t * 0.1, y.toDouble(), t * 0.1)
+                    + 0.50 * noise(x * 3 + t * 0.3, (y * 3).toDouble(), t * 0.3)).toFloat()
         }
                 .setColouring { (_, y) -> (vec3(0.3f, 0.6f, 0.9f) + vec3(1f, 1f, 1f) * y * 0.1f) }
 
         Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
-                .setTranslation(50f, -10f, 0f)
-                .setScale(40f, 1f, 40f)
+                .translateTo(50f, -10f, 0f)
+                .scaleTo(40f, 1f, 40f)
                 .draw(shader, context)
     }
 }

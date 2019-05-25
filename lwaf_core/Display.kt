@@ -12,6 +12,7 @@ const val DISPLAY_DEFAULT_WIDTH = 1080
 const val DISPLAY_DEFAULT_HEIGHT = 720
 const val DISPLAY_DEFAULT_TITLE = "Display"
 
+@Suppress("unused")
 class Display(
         private var width: Int = DISPLAY_DEFAULT_WIDTH,
         private var height: Int = DISPLAY_DEFAULT_HEIGHT,
@@ -135,7 +136,7 @@ class Display(
         onUnloadCallbacks.remove(callback)
     }
 
-    val FPS get() = internalFPS
+    val fps get() = internalFPS
 
     fun setMouseLocked(locked: Boolean) {
         whenSetup {
@@ -204,7 +205,7 @@ class Display(
             lastUpdate = t
 
             // calculate the FPS based on past FPS readings
-            fpsReadings = (fpsReadings + listOf(1000/dt)).take(DISPLAY_FPS_READINGS)
+            fpsReadings = (listOf(1000/dt) + fpsReadings).take(DISPLAY_FPS_READINGS)
             internalFPS = (fpsReadings.fold(dt) { acc, it -> acc + it } / (fpsReadings.size + 1)).toInt()
 
             // call the update render callbacks

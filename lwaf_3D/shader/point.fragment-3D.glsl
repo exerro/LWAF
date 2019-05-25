@@ -43,5 +43,5 @@ void main(void) {
     vec4 specularColour = attenuationFactor * lightIntensity * specularLightingIntensity * vec4(lightColour, 1.0) * pow(specularFactor, specularLightingPower);
 
     gl_FragColor = diffuseColour + specularColour;
-    // gl_FragColor = vec4(lightColour / 2, 1);
+//     gl_FragColor = vec4(lightColour / 2, 1);
 }
