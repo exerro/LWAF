@@ -32,7 +32,7 @@ open class DrawContext3D(
         framebuffer.unbind()
     }
 
-    fun drawObjects(shader: GLShaderProgram, objects: List<Object3D>) {
+    fun drawToGBuffer(shader: GLShaderProgram, objects: List<Object3D>) {
         val viewMatrix = camera.viewMatrix
         val projectionMatrix = camera.projectionMatrix
 
@@ -55,11 +55,11 @@ open class DrawContext3D(
         buffer.unbind()
     }
 
-    fun drawObjects(shader: GLShaderProgram, vararg objects: Object3D) {
-        drawObjects(shader, objects.toList())
+    fun drawToGBuffer(shader: GLShaderProgram, vararg objects: Object3D) {
+        drawToGBuffer(shader, objects.toList())
     }
 
-    fun render(vararg renderers: () -> Unit) {
+    fun renderToTexture(vararg renderers: () -> Unit) {
         framebuffer.bind()
         buffer.bindReading()
 
@@ -79,7 +79,7 @@ open class DrawContext3D(
     }
 
     fun light(light: Light) {
-        render({
+        renderToTexture({
             light.shader.start()
             light.shader.setUniform("screenSize", view.size)
             light.shader.setUniform("viewTransform", camera.viewMatrix)
@@ -89,12 +89,12 @@ open class DrawContext3D(
         })
     }
 
-    fun directionalLight(direction: vec3, intensity: Float = 0.4f, colour: vec3 = vec3(1f)) {
-        light(DirectionalLight(direction, intensity, colour))
-    }
-
     fun ambientLight(intensity: Float = 0.1f, colour: vec3 = vec3(1f)) {
         light(AmbientLight(intensity, colour))
+    }
+
+    fun directionalLight(direction: vec3, intensity: Float = 0.4f, colour: vec3 = vec3(1f)) {
+        light(DirectionalLight(direction, intensity, colour))
     }
 
     fun pointLight(position: vec3, intensity: Float = 4f, attenuation: vec3 = PointLight.ATTENUATION, colour: vec3 = vec3(1f)) {

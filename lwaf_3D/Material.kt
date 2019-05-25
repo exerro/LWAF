@@ -4,21 +4,13 @@ import lwaf_core.GLShaderProgram
 import lwaf_core.GLTexture
 import lwaf_core.vec3
 
-class Material private constructor(
-        val diffuseLightingIntensity: Float,
-        val specularLightingIntensity: Float,
-        val specularLightingPower: Int,
-        val texture: GLTexture?,
-        val colour: vec3
+class Material(
+        val diffuseLightingIntensity: Float = DIFFUSE_LIGHTING_INTENSITY,
+        val specularLightingIntensity: Float = SPECULAR_LIGHTING_INTENSITY,
+        val specularLightingPower: Int = SPECULAR_LIGHTING_POWER,
+        val texture: GLTexture? = null,
+        val colour: vec3 = vec3(1f)
 ) {
-    constructor(texture: GLTexture, colour: vec3) : this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER, texture, colour) {}
-
-    constructor(texture: GLTexture) : this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER, texture, vec3(1f, 1f, 1f)) {}
-
-    constructor(colour: vec3) : this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER, null, colour) {}
-
-    constructor() : this(DIFFUSE_LIGHTING_INTENSITY, SPECULAR_LIGHTING_INTENSITY, SPECULAR_LIGHTING_POWER, null, vec3(1f, 1f, 1f)) {}
-
     fun setDiffuseLightingIntensity(diffuseLightingIntensity: Float): Material {
         return Material(diffuseLightingIntensity, specularLightingIntensity, specularLightingPower, texture, colour)
     }

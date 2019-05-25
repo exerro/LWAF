@@ -9,7 +9,7 @@ import java.nio.file.Paths
 import org.lwjgl.opengl.GL30.*
 
 class GBuffer(width: Int, height: Int) {
-    private val fbo: GLFramebuffer
+    private val fbo: GLFramebuffer = GLFramebuffer(width, height)
     val colourTexture: GLTexture
     val positionTexture: GLTexture
     val normalTexture: GLTexture
@@ -19,8 +19,6 @@ class GBuffer(width: Int, height: Int) {
         get() = fbo.depthTexture
 
     init {
-        fbo = GLFramebuffer(width, height)
-
         colourTexture = fbo.attachTexture(createEmptyTexture(width, height), GL_COLOR_ATTACHMENT0)
         positionTexture = fbo.attachTexture(createEmptyTexture(width, height, GL_RGB32F, GL11.GL_RGB, GL11.GL_FLOAT), GL_COLOR_ATTACHMENT1)
         normalTexture = fbo.attachTexture(createEmptyTexture(width, height, GL_RGB32F, GL11.GL_RGB, GL11.GL_FLOAT), GL_COLOR_ATTACHMENT2)
@@ -38,29 +36,25 @@ class GBuffer(width: Int, height: Int) {
     }
 
     fun bindReading() {
-        for (i in 0..3) {
-            GL13.glActiveTexture(GL13.GL_TEXTURE0)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, colourTexture.textureID)
-            GL13.glActiveTexture(GL13.GL_TEXTURE1)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, positionTexture.textureID)
-            GL13.glActiveTexture(GL13.GL_TEXTURE2)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, normalTexture.textureID)
-            GL13.glActiveTexture(GL13.GL_TEXTURE3)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, lightingTexture.textureID)
-        }
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, colourTexture.textureID)
+        GL13.glActiveTexture(GL13.GL_TEXTURE1)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, positionTexture.textureID)
+        GL13.glActiveTexture(GL13.GL_TEXTURE2)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, normalTexture.textureID)
+        GL13.glActiveTexture(GL13.GL_TEXTURE3)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, lightingTexture.textureID)
     }
 
     fun unbindReading() {
-        for (i in 0..3) {
-            GL13.glActiveTexture(GL13.GL_TEXTURE0)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
-            GL13.glActiveTexture(GL13.GL_TEXTURE1)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
-            GL13.glActiveTexture(GL13.GL_TEXTURE2)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
-            GL13.glActiveTexture(GL13.GL_TEXTURE3)
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
-        }
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE1)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE2)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE3)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
     }
 
     fun destroy() {
@@ -72,7 +66,6 @@ class GBuffer(width: Int, height: Int) {
     }
 
     companion object {
-
         var FRAGMENT_SHADER_PATH = "lwaf_res/shader/draw-to-gbuffer.glsl"
 
         fun loadShader(vertexShader: String, instanced: Boolean): GLShaderProgram {

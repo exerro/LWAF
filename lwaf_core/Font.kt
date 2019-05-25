@@ -258,6 +258,7 @@ private var fontFilePatternMatcher: Pattern = Pattern.compile(
                 "file=\"(.+)\"\\s*" +
                 "/>"
 )
+
 private var commonPatternMatcher: Pattern = Pattern.compile(
         "<common\\s+" +
                 "lineHeight=\"(\\d+)\"\\s+" +
@@ -267,6 +268,7 @@ private var commonPatternMatcher: Pattern = Pattern.compile(
                 "pages=\"1\" packed=\"\\d+\"\\s*" +
                 "/>"
 )
+
 private var charPatternMatcher: Pattern = Pattern.compile(
         "<char " +
                 "id=\"(\\d+)\"\\s+" +
@@ -280,6 +282,7 @@ private var charPatternMatcher: Pattern = Pattern.compile(
                 "page=\"0\" chnl=\"\\d+\"\\s*" +
                 "/>"
 )
+
 private var kerningPatternMatcher: Pattern = Pattern.compile(
         "<kerning " +
                 "first=\"(\\d+)\" " +

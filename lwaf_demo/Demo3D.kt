@@ -1,6 +1,9 @@
 package lwaf_demo
 
-import lwaf_3D.*
+import lwaf_3D.DrawContext3D
+import lwaf_3D.GBuffer
+import lwaf_3D.Material
+import lwaf_3D.getLightingAttenuation
 import lwaf_3D.property.*
 import lwaf_core.*
 import lwaf_graph.Graph3D
@@ -36,7 +39,7 @@ fun loadModels() {
             addModel(Model(UVSphereVAO(j + 1, i + 3)))
                     .translateTo((18 - i * 2).toFloat(), (21 - 3 - j * 2).toFloat(), -2f).setMaterial(Material()
                             .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture))
-                            .setSpecularLightingIntensity(0f))
+                                    .setSpecularLightingIntensity(0f))
         }
     }
 
@@ -192,8 +195,8 @@ object Demo3D {
 
             context3D.begin()
 
-            context3D.drawObjects(shader, models)
-            context3D.drawObjects(shader, Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
+            context3D.drawToGBuffer(shader, models)
+            context3D.drawToGBuffer(shader, Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
                     .translateTo(50f, -10f, 0f)
                     .scaleTo(40f, 1f, 40f))
 
