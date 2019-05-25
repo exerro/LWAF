@@ -73,7 +73,7 @@ class GBuffer(width: Int, height: Int) {
 
     companion object {
 
-        var FRAGMENT_SHADER_PATH = "lwaf_3D/shader/gbuffer-render.fragment-3D.glsl"
+        var FRAGMENT_SHADER_PATH = "lwaf_res/shader/draw-to-gbuffer.glsl"
 
         fun loadShader(vertexShader: String, instanced: Boolean): GLShaderProgram {
             return loadShaderProgramFiles(

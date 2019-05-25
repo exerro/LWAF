@@ -17,7 +17,7 @@ class AmbientLight(
         override val colour: vec3
 ) : Light {
     override val shader = getLightingShader("lighting.ambient") {
-        loadShaderProgramFiles("lwaf_3D/shader/pass-through.vertex-3D.glsl", "lwaf_3D/shader/ambient.fragment-3D.glsl")
+        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/ambient.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -34,7 +34,7 @@ class DirectionalLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.directional") {
-        loadShaderProgramFiles("lwaf_3D/shader/pass-through.vertex-3D.glsl", "lwaf_3D/shader/directional.fragment-3D.glsl")
+        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/directional.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -53,7 +53,7 @@ class PointLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.point") {
-        loadShaderProgramFiles("lwaf_3D/shader/pass-through.vertex-3D.glsl", "lwaf_3D/shader/point.fragment-3D.glsl")
+        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/point.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -80,7 +80,7 @@ class SpotLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.spot") {
-        loadShaderProgramFiles("lwaf_3D/shader/pass-through.vertex-3D.glsl", "lwaf_3D/shader/spot.fragment-3D.glsl")
+        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/spot.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -123,20 +123,21 @@ fun getLightingAttenuation(distance: Float, halfBrightnessDistance: Float): vec3
     // Lx + Dh * Ly + Dh^2 * Lz = 2
     // Lx + D  * Ly + D^2  * Lz = 256
 
-    val Lz = (255 - (distance - 1) / (halfBrightnessDistance - 1)) /
-            ((distance-1) * (distance - halfBrightnessDistance));
-    val Ly = (1 - (halfBrightnessDistance * halfBrightnessDistance - 1) * Lz) /
-            (halfBrightnessDistance - 1);
-    val Lx = 1 - Ly - Lz;
+    val lZ = (255 - (distance - 1) / (halfBrightnessDistance - 1)) /
+            ((distance-1) * (distance - halfBrightnessDistance))
+    val lY = (1 - (halfBrightnessDistance * halfBrightnessDistance - 1) * lZ) /
+            (halfBrightnessDistance - 1)
+    val lX = 1 - lY - lZ
 
-    return vec3(Lx, Ly, Lz);
+    return vec3(lX, lY, lZ)
 }
 
 
 fun getLightingAttenuation(distance: Float): vec3 {
-    val Lz = 255 / (distance * distance)
-    val Ly = 0f
-    val Lx = 1f
+    val lZ = 255 / (distance * distance)
+    val lY = 0f
+    val lX = 1f
 
-    return vec3(Lx, Ly, Lz)
+    return vec3(lX, lY, lZ)
 }
+

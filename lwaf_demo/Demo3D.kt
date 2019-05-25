@@ -6,7 +6,6 @@ import lwaf_3D.property.rotateBy
 import lwaf_core.*
 import org.lwjgl.glfw.GLFW.*
 
-
 private lateinit var texture: GLTexture
 private lateinit var font: Font
 private lateinit var models: Models
@@ -36,7 +35,7 @@ object Demo3D {
             models = Models(context3D)
 
             shader = GBuffer.loadShader(
-                    "lwaf_3D/shader/vertex-3D.glsl",
+                    "lwaf_res/shader/vertex-3D.glsl",
                     false
             )
 
