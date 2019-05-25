@@ -23,13 +23,24 @@ class Font(
         private val char_x_advance: FloatArray,
         private val kerning: MutableMap<Int, MutableMap<Int, Int>>,
         private val sizeScale: Float,
+        private val resID: String,
         val texture: GLTexture
-) {
+): Resource, GLResource {
     val height: Float
         get() = lineHeight * sizeScale
 
-    fun withHeight(size: Float): Font
-            = Font(lineHeight, base, char_uvs, char_offsets, char_sizes, char_x_advance, kerning, size / lineHeight, texture)
+    fun withHeight(size: Float): Font = Font(
+            lineHeight,
+            base,
+            char_uvs,
+            char_offsets,
+            char_sizes,
+            char_x_advance,
+            kerning,
+            size / lineHeight,
+            resID.replace(Regex("@\\d+"), "@$size"),
+            texture
+    )
 
     fun getWidth(text: String): Float {
         var total = 0f
@@ -67,6 +78,17 @@ class Font(
 
     internal fun getKerning(id1: Int, id2: Int): Float
             = (kerning[id1]?.get(id2) ?: 0).toFloat() * sizeScale
+
+    override fun destroy() {
+        Logging.log("resource.font.destroy") { "Destroying font" }
+        texture.destroy()
+    }
+
+    override fun getResourceID(): String = resID
+
+    override fun free() {
+        destroy()
+    }
 }
 
 class FontText internal constructor(val text: String, val font: Font) {
@@ -160,9 +182,10 @@ fun loadFont(filePath: String): Font {
     val scaleW: Int
     val scaleH: Int
 
-    Logging.log("font.load") { "Loading font '$filePath'" }
+    Logging.log("resource.font.load") { "Loading font '$filePath'" }
 
     if (fontFileMatcher.find()) {
+        // this deliberately uses loadTexture not loadResource as it leads to ownership of the texture
         texture = loadTexture(fontFileMatcher.group(1))
     } else {
         throw IOException("Invalid .fnt file format: no page file found")
@@ -226,7 +249,7 @@ fun loadFont(filePath: String): Font {
         throw IOException("Invalid .fnt file format: no characters included")
     }
 
-    return Font(lineHeight, base, uvs, offsets, sizes, xAdvances, kerning, 1f, texture)
+    return Font(lineHeight, base, uvs, offsets, sizes, xAdvances, kerning, 1f, "$filePath@$lineHeight", texture)
 }
 
 private var fontFilePatternMatcher: Pattern = Pattern.compile(

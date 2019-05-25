@@ -2,13 +2,14 @@ package lwaf_model
 
 import lwaf_3D.DrawContext3D
 import lwaf_3D.Material
+import lwaf_3D.Object3D
 import lwaf_3D.property.MutablePositioned
 import lwaf_3D.property.MutableRotated
 import lwaf_3D.property.MutableScaled
 import lwaf_core.*
 import java.util.*
 
-class Model<T : GLVAO> : MutablePositioned, MutableRotated, MutableScaled {
+class Model<T : GLVAO> : Object3D {
     override var translation = vec3(0f)
     override var rotation = vec3(0f)
     override var scale = vec3(1f)
@@ -77,7 +78,7 @@ class Model<T : GLVAO> : MutablePositioned, MutableRotated, MutableScaled {
         return this
     }
 
-    fun draw(shader: GLShaderProgram, context: DrawContext3D) {
+    override fun draw(context: DrawContext3D, shader: GLShaderProgram) {
         shader.setUniform("transform", transformationMatrix)
 
         for (objectName in objectNames) {

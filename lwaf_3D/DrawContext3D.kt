@@ -32,7 +32,7 @@ open class DrawContext3D(
         framebuffer.unbind()
     }
 
-    fun drawObjects(shader: GLShaderProgram, vararg objects: Object3D) {
+    fun drawObjects(shader: GLShaderProgram, objects: List<Object3D>) {
         val viewMatrix = camera.viewMatrix
         val projectionMatrix = camera.projectionMatrix
 
@@ -53,6 +53,10 @@ open class DrawContext3D(
 
         shader.stop()
         buffer.unbind()
+    }
+
+    fun drawObjects(shader: GLShaderProgram, vararg objects: Object3D) {
+        drawObjects(shader, objects.toList())
     }
 
     fun render(vararg renderers: () -> Unit) {

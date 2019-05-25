@@ -7,7 +7,13 @@ import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryStack
 import java.nio.ByteBuffer
 
-class GLTexture internal constructor(val textureID: Int, val width: Int, val height: Int): GLResource {
+class GLTexture internal constructor(val textureID: Int, val width: Int, val height: Int, private val resID: String): Resource, GLResource {
+    override fun getResourceID(): String = resID
+
+    override fun free() {
+        destroy()
+    }
+
     fun bind() {
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, textureID)
@@ -19,6 +25,7 @@ class GLTexture internal constructor(val textureID: Int, val width: Int, val hei
     }
 
     override fun destroy() {
+        Logging.log("resource.texture.destroy") { "Destroying texture (ID: $textureID)" }
         glDeleteTextures(textureID)
     }
 }
@@ -27,7 +34,7 @@ class GLTexture internal constructor(val textureID: Int, val width: Int, val hei
 fun createEmptyTexture(width: Int, height: Int, internalFormat: Int = GL_RGBA, format: Int = GL_RGBA, type: Int = GL_UNSIGNED_BYTE): GLTexture {
     val textureID = glGenTextures()
 
-    Logging.log("texture.create") { "Creating ($width x $height) empty texture" }
+    Logging.log("resource.texture.create") { "Creating ($width x $height) empty texture (ID: $textureID)" }
 
     glBindTexture(GL_TEXTURE_2D, textureID)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
@@ -37,7 +44,7 @@ fun createEmptyTexture(width: Int, height: Int, internalFormat: Int = GL_RGBA, f
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null as ByteBuffer?)
     glBindTexture(GL_TEXTURE_2D, 0)
 
-    return GLTexture(textureID, width, height)
+    return GLTexture(textureID, width, height, "texture_$textureID")
 }
 
 fun loadTexture(filePath: String): GLTexture {
@@ -46,7 +53,7 @@ fun loadTexture(filePath: String): GLTexture {
     var height = 0
     var data: ByteBuffer? = null
 
-    Logging.log("texture.load") { "Loading texture '$filePath'" }
+    Logging.log("resource.texture.load") { "Loading texture '$filePath' (ID: $textureID)" }
 
     MemoryStack.stackPush().use { stack ->
         val w = stack.mallocInt(1)
@@ -72,5 +79,5 @@ fun loadTexture(filePath: String): GLTexture {
 
     STBImage.stbi_image_free(data!!)
 
-    return GLTexture(textureID, width, height)
+    return GLTexture(textureID, width, height, filePath)
 }

@@ -3,7 +3,7 @@ package lwaf_core
 object Logging
 private val enabled = HashSet<String>()
 
-fun Logging.enable(logType: String) {
+fun Logging.enable(logType: String = "") {
     enabled.add(logType)
 }
 

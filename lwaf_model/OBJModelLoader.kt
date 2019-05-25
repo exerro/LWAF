@@ -1,44 +1,45 @@
 package lwaf_model
 
 import lwaf_3D.Material
-import lwaf_core.GLVAO
 import lwaf_core.*
-import lwaf_core.vec2
-import lwaf_core.vec3
-
 import java.io.BufferedReader
 import java.io.FileNotFoundException
 import java.io.FileReader
-import java.nio.file.Paths
 import java.util.*
-import java.util.function.Function
 import java.util.regex.Pattern
 import java.util.stream.Collectors
-import java.util.stream.Stream
 
 object OBJModelLoader {
-
-    private val numberPattern = Pattern.compile("\\-?\\d*\\.?\\d+")
+    private val numberPattern = Pattern.compile("-?\\d*\\.?\\d+")
     private val faceSectionPattern = Pattern.compile("(\\d+)(?:/(\\d*)(?:/(\\d+))?)?")
 
-    @Throws(FileNotFoundException::class)
-    fun loadModel(file: String, basePath: String): Model<GLVAO> {
-        println("Loading $file")
-
-        val parsed = readObjectLines(file)
+    fun loadModel(data: List<Pair<String, ModelData>>): Model<GLVAO> {
         val model = Model<GLVAO>()
 
-        val vertices = (parsed.dataLines as java.util.Map<String, List<String>>)
+        for ((objectName, objectData) in data) {
+            model.addObject(objectName, objectData.getVAO(), Material())
+        }
+
+        return model
+    }
+
+    @Throws(FileNotFoundException::class)
+    fun preloadModel(file: String): ArrayList<Pair<String, ModelData>> {
+        println("Loading model '$file'")
+
+        val parsed = readObjectLines(file)
+
+        val vertices = (parsed.dataLines)
                 .getOrDefault("v", emptyList())
                 .stream()
                 .map(parseVecNf(3))
                 .collect(Collectors.toList())
-        val normals = (parsed.dataLines as java.util.Map<String, List<String>>)
+        val normals = (parsed.dataLines)
                 .getOrDefault("vn", emptyList())
                 .stream()
                 .map(parseVecNf(3))
                 .collect(Collectors.toList())
-        val uvs = (parsed.dataLines as java.util.Map<String, List<String>>)
+        val uvs = (parsed.dataLines)
                 .getOrDefault("vt", emptyList())
                 .stream()
                 .map(parseVecNf(2))
@@ -48,57 +49,39 @@ object OBJModelLoader {
         println(vertices.size.toString() + " vertices; " + normals.size + " normals; " + uvs.size + " uvs; " + parsed.objects.size + " objects")
 
         val vertexCache = HashMap<IntArray, Int>()
+        val pairs = ArrayList<Pair<String, ModelData>>()
 
         for (objectName in parsed.objects.keys) {
-            val vao = loadObjectVAO(parsed.objects[objectName]!!, vertices, normals, uvs, vertexCache)
-            val material = Material()
+            val vaoData = loadObjectVAO(parsed.objects[objectName] ?: error(""), vertices, normals, uvs, vertexCache)
 
             println("Object '" + objectName + "': " + parsed.objects[objectName]!!.getOrDefault("f", emptyList()).size + " faces")
 
-            model.addObject(objectName, vao, material)
+            pairs.add(Pair(objectName, vaoData))
         }
 
-        return model
+        return pairs
     }
 
-    @Throws(FileNotFoundException::class)
-    fun loadModel(file: String): Model<GLVAO> {
-        val basePath = Paths.get(file).parent
-        return loadModel(file, basePath?.toString() ?: "")
-    }
-
-    fun safeLoadModel(file: String, basePath: String): Model<GLVAO> {
+    fun safePreloadModel(file: String): ArrayList<Pair<String, ModelData>> {
         try {
-            return loadModel(file, basePath)
+            return preloadModel(file)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             System.exit(1)
             while (true);
         }
-
     }
 
-    fun safeLoadModel(file: String): Model<GLVAO> {
-        try {
-            return loadModel(file)
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-            System.exit(1)
-            while (true);
-        }
-
-    }
-
-    private fun loadObjectVAO(linesData: Map<String, List<String>>, vertices: List<vec3>, normals: List<vec3>, uvs: List<vec2>, vertexCache: HashMap<IntArray, Int>): GLVAO {
+    private fun loadObjectVAO(linesData: Map<String, List<String>>, vertices: List<vec3>, normals: List<vec3>, uvs: List<vec2>, vertexCache: HashMap<IntArray, Int>): ModelData {
         val faces = linesData
                 .getOrDefault("f", emptyList())
                 .stream()
                 .flatMap { parseFace(it).toList().stream() }
                 .collect(Collectors.toList())
 
-        val new_vertices = ArrayList<vec3>()
-        val new_normals = ArrayList<vec3>()
-        val new_uvs = ArrayList<vec2>()
+        val newVertices = ArrayList<vec3>()
+        val newNormals = ArrayList<vec3>()
+        val newUVs = ArrayList<vec2>()
         val elements = IntArray(faces.size * 3)
         var ei = 0
 
@@ -112,28 +95,28 @@ object OBJModelLoader {
 
                 if (face[v][1] == -1 || face[v][2] == -1) {
                     set = true
-                    elements[ei++] = new_vertices.size
+                    elements[ei++] = newVertices.size
                 } else {
                     if (!vertexCache.containsKey(face[v])) {
                         set = true
-                        vertexCache[face[v]] = new_vertices.size
+                        vertexCache[face[v]] = newVertices.size
                     }
 
                     elements[ei++] = vertexCache[face[v]]!!
                 }
 
                 if (set) {
-                    new_vertices.add(vertices[face[v][0] - 1])
-                    new_uvs.add(if (face[v][1] == -1) vec2(0f, 0f) else uvs[face[v][1] - 1])
-                    new_normals.add((if (face[v][2] == -1) normal else normals[face[v][2] - 1]).normalise())
+                    newVertices.add(vertices[face[v][0] - 1])
+                    newUVs.add(if (face[v][1] == -1) vec2(0f, 0f) else uvs[face[v][1] - 1])
+                    newNormals.add((if (face[v][2] == -1) normal else normals[face[v][2] - 1]).normalise())
                 }
             }
         }
 
-        return generateStandardVAO(
-                new_vertices.toTypedArray(),
-                new_normals.toTypedArray(), null,
-                new_uvs.toTypedArray(),
+        return ModelData(
+                newVertices.toTypedArray(),
+                newNormals.toTypedArray(),
+                newUVs.toTypedArray(),
                 elements
         )
     }
@@ -165,7 +148,7 @@ object OBJModelLoader {
             sections.add(intArrayOf(Integer.parseInt(sVertex), if (sUV == null || sUV == "") -1 else Integer.parseInt(sUV), if (sNormal == null || sNormal == "") -1 else Integer.parseInt(sNormal)))
         }
 
-        val faces = Array<Array<IntArray>>(sections.size - 2) { Array(0) { IntArray(0) } }
+        val faces = Array(sections.size - 2) { Array(0) { IntArray(0) } }
 
         for (i in 0 until sections.size - 2) {
             val s0 = sections[0]
@@ -198,7 +181,7 @@ object OBJModelLoader {
                 lines.computeIfAbsent(type) { ArrayList() }
                 lines[type]!!.add(data)
             } else {
-                objects!!.computeIfAbsent(objectName) { HashMap() }
+                objects.computeIfAbsent(objectName) { HashMap() }
                 objects[objectName]!!.computeIfAbsent(type) { ArrayList() }
                 objects[objectName]!![type]!!.add(data)
             }
@@ -216,12 +199,11 @@ object OBJModelLoader {
     }
 
     private fun sanitiseLine(line: String): String {
-        var line = line
-        if (line.contains("#")) {
-            line = line.substring(0, line.indexOf("#"))
+        var ln = line
+        if (ln.contains("#")) {
+            ln = ln.substring(0, ln.indexOf("#"))
         }
-
-        return line.toLowerCase()
+        return ln.toLowerCase()
     }
 
     private fun calculateNormal(v0n: Int, v1n: Int, v2n: Int, vertices: List<vec3>): vec3 {
@@ -232,5 +214,10 @@ object OBJModelLoader {
     }
 
     private class ObjectLines(internal val dataLines: Map<String, List<String>>, internal val objects: Map<String, Map<String, List<String>>>)
+
+}
+
+class ModelData(val vertices: Array<vec3>, val normals: Array<vec3>, val uvs: Array<vec2>, val elements: IntArray) {
+    fun getVAO() = generateStandardVAO(vertices, normals, null, uvs, elements)
 
 }
