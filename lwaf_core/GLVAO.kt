@@ -126,20 +126,20 @@ open class GLVAO : GLResource {
     }
 
     /**
-     * generates a default UV buffer using given data and binds it
-     */
-    fun genUVBuffer(data: FloatArray): Int {
-        enableTextures()
-        return genAttributeFloatBuffer(data, VERTEX_TEXTURE_ATTRIBUTE, 2, GL_STATIC_DRAW)
-    }
-
-    /**
      * generates a default colour using default data and binds it
      */
     fun genColourBuffer(vertices: Int): Int {
         val data = FloatArray(vertices * 3)
         Arrays.fill(data, 1f)
         return genColourBuffer(data)
+    }
+
+    /**
+     * generates a default UV buffer using given data and binds it
+     */
+    fun genUVBuffer(data: FloatArray): Int {
+        enableTextures()
+        return genAttributeFloatBuffer(data, VERTEX_TEXTURE_ATTRIBUTE, 2, GL_STATIC_DRAW)
     }
 
     /**
@@ -254,24 +254,28 @@ open class GLVAO : GLResource {
         const val VERTEX_NORMAL_ATTRIBUTE = 2
         const val VERTEX_COLOUR_ATTRIBUTE = 3
 
-        fun vec3fToFloatArray(vs: Array<vec3>): FloatArray {
+        fun vec3fToFloatArray(vs: Collection<vec3>): FloatArray {
             val result = FloatArray(vs.size * 3)
+            var i = 0
 
-            for (i in vs.indices) {
-                result[i * 3] = vs[i].x
-                result[i * 3 + 1] = vs[i].y
-                result[i * 3 + 2] = vs[i].z
+            for (v in vs) {
+                result[i] = v.x
+                result[i + 1] = v.y
+                result[i + 2] = v.z
+                i += 3
             }
 
             return result
         }
 
-        fun vec2fToFloatArray(vs: Array<vec2>): FloatArray {
+        fun vec2fToFloatArray(vs: Collection<vec2>): FloatArray {
             val result = FloatArray(vs.size * 2)
+            var i = 0
 
-            for (i in vs.indices) {
-                result[i * 2] = vs[i].x
-                result[i * 2 + 1] = vs[i].y
+            for (v in vs) {
+                result[i] = v.x
+                result[i + 1] = v.y
+                i += 2
             }
 
             return result
@@ -287,13 +291,25 @@ val screen_quad: GLVAO = object : GLVAO() {
     }
 }
 
-fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, elements: IntArray): GLVAO
-        = generateStandardVAO(vertices, normals, null, elements)
+fun generateStandardVAO(vertices: Collection<vec3>, normals: Collection<vec3>, elements: IntArray, colours: Int, uvs: Collection<vec2>? = null): GLVAO {
+    val vao = GLVAO()
+    vao.vertexCount = elements.size
+    vao.genVertexBuffer(GLVAO.vec3fToFloatArray(vertices))
+    vao.genNormalBuffer(GLVAO.vec3fToFloatArray(normals))
+    vao.genElementBuffer(elements)
 
-fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, colours: Array<vec3>?, elements: IntArray): GLVAO
-        = generateStandardVAO(vertices, normals, colours, null, elements)
+    if (uvs != null)
+        vao.genUVBuffer(GLVAO.vec2fToFloatArray(uvs))
 
-fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, colours: Array<vec3>?, uvs: Array<vec2>?, elements: IntArray): GLVAO {
+    vao.genColourBuffer(colours)
+
+    return vao
+}
+
+fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, elements: IntArray, colours: Int, uvs: Array<vec2>? = null): GLVAO
+        = generateStandardVAO(vertices.toList(), normals.toList(), elements, colours, uvs?.toList())
+
+fun generateStandardVAO(vertices: Collection<vec3>, normals: Collection<vec3>, elements: IntArray, colours: Collection<vec3>? = null, uvs: Collection<vec2>? = null): GLVAO {
     val vao = GLVAO()
     vao.vertexCount = elements.size
     vao.genVertexBuffer(GLVAO.vec3fToFloatArray(vertices))
@@ -310,3 +326,6 @@ fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, colours: Ar
 
     return vao
 }
+
+fun generateStandardVAO(vertices: Array<vec3>, normals: Array<vec3>, elements: IntArray, colours: Array<vec3>? = null, uvs: Array<vec2>? = null): GLVAO
+        = generateStandardVAO(vertices.toList(), normals.toList(), elements, colours?.toList(), uvs?.toList())

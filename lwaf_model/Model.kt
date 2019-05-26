@@ -2,14 +2,11 @@ package lwaf_model
 
 import lwaf_3D.DrawContext3D
 import lwaf_3D.Material
-import lwaf_3D.Object3D
-import lwaf_3D.property.MutablePositioned
-import lwaf_3D.property.MutableRotated
-import lwaf_3D.property.MutableScaled
+import lwaf_3D.MutableObject3D
 import lwaf_core.*
 import java.util.*
 
-class Model<T : GLVAO> : Object3D {
+class Model<T : GLVAO> : MutableObject3D {
     override var translation = vec3(0f)
     override var rotation = vec3(0f)
     override var scale = vec3(1f)

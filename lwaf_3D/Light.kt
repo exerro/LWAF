@@ -12,7 +12,7 @@ interface Light {
     fun render(shader: GLShaderProgram, context: DrawContext3D)
 }
 
-class AmbientLight(
+data class AmbientLight(
         override val intensity: Float,
         override val colour: vec3
 ) : Light {
@@ -28,7 +28,7 @@ class AmbientLight(
     }
 }
 
-class DirectionalLight(
+data class DirectionalLight(
         val direction: vec3,
         override val intensity: Float,
         override val colour: vec3
@@ -46,7 +46,7 @@ class DirectionalLight(
     }
 }
 
-class PointLight(
+data class PointLight(
         val position: vec3,
         override val intensity: Float,
         val attenuation: vec3 = ATTENUATION,
@@ -71,7 +71,7 @@ class PointLight(
     }
 }
 
-class SpotLight(
+data class SpotLight(
         val position: vec3,
         val direction: vec3,
         val spread: vec2,

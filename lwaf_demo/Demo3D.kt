@@ -1,9 +1,7 @@
 package lwaf_demo
 
-import lwaf_3D.DrawContext3D
-import lwaf_3D.GBuffer
-import lwaf_3D.Material
-import lwaf_3D.getLightingAttenuation
+import lwaf_3D.*
+import lwaf_3D.poly.*
 import lwaf_3D.property.*
 import lwaf_core.*
 import lwaf_graph.Graph3D
@@ -12,6 +10,7 @@ import lwaf_model.Model
 import lwaf_model.OBJModelLoader
 import lwaf_primitive.*
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.GL11.*
 
 private lateinit var texture2D: GLTexture
 private lateinit var font: Font
@@ -21,6 +20,7 @@ private var textureToDraw = 0
 private lateinit var view: GLView
 private lateinit var context2D: DrawContext2D
 private val models = ArrayList<Model<*>>()
+private val objects = ArrayList<Object3D>()
 private var t = 0f
 
 fun <T: GLVAO> addModel(model: Model<T>): Model<T> {
@@ -30,50 +30,47 @@ fun <T: GLVAO> addModel(model: Model<T>): Model<T> {
 
 fun loadModels() {
     for (i in 0..4) {
-        addModel(Model(IcoSphereVAO(i + 1)))
-                .translateTo((i * 2).toFloat(), -3f, -2f)
+        objects.add(Sphere().toVAOObject3D(i + 1)
+                .translateTo(i * 2.5f, -3f, -2f))
     }
 
     for (i in 0..9) {
         for (j in 0..9) {
-            addModel(Model(UVSphereVAO(j + 1, i + 3)))
-                    .translateTo((18 - i * 2).toFloat(), (21 - 3 - j * 2).toFloat(), -2f).setMaterial(Material()
-                            .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture))
-                                    .setSpecularLightingIntensity(0f))
+                objects.add(Sphere(0.8f).toUVVAOObject3D(i + 3, j + 1, Material()
+                                .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture))
+                                .setSpecularLightingIntensity(0f))
+                        .translateTo(18 - i * 2f, 18 - j * 2f, -5f))
         }
     }
 
-    addModel(Model(IcoSphereVAO(1)))
-            .setMaterial(Material()
+    objects.add(Sphere(1f).toVAOObject3D(1, Material()
                     .setColour(0f, 1f, 1f))
-            .translateTo(0f, 0f, 0f)
+            .translateTo(0f, 0f, 0f))
 
-    addModel(Model(CubeVAO()))
-            .setMaterial(Material()
-                    .setTexture(loadResource("lwaf_res/img/no-texture-light.png", ::loadTexture)))
+    objects.add(Box().toVAOObject3D(Material()
+            .setTexture(loadResource("lwaf_res/img/no-texture-light.png", ::loadTexture)))
+            .translateBy(vec3(2f, 0f, 0f)))
 //                .setTranslation(2f, 0f, 0f)
 
-    addModel(Model(UVSphereVAO(40, 80)))
-            .setMaterial(Material()
+    objects.add(Sphere().toUVVAOObject3D(60, 40, Material()
                     .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture)))
-            .translateTo(4f, 0f, 0f)
+            .translateTo(4f, 0f, 0f))
 
-    addModel(Model(IcoSphereVAO(7)))
-            .setMaterial(Material()
+    objects.add(Sphere().toVAOObject3D(7, Material()
                     .setColour(1f, 1f, 0f))
-            .translateTo(6f, 0f, 0f)
+            .translateTo(6f, 0f, 0f))
 
-    addModel(Model(ConeVAO(360)))
+    addModel(Model(LegacyConeVAO(360)))
             .translateTo(-2f, 0f, 0f)
 
-    addModel(Model(CylinderVAO(100)))
+    addModel(Model(LegacyCylinderVAO(100)))
             .translateTo(-2f, 2f, 0f)
 
-    addModel(Model(PyramidVAO(4)))
+    addModel(Model(LegacyPyramidVAO(4)))
             .translateTo(-2f, 4f, 0f)
 
-    addModel(Model(CubeVAO())).translateTo(0f, -10f, 11f)
-    addModel(Model(CubeVAO())).translateTo(10f, -10f, 11f)
+    objects.add(Box().toVAOObject3D().translateTo(0f, -10f, 11f))
+    objects.add(Box().toVAOObject3D().translateTo(10f, -10f, 11f))
 
 
     val graph = Graph3D { v ->
@@ -97,49 +94,49 @@ fun loadModels() {
     addModel(Model(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res))))
             .translateTo(-scale.x - 1, -10f, -scale.x / 2 - 1).scaleTo(scale)
 
-    loadResourceAsync("bugatti", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/bugatti/bugatti.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value).setMaterial(Material()
-            .setSpecularLightingIntensity(0.1f))
-            .translateTo(20f, 0f, 10f))
-    }
-
-    loadResourceAsync("cottage_obj", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/cottage/cottage_obj.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
-                .setSpecularLightingIntensity(0.1f)
-                .setTexture(loadResource("lwaf_demo/models/cottage/cottage_diffuse.png", ::loadTexture)))
-                .translateTo(30f, 0f, -50f)
-    }
-
-    loadResourceAsync("buildings", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/buildings/low poly buildings.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
-                .setSpecularLightingIntensity(0.1f))
-                .translateTo(40f, 0f, 10f)
-                .scaleTo(0.005f)
-    }
-
-    loadResourceAsync("Tree1", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/trees/Tree1.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value)).removeObject("Plane")
-                .setMaterial(Material()
-                        .setSpecularLightingIntensity(0.1f))
-                .translateTo(50f, -1f, 10f)
-    }
-
-    loadResourceAsync("stall", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/stall/stall.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
-                .setTexture(loadResource("lwaf_demo/models/stall/stall_texture.png", ::loadTexture))
-                .setSpecularLightingIntensity(0f))
-                .translateTo(0f, 0f, 10f)
-    }
+//    loadResourceAsync("bugatti", { ident ->
+//        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/bugatti/bugatti.obj"), ident)
+//    }) {
+//        addModel(OBJModelLoader.loadModel(it.value).setMaterial(Material()
+//            .setSpecularLightingIntensity(0.1f))
+//            .translateTo(20f, 0f, 10f))
+//    }
+//
+//    loadResourceAsync("cottage_obj", { ident ->
+//        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/cottage/cottage_obj.obj"), ident)
+//    }) {
+//        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
+//                .setSpecularLightingIntensity(0.1f)
+//                .setTexture(loadResource("lwaf_demo/models/cottage/cottage_diffuse.png", ::loadTexture)))
+//                .translateTo(30f, 0f, -50f)
+//    }
+//
+//    loadResourceAsync("buildings", { ident ->
+//        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/buildings/low poly buildings.obj"), ident)
+//    }) {
+//        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
+//                .setSpecularLightingIntensity(0.1f))
+//                .translateTo(40f, 0f, 10f)
+//                .scaleTo(0.005f)
+//    }
+//
+//    loadResourceAsync("Tree1", { ident ->
+//        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/trees/Tree1.obj"), ident)
+//    }) {
+//        addModel(OBJModelLoader.loadModel(it.value)).removeObject("Plane")
+//                .setMaterial(Material()
+//                        .setSpecularLightingIntensity(0.1f))
+//                .translateTo(50f, -1f, 10f)
+//    }
+//
+//    loadResourceAsync("stall", { ident ->
+//        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/stall/stall.obj"), ident)
+//    }) {
+//        addModel(OBJModelLoader.loadModel(it.value)).setMaterial(Material()
+//                .setTexture(loadResource("lwaf_demo/models/stall/stall_texture.png", ::loadTexture))
+//                .setSpecularLightingIntensity(0f))
+//                .translateTo(0f, 0f, 10f)
+//    }
 
     loadResourceAsync("deer", { ident ->
         ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/deer/deer.obj"), ident)
@@ -195,10 +192,16 @@ object Demo3D {
 
             context3D.begin()
 
+//            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
+
+            context3D.drawToGBuffer(shader, objects)
+
             context3D.drawToGBuffer(shader, models)
             context3D.drawToGBuffer(shader, Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
                     .translateTo(50f, -10f, 0f)
                     .scaleTo(40f, 1f, 40f))
+
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )
 
             context3D.ambientLight(0.2f)
             context3D.directionalLight(vec3(-1f, -1f, -1f), 0.4f, vec3(0f, 1f, 0f))

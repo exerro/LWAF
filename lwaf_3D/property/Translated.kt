@@ -7,8 +7,8 @@ interface Translated {
     val translation: vec3
 }
 
-interface MutableTranslated {
-    var translation: vec3
+interface MutableTranslated: Translated {
+    override var translation: vec3
 }
 
 fun <T: MutableTranslated> T.translateTo(translation: vec3): T {

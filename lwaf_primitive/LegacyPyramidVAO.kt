@@ -4,13 +4,13 @@ import lwaf_core.GLVAO
 import lwaf_core.normalise
 import lwaf_core.vec3
 
-class PyramidVAO(sides: Int) : GLVAO() {
+class LegacyPyramidVAO(sides: Int) : GLVAO() {
     init {
         if (sides < 3)
             throw IllegalArgumentException("Too few sides for pyramid construction ($sides)")
 
         val vertices = FloatArray((sides * 4 + 1) * 3)
-        val normals = arrayOfNulls<vec3>(sides * 4 + 1)
+        val normals = Array(sides * 4 + 1) { vec3(0f) }
         val elements = IntArray(sides * 6)
 
         for (i in 0 until sides) {
@@ -68,7 +68,7 @@ class PyramidVAO(sides: Int) : GLVAO() {
 
         vertexCount = elements.size
         genVertexBuffer(vertices)
-        genNormalBuffer(Util.vec3fToFloatArray(normals))
+        genNormalBuffer(vec3fToFloatArray(normals.toList()))
         genColourBuffer(vertices.size / 3)
         genElementBuffer(elements)
     }

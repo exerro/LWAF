@@ -28,6 +28,10 @@ fun vec3.normalise() = this / length()
 fun vec2.dot(v: vec2) = x * v.x + y * v.y
 fun vec3.dot(v: vec3) = x * v.x + y * v.y + z * v.z
 
+fun vec2.unpack(): Array<Float> = arrayOf(x, y)
+fun vec3.unpack(): Array<Float> = arrayOf(x, y, z)
+fun vec4.unpack(): Array<Float> = arrayOf(x, y, z, w)
+
 operator fun vec3.plus(v: vec3) = vec3(x + v.x, y + v.y, z + v.z)
 operator fun vec3.minus(v: vec3) = vec3(x - v.x, y - v.y, z - v.z)
 operator fun vec3.unaryMinus() = vec3(-x, -y, -z)

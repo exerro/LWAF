@@ -218,6 +218,5 @@ object OBJModelLoader {
 }
 
 class ModelData(val vertices: Array<vec3>, val normals: Array<vec3>, val uvs: Array<vec2>, val elements: IntArray) {
-    fun getVAO() = generateStandardVAO(vertices, normals, null, uvs, elements)
-
+    fun getVAO() = generateStandardVAO(vertices, normals, elements, null, uvs)
 }

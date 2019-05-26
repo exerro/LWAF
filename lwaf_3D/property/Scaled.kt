@@ -7,8 +7,8 @@ interface Scaled {
     val scale: vec3
 }
 
-interface MutableScaled {
-    var scale: vec3
+interface MutableScaled: Scaled {
+    override var scale: vec3
 }
 
 fun <T: MutableScaled> T.scaleTo(scale: vec3): T {

@@ -4,7 +4,7 @@ import lwaf_core.GLShaderProgram
 import lwaf_core.GLTexture
 import lwaf_core.vec3
 
-class Material(
+data class Material(
         val diffuseLightingIntensity: Float = DIFFUSE_LIGHTING_INTENSITY,
         val specularLightingIntensity: Float = SPECULAR_LIGHTING_INTENSITY,
         val specularLightingPower: Int = SPECULAR_LIGHTING_POWER,
@@ -47,7 +47,7 @@ class Material(
     }
 
     companion object {
-        const val DIFFUSE_LIGHTING_INTENSITY = 0.7f
+        const val DIFFUSE_LIGHTING_INTENSITY = 1f
         const val SPECULAR_LIGHTING_INTENSITY = 0.4f
         const val SPECULAR_LIGHTING_POWER = 5
     }

@@ -7,8 +7,8 @@ interface Positioned: Translated {
         get() = translation
 }
 
-interface MutablePositioned: MutableTranslated {
-    var position: vec3
+interface MutablePositioned: MutableTranslated, Positioned {
+    override var position: vec3
         get() = translation
         set(value) { translation = value }
 }

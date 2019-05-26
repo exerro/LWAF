@@ -7,13 +7,13 @@ import lwaf_core.vec3
 // TODO: improve this
 //  due to the single normal at the top of the cone
 //  there are very obvious vertical lines from lighting when rendering
-class ConeVAO(detail: Int) : GLVAO() {
+class LegacyConeVAO(detail: Int) : GLVAO() {
     init {
         if (detail < 3)
             throw IllegalArgumentException("Detail is too low for cone construction ($detail)")
 
         val vertices = FloatArray(detail * 12)
-        val normals = arrayOfNulls<vec3>(detail * 4)
+        val normals = Array(detail * 4) { vec3(0f) }
         val elements = IntArray(detail * 6)
 
         for (i in 0 until detail) {
@@ -56,7 +56,7 @@ class ConeVAO(detail: Int) : GLVAO() {
 
         vertexCount = elements.size
         genVertexBuffer(vertices)
-        genNormalBuffer(Util.vec3fToFloatArray(normals))
+        genNormalBuffer(vec3fToFloatArray(normals.toList()))
         genColourBuffer(vertices.size / 3)
         genElementBuffer(elements)
     }

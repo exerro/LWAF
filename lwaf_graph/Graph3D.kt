@@ -66,7 +66,7 @@ class Graph3D(private val function: (vec2) -> Float) {
             elements[i] = i
         }
 
-        return generateStandardVAO(vertices, normals, colours, uvs, elements)
+        return generateStandardVAO(vertices, normals, elements, colours, uvs)
     }
 
     fun getSmoothVAO(strategy: EvaluationStrategy): GLVAO {
@@ -157,7 +157,7 @@ class Graph3D(private val function: (vec2) -> Float) {
             el += 3
         }
 
-        return generateStandardVAO(vertices, normals, colours, uvs, elements)
+        return generateStandardVAO(vertices, normals, elements, colours, uvs)
     }
 
     fun buildVertexLookup(triangles: List<Tri>): Map<vec2, vec3> {

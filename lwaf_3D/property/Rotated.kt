@@ -7,8 +7,8 @@ interface Rotated {
     val rotation: vec3
 }
 
-interface MutableRotated {
-    var rotation: vec3
+interface MutableRotated: Rotated {
+    override var rotation: vec3
 }
 
 fun <T: MutableRotated> T.rotateTo(rotation: vec3): T {
