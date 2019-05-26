@@ -16,7 +16,8 @@ const val DISPLAY_DEFAULT_TITLE = "Display"
 class Display(
         private var width: Int = DISPLAY_DEFAULT_WIDTH,
         private var height: Int = DISPLAY_DEFAULT_HEIGHT,
-        private val title: String = DISPLAY_DEFAULT_TITLE
+        private val title: String = DISPLAY_DEFAULT_TITLE,
+        private val vsync: Boolean = false
 ) : GLResource {
     private var running = false
     private val heldMouseButtons = HashSet<Int>()
@@ -221,6 +222,7 @@ class Display(
             onDrawCallbacks.map { it() }
 
             // swap the color buffers to present the content to the screen
+            finaliseQueuedResources()
             glfwSwapBuffers(window)
             glFlush()
 
@@ -268,8 +270,7 @@ class Display(
             )
 
         glfwMakeContextCurrent(window) // make the OpenGL context current
-//        glfwSwapInterval(1) // enable v-sync
-        glfwSwapInterval(0) // disable v-sync
+        glfwSwapInterval(if (vsync) 1 else 0) // enable/disable v-sync
         glfwShowWindow(window) // make the window visible
 
         GL.createCapabilities() // makes OpenGL bindings available to use from LWJGL

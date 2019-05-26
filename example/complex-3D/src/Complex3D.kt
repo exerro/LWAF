@@ -31,7 +31,7 @@ fun loadModels() {
     for (i in 0..9) {
         for (j in 0..9) {
                 objects.add(Sphere(0.8f).toUVVAOObject3D(i + 3, j + 1, Material()
-                                .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture))
+                                .setTexture(loadResource("example/complex-3D/res/img/2k_earth_daymap.png", ::loadTexture))
                                 .setSpecularLightingIntensity(0f))
                         .translateTo(18 - i * 2f, 18 - j * 2f, -5f))
         }
@@ -47,7 +47,7 @@ fun loadModels() {
 //                .setTranslation(2f, 0f, 0f)
 
     objects.add(Sphere().toUVVAOObject3D(60, 40, Material()
-                    .setTexture(loadResource("lwaf_demo/2k_earth_daymap.png", ::loadTexture)))
+                    .setTexture(loadResource("example/complex-3D/res/img/2k_earth_daymap.png", ::loadTexture)))
             .translateTo(4f, 0f, 0f))
 
     objects.add(Sphere().toVAOObject3D(7, Material()
@@ -131,12 +131,12 @@ fun loadModels() {
 //                .translateTo(0f, 0f, 10f)
 //    }
 
-    val stall = loadResource("lwaf_demo/models/stall/stall.obj", ::loadOBJModel)
+    val stall = loadResource("example/complex-3D/res/models/stall/stall.obj", ::loadOBJModel)
     stall.translateBy(vec3(0f, 0f, -30f))
-    stall.objects["Cube[0]"] = stall.objects["Cube[0]"]!!.copy(second = Material().setTexture(loadResource("lwaf_demo/models/stall/stall_texture.png", ::loadTexture)))
+    stall.objects["Cube[0]"] = stall.objects["Cube[0]"]!!.copy(second = Material().setTexture(loadResource("example/complex-3D/res/models/stall/stall_texture.png", ::loadTexture)))
     objects.add(stall)
 
-    val deer = loadResource("lwaf_demo/models/deer/deer.obj", ::loadOBJModel)
+    val deer = loadResource("example/complex-3D/res/models/deer/deer.obj", ::loadOBJModel)
     deer.translateTo(vec3(10f, 0f, 9f))
     deer.scaleBy(0.002f)
     objects.add(deer)
