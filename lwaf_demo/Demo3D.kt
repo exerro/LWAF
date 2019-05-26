@@ -1,14 +1,16 @@
 package lwaf_demo
 
 import lwaf_3D.*
-import lwaf_3D.poly.*
+import lwaf_3D.poly.VAOObject3D
+import lwaf_3D.poly.loadOBJModel
+import lwaf_3D.poly.toUVVAOObject3D
+import lwaf_3D.poly.toVAOObject3D
 import lwaf_3D.property.*
 import lwaf_core.*
-import lwaf_graph.Graph3D
-import lwaf_math.noise
-import lwaf_model.Model
-import lwaf_model.OBJModelLoader
-import lwaf_primitive.*
+import lwaf_primitive.LegacyConeVAO
+import lwaf_primitive.LegacyCylinderVAO
+import lwaf_primitive.LegacyPyramidVAO
+import lwaf_util.noise
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
 
@@ -19,14 +21,8 @@ private lateinit var context3D: DrawContext3D
 private var textureToDraw = 0
 private lateinit var view: GLView
 private lateinit var context2D: DrawContext2D
-private val models = ArrayList<Model<*>>()
 private val objects = ArrayList<Object3D>()
 private var t = 0f
-
-fun <T: GLVAO> addModel(model: Model<T>): Model<T> {
-    models.add(model)
-    return model
-}
 
 fun loadModels() {
     for (i in 0..4) {
@@ -60,18 +56,17 @@ fun loadModels() {
                     .setColour(1f, 1f, 0f))
             .translateTo(6f, 0f, 0f))
 
-    addModel(Model(LegacyConeVAO(360)))
-            .translateTo(-2f, 0f, 0f)
+    objects.add(VAOObject3D(LegacyConeVAO(360))
+            .translateTo(-2f, 0f, 0f))
 
-    addModel(Model(LegacyCylinderVAO(100)))
-            .translateTo(-2f, 2f, 0f)
+    objects.add(VAOObject3D(LegacyCylinderVAO(100))
+            .translateTo(-2f, 2f, 0f))
 
-    addModel(Model(LegacyPyramidVAO(4)))
-            .translateTo(-2f, 4f, 0f)
+    objects.add(VAOObject3D(LegacyPyramidVAO(4))
+            .translateTo(-2f, 4f, 0f))
 
     objects.add(Box().toVAOObject3D().translateTo(0f, -10f, 11f))
     objects.add(Box().toVAOObject3D().translateTo(10f, -10f, 11f))
-
 
     val graph = Graph3D { v ->
         // (float) 1 / (0.1f + v.length())
@@ -82,17 +77,17 @@ fun loadModels() {
     val scale = vec3(20f, 1f, 20f)
     val res = 50
 
-    addModel(Model(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res))))
-            .translateTo(0f, -10f, scale.x / 2 + 1).scaleTo(scale)
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res)))
+            .translateTo(0f, -10f, scale.x / 2 + 1).scaleTo(scale))
 
-    addModel(Model(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res))))
-            .translateTo(0f, -10f, -scale.x / 2 - 1).scaleTo(scale)
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res)))
+            .translateTo(0f, -10f, -scale.x / 2 - 1).scaleTo(scale))
 
-    addModel(Model(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res))))
-            .translateTo(-scale.x - 1, -10f, scale.x / 2 + 1).scaleTo(scale)
+    objects.add(VAOObject3D(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res)))
+            .translateTo(-scale.x - 1, -10f, scale.x / 2 + 1).scaleTo(scale))
 
-    addModel(Model(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res))))
-            .translateTo(-scale.x - 1, -10f, -scale.x / 2 - 1).scaleTo(scale)
+    objects.add(VAOObject3D(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res)))
+            .translateTo(-scale.x - 1, -10f, -scale.x / 2 - 1).scaleTo(scale))
 
 //    loadResourceAsync("bugatti", { ident ->
 //        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/bugatti/bugatti.obj"), ident)
@@ -138,15 +133,15 @@ fun loadModels() {
 //                .translateTo(0f, 0f, 10f)
 //    }
 
-    loadResourceAsync("deer", { ident ->
-        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/deer/deer.obj"), ident)
-    }) {
-        addModel(OBJModelLoader.loadModel(it.value)).translateTo(10f, 0f, 10f)
-                .setMaterial(Material()
-                        .setSpecularLightingIntensity(0.1f))
-                .rotateBy(0f, 3.14159f, 0f)
-                .scaleBy(0.002f)
-    }
+    val stall = loadResource("lwaf_demo/models/stall/stall.obj", ::loadOBJModel)
+    stall.translateBy(vec3(0f, 0f, -30f))
+    stall.objects["Cube[0]"] = stall.objects["Cube[0]"]!!.copy(second = Material().setTexture(loadResource("lwaf_demo/models/stall/stall_texture.png", ::loadTexture)))
+    objects.add(stall)
+
+    val deer = loadResource("lwaf_demo/models/deer/deer.obj", ::loadOBJModel)
+    deer.translateTo(vec3(10f, 0f, 9f))
+    deer.scaleBy(0.002f)
+    objects.add(deer)
 }
 
 object Demo3D {
@@ -196,8 +191,7 @@ object Demo3D {
 
             context3D.drawToGBuffer(shader, objects)
 
-            context3D.drawToGBuffer(shader, models)
-            context3D.drawToGBuffer(shader, Model(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
+            context3D.drawToGBuffer(shader, VAOObject3D(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
                     .translateTo(50f, -10f, 0f)
                     .scaleTo(40f, 1f, 40f))
 

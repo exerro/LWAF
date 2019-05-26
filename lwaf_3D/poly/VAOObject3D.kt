@@ -14,9 +14,9 @@ data class VAOObject3D(val vao: GLVAO, val material: Material = Material()): Mut
         shader.setUniform("transform", mat4_translate(translation) * (rotation.toRotationMatrix() * mat3_scale(scale)).mat4())
         shader.setUniform("colour", material.colour)
         shader.setUniform("useTexture", material.texture != null)
-        shader.setUniform("diffuseLightingIntensity", 0.7f)
-        shader.setUniform("specularLightingIntensity", 0.4f)
-        shader.setUniform("specularLightingPower", 5)
+        shader.setUniform("diffuseLightingIntensity", material.diffuseLightingIntensity)
+        shader.setUniform("specularLightingIntensity", material.specularLightingIntensity)
+        shader.setUniform("specularLightingPower", material.specularLightingPower)
 
         material.texture?.bind()
         context.drawIndexedVAO(vao)

@@ -1,4 +1,4 @@
-package lwaf_math
+package lwaf_util
 
 class PolynomialCoefficientSolver(private val order: Int) {
     private val matrix: Array<FloatArray> = Array(order) { FloatArray(order) }

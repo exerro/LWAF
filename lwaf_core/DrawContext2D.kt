@@ -1,6 +1,6 @@
 package lwaf_core
 
-import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.*
 
 @Suppress("unused")
 class DrawContext2D(private val view: GLView) {
@@ -72,8 +72,10 @@ class DrawContext2D(private val view: GLView) {
         shaderProgram2D.setUniform("colour", colour)
         shaderProgram2D.setUniform("useTexture", texture != null)
         shaderProgram2D.start()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         vao.load()
-        GL11.glDrawElements(GL11.GL_TRIANGLES, vao.vertexCount, GL11.GL_UNSIGNED_INT, 0)
+        glDrawElements(GL_TRIANGLES, vao.vertexCount, GL_UNSIGNED_INT, 0)
         vao.unload()
         shaderProgram2D.stop()
         texture?.unbind()

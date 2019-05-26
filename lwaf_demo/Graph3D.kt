@@ -1,4 +1,4 @@
-package lwaf_graph
+package lwaf_demo
 
 import lwaf_core.GLVAO
 import lwaf_core.*
@@ -6,7 +6,6 @@ import lwaf_core.vec2
 import lwaf_core.vec3
 
 import java.util.*
-import java.util.function.Function
 import java.util.stream.Collectors
 import java.util.stream.IntStream
 import java.util.stream.Stream
