@@ -4,7 +4,7 @@ data class vec4(val x: Float, val y: Float, val z: Float, val w: Float = 1f)
 data class vec3(val x: Float, val y: Float = x, val z: Float = y)
 data class vec2(val x: Float, val y: Float = x)
 
-fun vec3.cross(v: vec3) = vec3(
+infix fun vec3.cross(v: vec3) = vec3(
         y*v.z - z*v.y,
         z*v.x - x*v.z,
         x*v.y - y*v.x
@@ -25,8 +25,8 @@ fun vec3.length() = Math.sqrt(length2().toDouble()).toFloat()
 fun vec2.normalise() = this / length()
 fun vec3.normalise() = this / length()
 
-fun vec2.dot(v: vec2) = x * v.x + y * v.y
-fun vec3.dot(v: vec3) = x * v.x + y * v.y + z * v.z
+infix fun vec2.dot(v: vec2) = x * v.x + y * v.y
+infix fun vec3.dot(v: vec3) = x * v.x + y * v.y + z * v.z
 
 fun vec2.unpack(): Array<Float> = arrayOf(x, y)
 fun vec3.unpack(): Array<Float> = arrayOf(x, y, z)

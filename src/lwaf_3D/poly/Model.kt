@@ -4,6 +4,7 @@ import lwaf_3D.DrawContext3D
 import lwaf_3D.Material
 import lwaf_3D.MutableObject3D
 import lwaf_core.*
+import lwaf_util.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -62,41 +63,24 @@ private fun loadOBJModelContent(lines: List<String>, resID: String): Model {
 
 // TODO: major optimisation with vertex sharing
 private fun loadObjectIntoVAO(smoothBlend: Boolean, faces: List<Face>, sourceVertices: List<vec3>, sourceUVs: List<vec2>, sourceNormals: List<vec3>): GLVAO {
-    val outputVertices = mutableListOf<vec3>()
-    val outputUVS = mutableListOf<vec2>()
-    val outputNormals = mutableListOf<vec3>()
+    fun FaceVertex.toTriangleVertex()
+            = TriangleVertex(
+                sourceVertices[first - 1],
+                third ?. let { sourceNormals[it - 1] },
+                second ?. let { sourceUVs[it - 1] * vec2(1f, -1f) + vec2(0f, 1f) }
+            )
 
-    // TODO: use smoothBlend
+    val triangles = faces.map { face -> Triangle(
+            face.first.toTriangleVertex(),
+            face.second.toTriangleVertex(),
+            face.third.toTriangleVertex()
+    ) } .toSet()
 
-    faces.forEach { (a, b, c) ->
-        val av = sourceVertices[a.first - 1]
-        val bv = sourceVertices[b.first - 1]
-        val cv = sourceVertices[c.first - 1]
-        val normal = if (a.third == null || b.third == null || c.third == null) {
-            (bv - av).cross(cv - av)
-        }
-        else {
-            sourceNormals[a.third!! - 1]
-        }
-        val an = if (a.third == null) normal else sourceNormals[a.third!! - 1]
-        val bn = if (b.third == null) normal else sourceNormals[b.third!! - 1]
-        val cn = if (c.third == null) normal else sourceNormals[c.third!! - 1]
-        val auv = if (a.second == null) vec2(0f) else sourceUVs[a.second!! - 1]
-        val buv = if (b.second == null) vec2(0f) else sourceUVs[b.second!! - 1]
-        val cuv = if (c.second == null) vec2(0f) else sourceUVs[c.second!! - 1]
-
-        outputVertices.add(av)
-        outputVertices.add(bv)
-        outputVertices.add(cv)
-        outputUVS.add(auv * vec2(1f, -1f) + vec2(0f, 1f))
-        outputUVS.add(buv * vec2(1f, -1f) + vec2(0f, 1f))
-        outputUVS.add(cuv * vec2(1f, -1f) + vec2(0f, 1f))
-        outputNormals.add(an.normalise())
-        outputNormals.add(bn.normalise())
-        outputNormals.add(cn.normalise())
-    }
-
-    return generateStandardVAO(outputVertices, outputNormals, (0 until faces.size * 3) .toList() .toIntArray(), null, outputUVS)
+    return TriangleSet(triangles).computeNormals(smoothBlend).generateVAO(true, VAOBufferGenerationOptions(
+            normals = VAOBufferGenerationOption.ON,
+            textures = VAOBufferGenerationOption.DETECT,
+            colours = VAOBufferGenerationOption.OFF_BUT_BLANK
+    ))
 }
 
 private fun loadMaterial(path: String): Material {
@@ -155,7 +139,7 @@ private fun parseObjects(lines: List<String>): Map<String, Object> {
                 faces.addAll(parseFace(line.substring(2)))
             }
             line.startsWith("s ") -> {
-                smoothEnabled = line == "s on"
+                smoothEnabled = line != "s off"
                 groups[objectName]!!.second.add(Pair(smoothEnabled, mutableListOf()))
             }
             line.startsWith("usemtl ") -> {

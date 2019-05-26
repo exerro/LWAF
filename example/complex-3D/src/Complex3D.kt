@@ -5,7 +5,6 @@ import lwaf_3D.poly.toUVVAOObject3D
 import lwaf_3D.poly.toVAOObject3D
 import lwaf_3D.property.*
 import lwaf_core.*
-import lwaf_demo.Graph3D
 import lwaf_util.noise
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
@@ -72,20 +71,20 @@ fun loadModels() {
     }
             .setColouring { (x, y, z) -> vec3(0.5f + y * 0.5f, vec2(x, z).length(), 1f - y * 0.5f) }
 
-    val scale = vec3(20f, 1f, 20f)
+    val scale = vec3(5f, 1f, 5f)
     val res = 50
 
-    objects.add(VAOObject3D(graph.getTriangulatedVAO(Graph3D.UniformGridStrategy(res)))
-            .translateTo(0f, -10f, scale.x / 2 + 1).scaleTo(scale))
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(false, Graph3D.UniformGridStrategy(res)))
+            .translateTo(scale.x + 1, -10f, scale.x + 1).scaleTo(scale))
 
-    objects.add(VAOObject3D(graph.getTriangulatedVAO(Graph3D.GradientPullStrategy(res)))
-            .translateTo(0f, -10f, -scale.x / 2 - 1).scaleTo(scale))
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(false, Graph3D.GradientPullStrategy(res)))
+            .translateTo(scale.x + 1, -10f, -scale.x - 1).scaleTo(scale))
 
-    objects.add(VAOObject3D(graph.getSmoothVAO(Graph3D.UniformGridStrategy(res)))
-            .translateTo(-scale.x - 1, -10f, scale.x / 2 + 1).scaleTo(scale))
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(true, Graph3D.UniformGridStrategy(res)))
+            .translateTo(-scale.x - 1, -10f, scale.x + 1).scaleTo(scale))
 
-    objects.add(VAOObject3D(graph.getSmoothVAO(Graph3D.GradientPullStrategy(res)))
-            .translateTo(-scale.x - 1, -10f, -scale.x / 2 - 1).scaleTo(scale))
+    objects.add(VAOObject3D(graph.getTriangulatedVAO(true, Graph3D.GradientPullStrategy(res)))
+            .translateTo(-scale.x - 1, -10f, -scale.x - 1).scaleTo(scale))
 
 //    loadResourceAsync("bugatti", { ident ->
 //        ResourceWrapper(OBJModelLoader.safePreloadModel("lwaf_demo/models/bugatti/bugatti.obj"), ident)
@@ -182,7 +181,7 @@ object Demo3D {
 
             context3D.drawToGBuffer(context3D.DEFAULT_SHADER, objects)
 
-            context3D.drawToGBuffer(context3D.DEFAULT_SHADER, VAOObject3D(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
+            context3D.drawToGBuffer(context3D.DEFAULT_SHADER, VAOObject3D(sea.getTriangulatedVAO(true, Graph3D.UniformGridStrategy(50)))
                     .translateTo(50f, -10f, 0f)
                     .scaleTo(40f, 1f, 40f))
 
