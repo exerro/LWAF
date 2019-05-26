@@ -14,6 +14,16 @@ open class DrawContext3D(
     val texture = createEmptyTexture(view.size.x.toInt(), view.size.y.toInt())
     val aspectRatio = view.size.x / view.size.y
 
+    val DEFAULT_VERTEX_SHADER_PATH = "/shader/vertex-3D.glsl"
+    val DEFAULT_FRAGMENT_SHADER_PATH = "/shader/draw-to-gbuffer.glsl"
+
+    val DEFAULT_SHADER_DELEGATE = lazy {
+        val vertexShaderContent = String(Light::class.java.getResourceAsStream(DEFAULT_VERTEX_SHADER_PATH).readBytes())
+        val fragmentShaderContent = String(Light::class.java.getResourceAsStream(DEFAULT_FRAGMENT_SHADER_PATH).readBytes())
+        loadShaderProgram(vertexShaderContent, fragmentShaderContent)
+    }
+    val DEFAULT_SHADER: GLShaderProgram by DEFAULT_SHADER_DELEGATE
+
     init {
         framebuffer.attachTexture(texture, GL30.GL_COLOR_ATTACHMENT0)
         framebuffer.setDrawBuffers(GL30.GL_COLOR_ATTACHMENT0)
@@ -93,7 +103,7 @@ open class DrawContext3D(
         light(AmbientLight(intensity, colour))
     }
 
-    fun directionalLight(direction: vec3, intensity: Float = 0.4f, colour: vec3 = vec3(1f)) {
+    fun directionalLight(direction: vec3, intensity: Float = 0.7f, colour: vec3 = vec3(1f)) {
         light(DirectionalLight(direction, intensity, colour))
     }
 
@@ -116,5 +126,9 @@ open class DrawContext3D(
         buffer.destroy()
         framebuffer.destroy()
         texture.destroy()
+
+        if (DEFAULT_SHADER_DELEGATE.isInitialized()) {
+            DEFAULT_SHADER.destroy()
+        }
     }
 }

@@ -1,5 +1,3 @@
-package lwaf_primitive
-
 import lwaf_core.GLVAO
 import lwaf_core.normalise
 import lwaf_core.vec3

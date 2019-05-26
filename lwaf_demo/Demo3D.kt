@@ -1,5 +1,3 @@
-package lwaf_demo
-
 import lwaf_3D.*
 import lwaf_3D.poly.VAOObject3D
 import lwaf_3D.poly.loadOBJModel
@@ -7,16 +5,12 @@ import lwaf_3D.poly.toUVVAOObject3D
 import lwaf_3D.poly.toVAOObject3D
 import lwaf_3D.property.*
 import lwaf_core.*
-import lwaf_primitive.LegacyConeVAO
-import lwaf_primitive.LegacyCylinderVAO
-import lwaf_primitive.LegacyPyramidVAO
+import lwaf_demo.Graph3D
 import lwaf_util.noise
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
 
 private lateinit var texture2D: GLTexture
-private lateinit var font: Font
-private lateinit var shader: GLShaderProgram
 private lateinit var context3D: DrawContext3D
 private var textureToDraw = 0
 private lateinit var view: GLView
@@ -25,6 +19,10 @@ private val objects = ArrayList<Object3D>()
 private var t = 0f
 
 fun loadModels() {
+    val noTextureLight = loadResource("No texture light") { ->
+        loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream("/res/img/no-texture-light.png"), "no-texture-light.png")
+    }
+
     for (i in 0..4) {
         objects.add(Sphere().toVAOObject3D(i + 1)
                 .translateTo(i * 2.5f, -3f, -2f))
@@ -44,7 +42,7 @@ fun loadModels() {
             .translateTo(0f, 0f, 0f))
 
     objects.add(Box().toVAOObject3D(Material()
-            .setTexture(loadResource("lwaf_res/img/no-texture-light.png", ::loadTexture)))
+            .setTexture(noTextureLight))
             .translateBy(vec3(2f, 0f, 0f)))
 //                .setTranslation(2f, 0f, 0f)
 
@@ -153,18 +151,12 @@ object Demo3D {
         var text = "Hello world"
 
         display.attachLoadCallback {
-            font = loadResource("lwaf_res/font/open-sans/OpenSans-Regular.fnt", ::loadFont)
             view = GLView(vec2(0f, 0f), display.getWindowSize())
             context2D = DrawContext2D(view)
             context3D = DrawContext3D(view)
-
-            texture2D = loadResource("lwaf_res/img/no-texture-dark.png", ::loadTexture)
-
-            shader = GBuffer.loadShader(
-                    "lwaf_res/shader/vertex-3D.glsl",
-                    false
-            )
-
+            texture2D = loadResource("No texture dark") { ->
+                loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream("/res/img/no-texture-dark.png"), "no-texture-dark.png")
+            }
             context3D.camera.setPerspectiveProjection(context3D.aspectRatio)
 
             loadModels()
@@ -172,7 +164,6 @@ object Demo3D {
 
         display.attachUnloadCallback {
             context3D.destroy()
-            shader.destroy()
             freeResources()
         }
 
@@ -189,9 +180,9 @@ object Demo3D {
 
 //            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
 
-            context3D.drawToGBuffer(shader, objects)
+            context3D.drawToGBuffer(context3D.DEFAULT_SHADER, objects)
 
-            context3D.drawToGBuffer(shader, VAOObject3D(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
+            context3D.drawToGBuffer(context3D.DEFAULT_SHADER, VAOObject3D(sea.getSmoothVAO(Graph3D.UniformGridStrategy(50)))
                     .translateTo(50f, -10f, 0f)
                     .scaleTo(40f, 1f, 40f))
 
@@ -230,7 +221,7 @@ object Demo3D {
 
             context2D.setColour(1f, 1f, 1f)
             context2D.drawTexture(texture, vec2(0f, 0f), scale)
-            context2D.write(text, font, vec2(0f, 0f))
+            context2D.write(text, Font.DEFAULT_FONT, vec2(0f, 0f))
 
             if (::texture2D.isInitialized) context2D.drawImage(texture2D, vec2(100f), vec2(0.1f))
         }

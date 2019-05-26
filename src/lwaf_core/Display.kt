@@ -40,6 +40,8 @@ class Display(
     private val onLoadCallbacks: MutableList<(() -> Unit)> = ArrayList()
     private val onUnloadCallbacks: MutableList<(() -> Unit)> = ArrayList()
 
+    val fps get() = internalFPS
+
     fun attachResizedCallback(callback: (Int, Int) -> Unit) {
         onResizedCallbacks.add(callback)
     }
@@ -136,8 +138,6 @@ class Display(
         onUnloadCallbacks.remove(callback)
     }
 
-    val fps get() = internalFPS
-
     fun setMouseLocked(locked: Boolean) {
         whenSetup {
             glfwSetInputMode(window, GLFW_CURSOR, if (locked) GLFW_CURSOR_DISABLED else GLFW_CURSOR_NORMAL)
@@ -177,6 +177,14 @@ class Display(
         val h = IntArray(1)
         glfwGetWindowSize(window, w, h)
         return vec2(w[0].toFloat(), h[0].toFloat())
+    }
+
+    /**
+     * Gets the aspect ratio of the window
+     */
+    fun getWindowAspectRatio(): Float {
+        val size = getWindowSize()
+        return size.x / size.y
     }
 
     /**

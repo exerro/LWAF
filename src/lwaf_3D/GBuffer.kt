@@ -66,12 +66,15 @@ class GBuffer(width: Int, height: Int) {
     }
 
     companion object {
-        var FRAGMENT_SHADER_PATH = "lwaf_res/shader/draw-to-gbuffer.glsl"
+        const val FRAGMENT_SHADER_PATH = "lwaf_res/shader/draw-to-gbuffer.glsl"
+        private val FRAGMENT_SHADER_CONTENT: String by lazy {
+            String(this::class.java.getResourceAsStream("/shader/draw-to-gbuffer.glsl").readBytes())
+        }
 
-        fun loadShader(vertexShader: String, instanced: Boolean): GLShaderProgram {
-            return loadShaderProgramFiles(
-                    Paths.get(vertexShader).toString(),
-                    FRAGMENT_SHADER_PATH,
+        fun loadShader(vertexShaderContent: String, instanced: Boolean): GLShaderProgram {
+            return loadShaderProgram(
+                    vertexShaderContent,
+                    FRAGMENT_SHADER_CONTENT,
                     instanced
             )
         }

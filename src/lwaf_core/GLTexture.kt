@@ -1,11 +1,16 @@
 package lwaf_core
 
+import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryStack
+import java.io.File
+import java.io.InputStream
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
 class GLTexture internal constructor(val textureID: Int, val width: Int, val height: Int, private val resID: String): Resource, GLResource {
     override fun getResourceID(): String = resID
@@ -47,27 +52,34 @@ fun createEmptyTexture(width: Int, height: Int, internalFormat: Int = GL_RGBA, f
     return GLTexture(textureID, width, height, "texture_$textureID")
 }
 
+fun loadTextureFromInputStream(stream: InputStream, resID: String): GLTexture {
+    val byteArray = stream.readAllBytes()
+    val byteBuffer = BufferUtils.createByteBuffer(byteArray.size)
+    byteBuffer.put(byteArray)
+    byteBuffer.flip()
+    return loadTexture(byteBuffer, resID)
+}
+
 fun loadTexture(filePath: String): GLTexture {
+    val file = RandomAccessFile(File(filePath), "r")
+    return loadTexture(file.channel.map(FileChannel.MapMode.READ_ONLY, 0, file.channel.size()), filePath)
+}
+
+private fun loadTexture(buffer: ByteBuffer, resID: String): GLTexture {
     val textureID: Int = glGenTextures()
-    var width = 0
-    var height = 0
-    var data: ByteBuffer? = null
+    val width: Int
+    val height: Int
+    val data: ByteBuffer
+    val w = BufferUtils.createIntBuffer(1)
+    val h = BufferUtils.createIntBuffer(1)
+    val channels = BufferUtils.createIntBuffer(1)
 
-    Logging.log("resource.texture.load") { "Loading texture '$filePath' (ID: $textureID)" }
+    Logging.log("resource.texture.load") { "Loading texture '$resID' (ID: $textureID)" }
 
-    MemoryStack.stackPush().use { stack ->
-        val w = stack.mallocInt(1)
-        val h = stack.mallocInt(1)
-        val channels = stack.mallocInt(1)
-
-        data = STBImage.stbi_load(filePath, w, h, channels, STBImage.STBI_rgb_alpha)
-
-        if (data == null)
-            throw RuntimeException(STBImage.stbi_failure_reason())
-
-        width = w.get()
-        height = h.get()
-    }
+    data = STBImage.stbi_load_from_memory(buffer, w, h, channels, STBImage.STBI_rgb_alpha)
+            ?: throw RuntimeException(STBImage.stbi_failure_reason())
+    width = w.get()
+    height = h.get()
 
     glBindTexture(GL_TEXTURE_2D, textureID)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
@@ -77,7 +89,7 @@ fun loadTexture(filePath: String): GLTexture {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
     glBindTexture(GL_TEXTURE_2D, 0)
 
-    STBImage.stbi_image_free(data!!)
+    STBImage.stbi_image_free(data)
 
-    return GLTexture(textureID, width, height, filePath)
+    return GLTexture(textureID, width, height, resID)
 }

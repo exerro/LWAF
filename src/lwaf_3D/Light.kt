@@ -17,7 +17,7 @@ data class AmbientLight(
         override val colour: vec3
 ) : Light {
     override val shader = getLightingShader("lighting.ambient") {
-        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/ambient.fragment-3D.glsl")
+        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/ambient.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -34,7 +34,7 @@ data class DirectionalLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.directional") {
-        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/directional.fragment-3D.glsl")
+        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/directional.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -53,7 +53,7 @@ data class PointLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.point") {
-        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/point.fragment-3D.glsl")
+        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/point.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -80,7 +80,7 @@ data class SpotLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.spot") {
-        loadShaderProgramFiles("lwaf_res/shader/pass-through.vertex-3D.glsl", "lwaf_res/shader/lighting/spot.fragment-3D.glsl")
+        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/spot.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -139,5 +139,11 @@ fun getLightingAttenuation(distance: Float): vec3 {
     val lX = 1f
 
     return vec3(lX, lY, lZ)
+}
+
+private fun loadShaders(vertexShaderPath: String, fragmentShaderPath: String): GLShaderProgram {
+    val vertexShaderContent = String(Light::class.java.getResourceAsStream(vertexShaderPath).readBytes())
+    val fragmentShaderContent = String(Light::class.java.getResourceAsStream(fragmentShaderPath).readBytes())
+    return loadShaderProgram(vertexShaderContent, fragmentShaderContent)
 }
 
