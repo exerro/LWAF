@@ -39,18 +39,18 @@ class Graph3D(private val function: (vec2) -> Float) {
         return TriangleSet(triangles).computeNormals(smooth).generateVAO(false)
     }
 
-    fun eval(v: vec2): vec3 {
+    private fun eval(v: vec2): vec3 {
         val pos = bounds_min + (bounds_max - bounds_min) * (v + vec2(0.5f))
         return vec3(pos.x, function(pos), pos.y)
     }
 
-    fun evalCached(v: vec2, cache: MutableMap<vec2, vec3>): vec3 {
+    private fun evalCached(v: vec2, cache: MutableMap<vec2, vec3>): vec3 {
         synchronized(cache) {
             return cache.computeIfAbsent(v) { this.eval(it) }
         }
     }
 
-    fun generateCache(): MutableMap<vec2, vec3> {
+    private fun generateCache(): MutableMap<vec2, vec3> {
         return HashMap()
     }
 
