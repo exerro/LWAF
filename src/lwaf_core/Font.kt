@@ -53,7 +53,7 @@ class Font(
 
         total += getCharAdvance(text[text.length - 1])
 
-        return total * sizeScale
+        return total
     }
 
     fun getTextObject(text: String): FontText
