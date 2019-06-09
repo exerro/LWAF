@@ -65,7 +65,7 @@ class DrawContext2D(private val view: GLView) {
         drawTexturedVAO(texture, rectangleVAO, transform)
     }
 
-    private fun drawTexturedVAO(texture: GLTexture?, vao: GLVAO, transform: mat4) {
+    protected fun drawTexturedVAO(texture: GLTexture?, vao: GLVAO, transform: mat4) {
         view.setViewport()
         texture?.bind()
         shaderProgram2D.setUniform("transform", transform)
@@ -81,7 +81,7 @@ class DrawContext2D(private val view: GLView) {
         texture?.unbind()
     }
 
-    private var rectangleVAO: GLVAO = object : GLVAO() {
+    protected var rectangleVAO: GLVAO = object : GLVAO() {
         init {
             vertexCount = 6
 
@@ -122,7 +122,6 @@ class DrawContext2D(private val view: GLView) {
             "    gl_FragColor = vec4(colour * fragment_colour, 1.0);\n" +
             "    if (useTexture) gl_FragColor *= texture(textureSampler, fragment_uv);\n" +
             "}", false)
-
 
     private fun mat4.translateBy(translation: vec3): mat4 = this * mat4_translate(translation)
     private fun mat4.scaleBy(scale: vec3): mat4 = this * mat3_scale(scale).mat4()
