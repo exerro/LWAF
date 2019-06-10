@@ -1,13 +1,21 @@
+import lwaf_core.vec2
+
+open class Button: UINode() {
+    open var text by property("text", this, "")
+    open val size by readOnlyProperty("size", vec2(3f))
+    open val area by computedProperty("area", this) { size.x * size.y }
+
+    val x: String = "hi"
+}
 
 fun main() {
+    val root = UIRoot()
     val b = Button()
+    val bb = Button()
 
-    b.onPropertyChanged(b::text) { old, new ->
-        println("Button value changed from '$old' to '$new'")
-    }
+    b.addChild(bb)
 
-    b.text = "new text"
-    b.text = "newer text"
+    root.setRoot(b)
 
-    println(b.properties.map { "$it => ${it.value}" } .joinToString("\n") { it })
+    println(root.nodes)
 }

@@ -1,23 +1,45 @@
-import lwaf_core.vec2
+import kotlin.properties.Delegates
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
-open class UINode
+open class UINode {
+    private val children: MutableList<UINode> = mutableListOf()
+    internal var root: UIRoot? by Delegates.observable<UIRoot?>(null) { _, _, new ->
+        children.map { it.root = new }
+    }
+    var parent: UINode? by Delegates.observable<UINode?>(null) { _, old, new ->
+        old?.children?.remove(this)
+        new?.children?.add(this)
 
-open class Button: UINode() {
-    open var text by property("text", this, "")
-    open val size by readOnlyProperty("size", vec2(3f))
-    open val area by computedProperty("area", this) { size.x * size.y }
+        if (new != null) {
+            root = new.root
+        }
+    }
+
+    fun addChild(child: UINode) { child.parent = this }
+    fun removeChild(child: UINode) { if (child.parent == this) child.parent = null }
+    fun getChildren() = ArrayList(children)
+    fun getAllChildren() = generateSequence(listOf(this)) { parents ->
+        parents.flatMap { it.children } .let { if (it.isEmpty()) null else it }
+    } .drop(1) .toList() .flatten()
 }
 
-open class RoundedButton: Button() {
-    override var text by property("text", this, "")
-}
+fun <N: UINode, T> N.onPropertyChanged(property: KProperty0<T>, callback: N.(T, T) -> Unit)
+        = withProperty(property) { prop -> prop.onChange(callback) }
 
-inline val <reified N : UINode> N.properties: List<ReadOnlyUIProperty<Any>> get()
+fun <N: UINode, T> N.onPropertyChanged(property: KProperty0<T>, callback: N.(T) -> Unit)
+        = withProperty(property) { prop -> prop.onChange { self, _, new -> callback(self, new) } }
+
+fun <N: UINode, T> N.assertPropertyMatches(property: KProperty0<T>, predicate: N.(T, T) -> Boolean)
+        = withProperty(property) { prop -> prop.attachValuePredicate(predicate) }
+
+fun <N: UINode, T> N.assertPropertyMatches(property: KProperty0<T>, predicate: N.(T) -> Boolean)
+        = withProperty(property) { prop -> prop.attachValuePredicate { self, _, new -> predicate(self, new) } }
+
+val <N : UINode> N.properties: List<ReadOnlyUIProperty<Any>> get()
         = this::class.memberProperties
             .asSequence()
             .map { property ->
@@ -35,22 +57,15 @@ inline val <reified N : UINode> N.properties: List<ReadOnlyUIProperty<Any>> get(
             }
             .toList()
 
-inline fun <reified N: UINode, reified T> N.onPropertyChanged(property: KProperty0<T>, noinline callback: N.(T, T) -> Unit) {
+private inline fun <N: UINode, T> N.withProperty(property: KProperty0<T>, func: N.(UIProperty<N, T>) -> Unit) {
     property.isAccessible = true
     val delegate = property.getDelegate()
 
-    if (delegate != null) {
-        if (delegate::class.isSubclassOf(UIProperty::class)) {
-            @Suppress("UNCHECKED_CAST") // safe unless the property was incorrectly initialised
-            val self = (delegate as UIProperty<N, T>)
-            self.onChange(callback)
-            println(self)
-        }
-        else {
-            throw Exception("'${property.name}' is not a UI property")
-        }
+    if (delegate != null && delegate::class.isSubclassOf(UIProperty::class)) {
+        @Suppress("UNCHECKED_CAST") // safe unless the property was incorrectly initialised
+        func(this, (delegate as UIProperty<N, T>))
     }
     else {
-        throw Exception("No such property '${property.name}' of type ${T::class.simpleName} in type ${N::class.simpleName}")
+        throw Exception("No such UI property '${property.name}' in type ${this::class.simpleName}")
     }
 }

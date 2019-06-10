@@ -2,7 +2,7 @@ import kotlin.reflect.KProperty
 
 open class ReadOnlyUIProperty<out T> internal constructor(
         protected open val internalValue: T,
-        val propertyName: String
+        private val propertyName: String
 ) {
     open val value: T get() = internalValue
     open operator fun getValue(self: UINode, prop: KProperty<*>): T = internalValue
@@ -12,7 +12,7 @@ open class ReadOnlyUIProperty<out T> internal constructor(
 }
 
 class ComputedUIProperty<out N: UINode, out T> internal constructor(
-        val owner: N,
+        private val owner: N,
         propertyName: String,
         private val computeValue: (N) -> T
 ): ReadOnlyUIProperty<T>(computeValue(owner), propertyName) {
