@@ -1,5 +1,6 @@
+import lwaf_core.vec2
 
-class UIRoot {
+class UIRoot(var size: vec2) {
     private lateinit var node: UINode
 
     val nodes: List<UINode>
@@ -11,5 +12,11 @@ class UIRoot {
         }
         this.node = node
         node.root = this
+    }
+
+    fun draw() {
+        if (node.needsRepositioning) {
+
+        }
     }
 }
