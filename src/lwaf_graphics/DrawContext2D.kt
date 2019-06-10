@@ -1,4 +1,7 @@
 import lwaf_core.*
+import lwaf_util.ConvexPolygon2D
+import lwaf_util.Polygon2D
+import lwaf_util.toFanGLVAOs
 import org.lwjgl.opengl.GL11.*
 import kotlin.math.atan2
 import kotlin.math.max
@@ -33,16 +36,99 @@ fun DrawContext2D.circle(position: vec2, radius: Float = 5f) {
     }
 }
 
-fun DrawContext2D.convexPoly(vararg points: vec2) {
-    vao(generateStandardVAO(
-            points.map { it.vec3(0f) },
-            points.map { vec3(0f, 0f, 1f) },
-            (2 until points.size).flatMap { i -> listOf(0, i - 1, i) } .toIntArray()
-    ))
+fun DrawContext2D.convexPolygon(vararg points: vec2) {
+    if (drawMode == DrawMode.Fill) {
+        ConvexPolygon2D(points.toList()).toFanGLVAOs().map {
+            vao(it, mat4_identity, GL_TRIANGLE_FAN)
+        }
+    }
+    else {
+        lines(*points)
+        line(points.last(), points[0])
+    }
 }
 
-fun DrawContext2D.poly(vararg points: vec2) {
-    convexPoly(*points)
+fun DrawContext2D.polygon(vararg points: vec2) {
+    if (drawMode == DrawMode.Fill) {
+        Polygon2D(points.toList()).toFanGLVAOs().map {
+            vao(it, mat4_identity, GL_TRIANGLE_FAN)
+        }
+    }
+    else {
+        push()
+
+        TODO("kill me")
+
+        val poly = Polygon2D(points.toList())
+
+        val p = ArrayList(poly.points)
+        val cpoints = mutableListOf<List<Int>>()
+        var n = 0
+
+        while (p.size > 3) {
+            val triple = (0 until p.size).map { i ->
+                val a = i
+                val b = (i + 1) % p.size
+                val c = (i + 2) % p.size
+                val d = (i + 3) % p.size
+                listOf(a, b, c, d)
+            } .filter { (a, b, c, _) ->
+                val ab = poly.vertices[p[b]] - poly.vertices[p[a]]
+                val bc = poly.vertices[p[c]] - poly.vertices[p[b]]
+                val abR = ab.rotate90CW()
+                (abR dot bc) >= 0
+            } .filter { (a, b, c, d) ->
+                val ca = poly.vertices[p[a]] - poly.vertices[p[c]]
+                val bc = poly.vertices[p[c]] - poly.vertices[p[b]]
+                val cd = poly.vertices[p[d]] - poly.vertices[p[c]]
+                val caR = ca.rotate90CW()
+                val bcR = bc.rotate90CW()
+
+                caR dot cd < 0 || bcR dot cd < 0
+            } .filter { (a, _, c, _) ->
+                val sA = poly.vertices[p[a]]
+                val sC = poly.vertices[p[c]]
+
+                !(0 until p.size).map {
+                    Pair(p[it], p[(it + 1) % p.size])
+                } .filter { (aa, bb) ->
+                    (aa != p[a] || bb != p[c]) && (aa != p[c] || bb != p[a])
+                } .map { (aa, bb) ->
+                    Pair(poly.vertices[aa], poly.vertices[bb])
+                } .any { (aa, bb) ->
+                    val dA = sA - aa
+                    val dC = sC - aa
+                    val nAA = (bb - aa).rotate90CCW()
+                    val ndA = (dC - dA).rotate90CCW()
+                    (dA dot nAA) * (dC dot nAA) < 0 && (aa dot ndA) * (bb dot ndA) < 0
+                }
+            } .first() .let { (a, b, c, _) ->
+                Triple(p[a], p[b], p[c])
+            }
+
+            if (n == 0) {
+                colour = Colour.white
+                convexPolygon(*p.map { poly.vertices[it] }.toTypedArray())
+            }
+
+            cpoints.add(listOf(triple.first, triple.second, triple.third))
+            if (n-- <= 0) {
+                colour = Colour.green
+                line(poly.vertices[triple.first], poly.vertices[triple.third])
+                colour = Colour.red
+                drawMode = DrawMode.Fill
+                circle(poly.vertices[triple.second])
+            }
+            p.remove(triple.second)
+        }
+
+        cpoints.add(p)
+
+        cpoints.map { points ->
+//            convexPolygon(*points.map { poly.vertices[it] } .toTypedArray())
+        }
+        pop()
+    }
 }
 
 fun DrawContext2D.line(a: vec2, b: vec2) {
@@ -66,7 +152,7 @@ fun DrawContext2D.path(start: vec2, init: Path.() -> Unit) {
         lines(*points.toTypedArray())
     }
     else {
-        poly(*points.toTypedArray())
+        polygon(*points.toTypedArray())
     }
 }
 
@@ -98,8 +184,8 @@ open class DrawContext2D(protected val view: GLView) {
         get() = activeState.lineWidth
         set(width) { activeState.lineWidth = width }
 
-    fun vao(vao: GLVAO, customTransform: mat4 = mat4_identity) {
-        drawTexturedVAO(null, vao, transform * customTransform)
+    fun vao(vao: GLVAO, customTransform: mat4 = mat4_identity, mode: Int = GL_TRIANGLES) {
+        drawTexturedVAO(null, vao, transform * customTransform, mode)
     }
 
     fun push() {

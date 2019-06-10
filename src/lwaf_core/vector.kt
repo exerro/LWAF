@@ -32,6 +32,9 @@ fun vec2.unpack(): Array<Float> = arrayOf(x, y)
 fun vec3.unpack(): Array<Float> = arrayOf(x, y, z)
 fun vec4.unpack(): Array<Float> = arrayOf(x, y, z, w)
 
+fun vec2.rotate90CCW(): vec2 = vec2(-y, x)
+fun vec2.rotate90CW(): vec2 = vec2(y, -x)
+
 operator fun vec3.plus(v: vec3) = vec3(x + v.x, y + v.y, z + v.z)
 operator fun vec3.minus(v: vec3) = vec3(x - v.x, y - v.y, z - v.z)
 operator fun vec3.unaryMinus() = vec3(-x, -y, -z)

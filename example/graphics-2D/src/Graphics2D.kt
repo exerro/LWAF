@@ -1,4 +1,5 @@
 import lwaf_core.*
+import org.lwjgl.opengl.GL11.*
 
 fun main() {
     // create a 1080x720 display with title "Display" and vsync enabled
@@ -13,6 +14,8 @@ fun main() {
     display.attachLoadCallback {
         // create the 2D context that we'll use for drawing later on
         context2D = DrawContext2D(GLView(display.getWindowSize()))
+
+        glHint(GL_POLYGON_SMOOTH, GL_NICEST)
     }
 
     display.attachMouseDownCallback { pos, _ ->
@@ -43,13 +46,14 @@ fun main() {
                     Colour.lightGrey, Colour.grey, Colour.darkGrey
             ).mapIndexed { i, c ->
                 context2D.colour = c
-                context2D.rectangle(vec2(i * 20f, 0f), vec2(20f, 100f))
+                context2D.rectangle(vec2(i * 20f, 0f), vec2(20f, 80f))
             }
         context2D.pop()
 
         context2D.draw {
             push()
-            convexPoly(vec2(100f), vec2(100f), vec2(100f, 300f), vec2(300f), vec2(300f, 100f))
+            drawMode = DrawMode.Line
+            polygon(vec2(100f), vec2(200f), vec2(100f, 300f), vec2(0f, 300f), vec2(400f, 350f), *controls.toTypedArray())
             pop()
         }
     }
