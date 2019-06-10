@@ -47,22 +47,11 @@ fun main() {
             }
         context2D.pop()
 
-        context2D.push()
-//            context2D.drawMode = DrawMode.Line
-            context2D.path(vec2(300f, 300f)) {
-                bezierCurveTo(500f, 500f) {
-                    controls.map { controlPoint(it) }
-                    controlPoint(display.getMousePosition())
-                }
-            }
-
-            context2D.colour = Colour.green
-            context2D.drawMode = DrawMode.Fill
-            context2D.circle(vec2(300f, 300f))
-            context2D.circle(vec2(500f, 500f))
-            controls.map { context2D.circle(it) }
-            context2D.circle(display.getMousePosition())
-        context2D.pop()
+        context2D.draw {
+            push()
+            convexPoly(vec2(100f), vec2(100f), vec2(100f, 300f), vec2(300f), vec2(300f, 100f))
+            pop()
+        }
     }
 
     display.attachUpdateCallback { dt ->

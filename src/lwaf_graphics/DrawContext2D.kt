@@ -33,6 +33,18 @@ fun DrawContext2D.circle(position: vec2, radius: Float = 5f) {
     }
 }
 
+fun DrawContext2D.convexPoly(vararg points: vec2) {
+    vao(generateStandardVAO(
+            points.map { it.vec3(0f) },
+            points.map { vec3(0f, 0f, 1f) },
+            (2 until points.size).flatMap { i -> listOf(0, i - 1, i) } .toIntArray()
+    ))
+}
+
+fun DrawContext2D.poly(vararg points: vec2) {
+    convexPoly(*points)
+}
+
 fun DrawContext2D.line(a: vec2, b: vec2) {
     // hacky af but oh well
     push()
@@ -54,15 +66,7 @@ fun DrawContext2D.path(start: vec2, init: Path.() -> Unit) {
         lines(*points.toTypedArray())
     }
     else {
-        // TODO! this is just a simple illustration
-        push()
-        drawMode = DrawMode.Fill
-        lineWidth = 3f
-        colour = Colour.red
-        lines(*points.toTypedArray())
-        colour = Colour.blue
-        points.map { p -> circle(p, 5f) }
-        pop()
+        poly(*points.toTypedArray())
     }
 }
 
