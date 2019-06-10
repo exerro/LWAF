@@ -5,7 +5,9 @@ import lwaf_core.plus
 import lwaf_core.vec2
 import kotlin.math.min
 
-data class AABB(val min: vec2, val max: vec2)
+data class AABB(val min: vec2, val max: vec2) {
+    constructor(max: vec2): this(vec2(0f), max)
+}
 
 fun AABB.translate(dp: vec2) = AABB(min + dp, max + dp)
 

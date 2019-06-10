@@ -1,6 +1,7 @@
 import lwaf_core.*
 import lwaf_util.AABB
 import org.lwjgl.opengl.GL11.*
+import kotlin.math.sin
 
 fun main() {
     // create a 1080x720 display with title "Display" and vsync enabled
@@ -27,21 +28,7 @@ fun main() {
 
     // attach a draw callback, which will run every frame
     display.attachDrawCallback {
-        context2D.push()
-            context2D.rotateAbout(vec2(70f), t)
-            context2D.lineWidth = 5f
-            context2D.drawMode = DrawMode.Fill
-            context2D.colour = vec3(0.9f, 0.6f, 0.3f)
-            context2D.rectangle(vec2(20f), vec2(100f))
-            context2D.drawMode = DrawMode.Line
-            context2D.colour = vec3(0.3f, 0.6f, 0.9f)
-            context2D.rectangle(vec2(20f), vec2(100f))
-        context2D.pop()
-
-        context2D.push()
-            context2D.stencil = AABB(vec2(20f, 20f), vec2(1000f))
-            context2D.push()
-//            context2D.stencil = AABB(vec2(20f, 20f), vec2(1000f))
+        context2D.draw {
             listOf(
                     Colour.red, Colour.pink, Colour.purple,
                     Colour.deepPurple, Colour.indigo, Colour.blue,
@@ -51,11 +38,13 @@ fun main() {
                     Colour.deepOrange, Colour.brown, Colour.blueGrey,
                     Colour.lightGrey, Colour.grey, Colour.darkGrey
             ).mapIndexed { i, c ->
-                context2D.colour = c
-                context2D.rectangle(vec2(i * 20f, 0f), vec2(20f, 80f))
+                colour = c
+                rectangle(vec2(i * 20f, 0f), vec2(20f, 80f))
             }
-            context2D.pop()
-        context2D.pop()
+
+            colour = Colour.white
+            circle(display.getMousePosition(), (sin(t * 4) + 2) * 10)
+        }
     }
 
     display.attachUpdateCallback { dt ->
