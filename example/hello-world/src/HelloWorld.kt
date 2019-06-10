@@ -34,7 +34,7 @@ fun main() {
 
     // attach a resize callback, which will run with the new width and height when the window is resized
     display.attachResizedCallback { _, _ ->
-        // create new draw contexts
+        // create a new draw context with a new view
         context2D = DrawContext2D(GLView(display.getWindowSize()))
     }
 

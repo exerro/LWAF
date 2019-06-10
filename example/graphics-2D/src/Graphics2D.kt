@@ -1,4 +1,5 @@
 import lwaf_core.*
+import lwaf_util.AABB
 import org.lwjgl.opengl.GL11.*
 
 fun main() {
@@ -9,11 +10,13 @@ fun main() {
     var t = 0f
     // declare draw contexts for later use
     lateinit var context2D: DrawContext2D
+    lateinit var view: GLView
 
     // attach a load callback, which will run when the display loads
     display.attachLoadCallback {
         // create the 2D context that we'll use for drawing later on
-        context2D = DrawContext2D(GLView(display.getWindowSize()))
+        view = GLView(display.getWindowSize())
+        context2D = DrawContext2D(view)
 
         glHint(GL_POLYGON_SMOOTH, GL_NICEST)
     }
@@ -36,6 +39,7 @@ fun main() {
         context2D.pop()
 
         context2D.push()
+            context2D.stencil = AABB(vec2(0f, 20f), vec2(1000f))
             listOf(
                     Colour.red, Colour.pink, Colour.purple,
                     Colour.deepPurple, Colour.indigo, Colour.blue,
@@ -49,13 +53,6 @@ fun main() {
                 context2D.rectangle(vec2(i * 20f, 0f), vec2(20f, 80f))
             }
         context2D.pop()
-
-        context2D.draw {
-            push()
-            drawMode = DrawMode.Line
-            polygon(vec2(100f), vec2(200f), vec2(100f, 300f), vec2(0f, 300f), vec2(400f, 350f), *controls.toTypedArray())
-            pop()
-        }
     }
 
     display.attachUpdateCallback { dt ->
@@ -64,8 +61,9 @@ fun main() {
 
     // attach a resize callback, which will run with the new width and height when the window is resized
     display.attachResizedCallback { _, _ ->
-        // create new draw contexts
-        context2D = DrawContext2D(GLView(display.getWindowSize()))
+        // create a new draw context
+        view = GLView(display.getWindowSize())
+        context2D = DrawContext2D(view)
     }
 
     // run the display (and the whole application, in turn)
