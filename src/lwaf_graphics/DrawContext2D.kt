@@ -23,7 +23,7 @@ fun DrawContext2D.rectangle(position: vec2, size: vec2) {
     }
 }
 
-fun DrawContext2D.circle(position: vec2, radius: Float) {
+fun DrawContext2D.circle(position: vec2, radius: Float = 5f) {
     if (drawMode == DrawMode.Fill) {
         vao(circleVAO(calculateCirclePoints(radius)), mat4_translate(position.vec3(0f)) *
                 mat3_scale(radius).mat4())
@@ -42,18 +42,28 @@ fun DrawContext2D.line(a: vec2, b: vec2) {
     pop()
 }
 
+fun DrawContext2D.lines(vararg points: vec2) {
+    // also hacky: shouldn't draw rectangles because that's dumb
+    points.zip(points.drop(1)).map { (a, b) -> line(a, b) }
+}
+
 fun DrawContext2D.path(start: vec2, init: Path.() -> Unit) {
-    // TODO! this is just a simple illustration
     val points = Path(start, init).computePoints()
 
-    push()
-    drawMode = DrawMode.Fill
-    lineWidth = 3f
-    colour = Colour.red
-    points.zip(points.drop(1)).map { (a, b) -> line(a, b) }
-    colour = Colour.blue
-    points.map { p -> circle(p, 5f) }
-    pop()
+    if (drawMode == DrawMode.Line) {
+        lines(*points.toTypedArray())
+    }
+    else {
+        // TODO! this is just a simple illustration
+        push()
+        drawMode = DrawMode.Fill
+        lineWidth = 3f
+        colour = Colour.red
+        points.zip(points.drop(1)).map { (a, b) -> line(a, b) }
+        colour = Colour.blue
+        points.map { p -> circle(p, 5f) }
+        pop()
+    }
 }
 
 open class DrawContext2D(protected val view: GLView) {

@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="module" module-name="lwaf_core" exported="" />
+    <orderEntry type="module" module-name="lwaf_util" exported="" />
   </component>
 </module>
