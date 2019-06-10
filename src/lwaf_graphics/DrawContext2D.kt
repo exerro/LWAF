@@ -147,7 +147,7 @@ open class DrawContext2D(protected val view: GLView) {
 
     private fun drawTexturedVAO(texture: GLTexture?, vao: GLVAO, transform: mat4, mode: Int = GL_TRIANGLES) {
         val s = stencil
-        (if (s != null) GLView(s.min, s.max - s.min) else view).setViewport()
+        (if (s != null) GLView(view.offset + vec2(s.min.x, view.size.y - s.max.y), s.max - s.min) else view).setViewport()
         texture?.bind()
         shaderProgram2D.setUniform("transform", transform)
         shaderProgram2D.setUniform("colour", activeState.colour)

@@ -39,7 +39,9 @@ fun main() {
         context2D.pop()
 
         context2D.push()
-            context2D.stencil = AABB(vec2(0f, 20f), vec2(1000f))
+            context2D.stencil = AABB(vec2(20f, 20f), vec2(1000f))
+            context2D.push()
+//            context2D.stencil = AABB(vec2(20f, 20f), vec2(1000f))
             listOf(
                     Colour.red, Colour.pink, Colour.purple,
                     Colour.deepPurple, Colour.indigo, Colour.blue,
@@ -52,6 +54,7 @@ fun main() {
                 context2D.colour = c
                 context2D.rectangle(vec2(i * 20f, 0f), vec2(20f, 80f))
             }
+            context2D.pop()
         context2D.pop()
     }
 
