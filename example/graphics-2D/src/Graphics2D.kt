@@ -3,6 +3,7 @@ import lwaf_core.*
 fun main() {
     // create a 1080x720 display with title "Display" and vsync enabled
     val display = Display(1080, 720, "2D Graphics Display", true)
+    val controls = mutableListOf<vec2>()
     // keep track of time
     var t = 0f
     // declare draw contexts for later use
@@ -12,6 +13,10 @@ fun main() {
     display.attachLoadCallback {
         // create the 2D context that we'll use for drawing later on
         context2D = DrawContext2D(GLView(display.getWindowSize()))
+    }
+
+    display.attachMouseDownCallback { pos, _ ->
+        controls.add(pos)
     }
 
     // attach a draw callback, which will run every frame
@@ -43,28 +48,20 @@ fun main() {
         context2D.pop()
 
         context2D.push()
-            context2D.drawMode = DrawMode.Line
-            context2D.lineWidth = 5f
-            context2D.path(vec2(100f, 100f)) {
-                lineTo(300f, 200f)
-                curveTo(300f, 300f) {
-                    controlPoint(500f, 100f)
-                    controlPoint(400f, 200f)
+//            context2D.drawMode = DrawMode.Line
+            context2D.path(vec2(300f, 300f)) {
+                bezierCurveTo(500f, 500f) {
+                    controls.map { controlPoint(it) }
+                    controlPoint(display.getMousePosition())
                 }
-                close()
             }
-        context2D.pop()
 
-        context2D.push()
-            context2D.drawMode = DrawMode.Line
-            context2D.lineWidth = 3f
-            context2D.path(vec2(500f, 500f)) {
-                curveTo(600f, 600f) { controlPoint(575f, 525f) }
-                curveTo(500f, 700f) { controlPoint(575f, 675f) }
-                curveTo(400f, 600f) { controlPoint(425f, 675f) }
-                curveTo(500f, 500f) { controlPoint(425f, 525f) }
-                close()
-            }
+            context2D.colour = Colour.green
+            context2D.drawMode = DrawMode.Fill
+            context2D.circle(vec2(300f, 300f))
+            context2D.circle(vec2(500f, 500f))
+            controls.map { context2D.circle(it) }
+            context2D.circle(display.getMousePosition())
         context2D.pop()
     }
 

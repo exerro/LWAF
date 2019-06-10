@@ -1,12 +1,11 @@
-import lwaf_core.length
-import lwaf_core.minus
-import lwaf_core.vec2
+import lwaf_core.*
 import lwaf_util.PolynomialCoefficientSolver
 import java.lang.Math.pow
 import kotlin.math.ceil
 
 private const val ARC_SEGMENT_LENGTH = 3f
 private const val CURVE_SEGMENT_LENGTH = 10f
+private const val BEZIER_CURVE_SEGMENT_LENGTH = 20f
 
 class Path(val start: vec2, init: Path.() -> Unit) {
     private val children = mutableListOf<PathStep>()
@@ -42,7 +41,14 @@ class Path(val start: vec2, init: Path.() -> Unit) {
                         }
                     }
             ))
-            is BezierCurveToStep -> TODO()
+            is BezierCurveToStep -> points.addAll(generateBezierCurvePoints(
+                    listOf(points.last()) + step.curve.controls + listOf(step.curve.to),
+                    estimateBezierCurveLength(points.last(), step.curve.to, step.curve.controls).let { len ->
+                        ceil(len / BEZIER_CURVE_SEGMENT_LENGTH * detail).toInt().let { points ->
+                            (1 until points).map { it.toFloat() / points }
+                        }
+                    }
+            ))
         } }
 
         if (closed && points[0] != points.last()) {
@@ -87,7 +93,22 @@ fun generateCurvePoints(first: vec2, last: vec2, controls: List<Pair<Float, vec2
     return (samples + 1f).map { t -> vec2(poly(xPoly, t), poly(yPoly, t)) }
 }
 
+fun generateBezierCurvePoints(controls: List<vec2>, samples: List<Float>): List<vec2> {
+    return (samples + 1f).map { t -> evaluateBezierCurvePoint(t, controls) }
+}
+
+fun evaluateBezierCurvePoint(t: Float, controls: List<vec2>): vec2 {
+    if (controls.size == 1) return controls[0]
+
+    return evaluateBezierCurvePoint(t, controls.zip(controls.drop(1)).map { (a, b) ->
+        a * (1 - t) + b * t
+    } )
+}
+
 fun estimateCurveLength(first: vec2, last: vec2, controls: List<vec2>): Float
+        = (listOf(first) + controls).zip(controls + listOf(last)).map { (a, b) -> (b - a).length() } .sum()
+
+fun estimateBezierCurveLength(first: vec2, last: vec2, controls: List<vec2>): Float
         = (listOf(first) + controls).zip(controls + listOf(last)).map { (a, b) -> (b - a).length() } .sum()
 
 fun powers(t: Float, n: Int): FloatArray = Array(n) { 1f } .let { result ->

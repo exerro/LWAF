@@ -43,7 +43,7 @@ fun DrawContext2D.line(a: vec2, b: vec2) {
 }
 
 fun DrawContext2D.lines(vararg points: vec2) {
-    // also hacky: shouldn't draw rectangles because that's dumb
+    // also hacky: shouldn't draw rectangles for lines because that's dumb
     points.zip(points.drop(1)).map { (a, b) -> line(a, b) }
 }
 
@@ -59,18 +59,22 @@ fun DrawContext2D.path(start: vec2, init: Path.() -> Unit) {
         drawMode = DrawMode.Fill
         lineWidth = 3f
         colour = Colour.red
-        points.zip(points.drop(1)).map { (a, b) -> line(a, b) }
+        lines(*points.toTypedArray())
         colour = Colour.blue
         points.map { p -> circle(p, 5f) }
         pop()
     }
 }
 
+fun DrawContext2D.draw(draw: DrawContext2D.() -> Unit) {
+    draw(this)
+}
+
 open class DrawContext2D(protected val view: GLView) {
     protected val state = DrawState()
     protected val states: MutableList<DrawState> = mutableListOf()
     protected val activeState: DrawState
-        get() = if (states.isNotEmpty()) states.first() else state
+        get() = if (states.isNotEmpty()) states.last() else state
     protected val transform: mat4
         get() = mat4_identity *
                 mat3_scale(vec3(1f, -1f, 1f)).mat4() *
@@ -99,7 +103,7 @@ open class DrawContext2D(protected val view: GLView) {
     }
 
     fun pop() {
-        states.remove(activeState)
+        if (states.isNotEmpty()) states.removeAt(states.size - 1)
     }
 
     fun translate(translation: vec2) {
