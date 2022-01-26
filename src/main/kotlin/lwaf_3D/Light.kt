@@ -17,7 +17,7 @@ data class AmbientLight(
         override val colour: vec3
 ) : Light {
     override val shader = getLightingShader("lighting.ambient") {
-        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/ambient.fragment-3D.glsl")
+        loadShaders("/res/shader/pass-through.vertex-3D.glsl", "/res/shader/lighting/ambient.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -34,7 +34,7 @@ data class DirectionalLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.directional") {
-        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/directional.fragment-3D.glsl")
+        loadShaders("/res/shader/pass-through.vertex-3D.glsl", "/res/shader/lighting/directional.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -53,7 +53,7 @@ data class PointLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.point") {
-        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/point.fragment-3D.glsl")
+        loadShaders("/res/shader/pass-through.vertex-3D.glsl", "/res/shader/lighting/point.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -80,7 +80,7 @@ data class SpotLight(
         override val colour: vec3
 ): Light {
     override val shader = getLightingShader("lighting.spot") {
-        loadShaders("/shader/pass-through.vertex-3D.glsl", "/shader/lighting/spot.fragment-3D.glsl")
+        loadShaders("/res/shader/pass-through.vertex-3D.glsl", "/res/shader/lighting/spot.fragment-3D.glsl")
     }
 
     override fun render(shader: GLShaderProgram, context: DrawContext3D) {
@@ -146,4 +146,3 @@ private fun loadShaders(vertexShaderPath: String, fragmentShaderPath: String): G
     val fragmentShaderContent = String(Light::class.java.getResourceAsStream(fragmentShaderPath).readBytes())
     return loadShaderProgram(vertexShaderContent, fragmentShaderContent)
 }
-

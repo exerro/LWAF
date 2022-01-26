@@ -5,6 +5,7 @@ import lwaf_3D.Material
 import lwaf_3D.MutableObject3D
 import lwaf_core.*
 import lwaf_util.*
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -41,6 +42,9 @@ class Model internal constructor(val objects: MutableMap<String, Pair<GLVAO, Mat
 
 fun loadOBJModel(path: String): Model
         = loadOBJModelContent(Files.readAllLines(Paths.get(path)), path)
+
+fun loadOBJModelFromInputStream(stream: InputStream, name: String): Model
+        = loadOBJModelContent(String(stream.readAllBytes()).split('\n'), name)
 
 private fun loadOBJModelContent(lines: List<String>, resID: String): Model {
     val (vertexData, rest) = splitVertexDataLines(trimEmptyLines(lines))

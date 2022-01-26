@@ -1,8 +1,5 @@
 import lwaf_3D.*
-import lwaf_3D.poly.VAOObject3D
-import lwaf_3D.poly.loadOBJModel
-import lwaf_3D.poly.toUVVAOObject3D
-import lwaf_3D.poly.toVAOObject3D
+import lwaf_3D.poly.*
 import lwaf_3D.property.*
 import lwaf_core.*
 import lwaf_util.noise
@@ -30,7 +27,9 @@ fun loadModels() {
     for (i in 0..9) {
         for (j in 0..9) {
                 objects.add(Sphere(0.8f).toUVVAOObject3D(i + 3, j + 1, Material()
-                                .setTexture(loadResource("example/complex-3D/res/img/2k_earth_daymap.png", ::loadTexture))
+                                .setTexture(loadResource("/res/img/2k_earth_daymap.png") { r ->
+                                    loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream(r)!!, r)
+                                })
                                 .setSpecularLightingIntensity(0f))
                         .translateTo(18 - i * 2f, 18 - j * 2f, -5f))
         }
@@ -46,7 +45,9 @@ fun loadModels() {
 //                .setTranslation(2f, 0f, 0f)
 
     objects.add(Sphere().toUVVAOObject3D(60, 40, Material()
-                    .setTexture(loadResource("example/complex-3D/res/img/2k_earth_daymap.png", ::loadTexture)))
+                    .setTexture(loadResource("/res/img/2k_earth_daymap.png") { r ->
+                        loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream(r)!!, r)
+                    }))
             .translateTo(4f, 0f, 0f))
 
     objects.add(Sphere().toVAOObject3D(7, Material()
@@ -130,12 +131,18 @@ fun loadModels() {
 //                .translateTo(0f, 0f, 10f)
 //    }
 
-    val stall = loadResource("example/complex-3D/res/models/stall/stall.obj", ::loadOBJModel)
+    val stall = loadResource("/res/models/stall/stall.obj") { r ->
+        loadOBJModelFromInputStream(GLTexture::class.java.getResourceAsStream(r)!!, r)
+    }
     stall.translateBy(vec3(0f, 0f, -30f))
-    stall.objects["Cube[0]"] = stall.objects["Cube[0]"]!!.copy(second = Material().setTexture(loadResource("example/complex-3D/res/models/stall/stall_texture.png", ::loadTexture)))
+    stall.objects["Cube[0]"] = stall.objects["Cube[0]"]!!.copy(second = Material().setTexture(loadResource("/res/models/stall/stall_texture.png") { r ->
+        loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream(r)!!, r)
+    }))
     objects.add(stall)
 
-    val deer = loadResource("example/complex-3D/res/models/deer/deer.obj", ::loadOBJModel)
+    val deer = loadResource("/res/models/deer/deer.obj") { r ->
+        loadOBJModelFromInputStream(GLTexture::class.java.getResourceAsStream(r)!!, r)
+    }
     deer.translateTo(vec3(10f, 0f, 9f))
     deer.scaleBy(0.002f)
     objects.add(deer)
@@ -154,7 +161,7 @@ object Demo3D {
             context2D = DrawContext2D(view)
             context3D = DrawContext3D(view)
             texture2D = loadResource("No texture dark") { ->
-                loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream("/res/img/no-texture-dark.png"), "no-texture-dark.png")
+                loadTextureFromInputStream(GLTexture::class.java.getResourceAsStream("/res/img/no-texture-dark.png")!!, "no-texture-dark.png")
             }
             context3D.camera.setPerspectiveProjection(context3D.aspectRatio)
 

@@ -14,8 +14,8 @@ open class DrawContext3D(
     val texture = createEmptyTexture(view.size.x.toInt(), view.size.y.toInt())
     val aspectRatio = view.size.x / view.size.y
 
-    val DEFAULT_VERTEX_SHADER_PATH = "/shader/vertex-3D.glsl"
-    val DEFAULT_FRAGMENT_SHADER_PATH = "/shader/draw-to-gbuffer.glsl"
+    val DEFAULT_VERTEX_SHADER_PATH = "/res/shader/vertex-3D.glsl"
+    val DEFAULT_FRAGMENT_SHADER_PATH = "/res/shader/draw-to-gbuffer.glsl"
 
     val DEFAULT_SHADER_DELEGATE = lazy {
         val vertexShaderContent = String(Light::class.java.getResourceAsStream(DEFAULT_VERTEX_SHADER_PATH).readBytes())

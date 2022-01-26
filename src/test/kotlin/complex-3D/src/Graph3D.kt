@@ -6,8 +6,6 @@ import lwaf_util.*
 
 import java.util.*
 import java.util.stream.Collectors
-import java.util.stream.IntStream
-import java.util.stream.Stream
 
 class Graph3D(private val function: (vec2) -> Float) {
     private var colouring: (vec3) -> vec3 = { _ -> vec3(1f, 1f, 1f) }
